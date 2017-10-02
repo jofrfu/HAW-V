@@ -3,9 +3,9 @@
 % Created at :	02.10.17 19:00
 % Authors	:	Sebastian Brückner
 
-\charpter{CPU Architecture Selection}
+\chapter{CPU Architecture Selection}
 
-\subsection{RISC vs CISC}
+\section{RISC vs CISC}
 
 The CPU in this project is an RISC CPU, because
 \begin{itemize}
@@ -14,7 +14,7 @@ The CPU in this project is an RISC CPU, because
 	\item a CISC might be to complex to implement within the scope of this project 
 \end{itemize}
 
-\subsection{Instruction sets}
+\section{Instruction sets}
 There are plenty of choices when it comes to instruction sets, 
 this list compiles the most obvious.
 
@@ -39,11 +39,11 @@ RISC-V was chosen over OpenRISC because:
 
 \begin{itemize}
 	\item a very good documentation
-	\item modular ISA with multiple well defined extensions
-	\item existing compiler
-	\item existing 
-	\item the RISC-V Foundation has stronger backe
-	\item
+	\item modular Instruction Set Architecture with multiple well defined extensions
+	\item existing compiler (gcc toolchain)
+	\item existing QEMU simulator to develop the OS on
+	\item not many existing CPU designs (being capable to break fresh ground)
+	\item the RISC-V Foundation has strong backers (e.g. Google and IBM) \footnote{https://riscv.org/membership/}
 \end{itemize}
 
  
