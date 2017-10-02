@@ -1,0 +1,26 @@
+% File		: 	main.tex
+% Created by:	Sebastian Brückner
+% Created at :	02.10.17 17:45
+
+\documentclass[a4paper, oneside]{scrreprt}
+\usepackage[utf8]{inputenc}
+\usepackage{vhistory}		%Used to track history of the document
+\inputencoding{utf8}
+
+\begin{document}
+    \title{Design Documentation}
+    \author{\vhListAllAuthors}
+    \date{Version \vhCurrentVersion}
+    \subject{Ach, ne! - WS2017/18}
+    \maketitle
+
+    \begin{versionhistory}
+	\vhEntry{0.1}{02.10.2017}{Sebastian Brückner}{Template}
+    \end{versionhistory}
+
+    \tableofcontents
+    
+    \input{chapters/1-introduction.tex}
+    
+
+\end{document}
