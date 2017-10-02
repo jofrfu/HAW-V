@@ -1,0 +1,49 @@
+% File		: 	main.tex
+% Created by:	Sebastian Brückner
+% Created at :	02.10.17 19:00
+% Authors	:	Sebastian Brückner
+
+\chapter{CPU Architecture Selection}
+
+\section{RISC vs CISC}
+
+The CPU in this project is an RISC CPU, because
+\begin{itemize}
+	\item a CISC CPU might be to complex to be easily understood
+	\item modern CPU tend to be RISC CPUs
+	\item a CISC might be to complex to implement within the scope of this project 
+\end{itemize}
+
+\section{Instruction sets}
+There are plenty of choices when it comes to instruction sets, 
+this list compiles the most obvious.
+
+\begin{itemize}
+	\item  ARM
+	\item Thumb-2
+	\item AVR
+	\item OpenRisc
+	\item RISC-V
+\end{itemize}
+
+While ARM (and Thumb-2) are well documented, the ARM is not a RISC by the book.
+Also there a plenty of ARM devices around and this project aims to break fresh ground.
+
+AVR is not really suited for an CPU that is supposed to run an OS. 
+Its better suited for small microcontrollers.
+
+Also these architectures are nor open source.
+This is the main advantage of OpenRISC and RISC-V.
+
+RISC-V was chosen over OpenRISC because:
+
+\begin{itemize}
+	\item a very good documentation
+	\item modular Instruction Set Architecture with multiple well defined extensions
+	\item existing compiler (gcc toolchain)
+	\item existing QEMU simulator to develop the OS on
+	\item not many existing CPU designs (being capable to break fresh ground)
+	\item the RISC-V Foundation has strong backers (e.g. Google and IBM) \footnote{https://riscv.org/membership/}
+\end{itemize}
+
+ 
