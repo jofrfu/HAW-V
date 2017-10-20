@@ -4,7 +4,7 @@
 
 library IEEE;
     use IEEE.std_logic_1164.all;
-    use IEEE.numeric_std.all
+    use IEEE.numeric_std.all;
 
 package riscv_pack is
 
@@ -14,12 +14,12 @@ type INSTRUCTION_TYPE is (  luii, auipci, jali, jalri,
                             lbi, lhi, lwi, lbui, lhui,
                             sbi, shi, swi,
                             addii, sltii, sltiui, xorii, orii, andii, sllii, srlii, sraii,
-                            addi, subi, slli, slti, sltui, xori, srli, srai, ori, andi,
+                            addi, subi, slli, slti, sltui, xori, srli, srai, ori, andi
                             --fence, ecall and csr instructions not implemented at the moment
                             );
                             
 type OPCODE_TYPE is (   luio, auipco, jalo, jalro,
-                        brancho, loado, storeo, opimmo, opo,
+                        brancho, loado, storeo, opimmo, opo
                         --misc-mem and system not implemented at the moment
                         );
                         
