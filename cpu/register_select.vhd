@@ -17,6 +17,6 @@ end entity register_select;
 
 architecture beh of register_select is
 
-
+    signal
 
 end architecture beh;
