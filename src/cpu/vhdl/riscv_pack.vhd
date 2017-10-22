@@ -4,7 +4,7 @@
 
 library IEEE;
     use IEEE.std_logic_1164.all;
-    use IEEE.numeric_std.all;
+    use IEEE.all;
 
 package riscv_pack is
 
@@ -28,6 +28,12 @@ constant REGISTER_ADDRESS_WIDTH : natural := 5;
 constant REGISTER_COUNT : natural := 32;
 
 subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
+subtype ADRESS_TYPE is DATA_TYPE;
 subtype REGISTER_ADDRESS_TYPE is std_logic_vector(REGISTER_ADDRESS_WIDTH-1 downto 0);
+
+--Instruction Fetch Constants
+constant STD_PC_ADD : DATA_TYPE := TO_STDLOGICVECTOR(4); --! PC must be increased by 4 every clock cycle 
+constant IF_CNTRL_WIDTH : natural := 2;
+subtype IF_CNTRL_TYPE is std_logic_vector(IF_CNTRL_WIDTH-1 downto 0);
 
 end riscv_pack;
