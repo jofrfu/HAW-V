@@ -12,7 +12,7 @@ architecture std_impl of PC_log is
 	signal pc_ns : ADRESS_TYPE;
 	
 begin
-	pc_logioc : process(cntrl, rel, abso, pc_cs) is
+	pc_logic : process(cntrl, rel, abso, pc_cs) is
 		variable cntrl_v : IF_CNTRL_TYPE;
 		variable rel_v 	 : DATA_TYPE;
 		variable abso_v  : DATA_TYPE;

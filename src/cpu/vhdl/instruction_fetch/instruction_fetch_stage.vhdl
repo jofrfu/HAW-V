@@ -22,6 +22,7 @@ entity instruction_fetch is
 		 abso	: in DATA_TYPE;		--! absolute branch adress, or base for relative jump
 		 ins 	: in DATA_TYPE;		--! the new instruction is loaded from here
 		 
+		 IFR	: out DATA_TYPE;	--! Instruction fetch register contents
 		 pc : out DATA_TYPE;		--! programm counter output
 	);
 end entity instruction_fetch;
