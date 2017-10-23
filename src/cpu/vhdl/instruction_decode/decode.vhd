@@ -20,3 +20,9 @@ entity decode is
 		Imm			 : out DATA_TYPE
 	);
 end entity decode;
+
+architecture beh of decode is
+
+begin
+
+end architecture beh;
