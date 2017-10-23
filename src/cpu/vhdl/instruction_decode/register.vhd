@@ -17,7 +17,7 @@ begin
     process(clk, reset)
     begin
         if clk'event and clk = '1' then
-            if nres = '1' then
+            if reset = '1' then
                 reg_out <= (others => '0');
             elsif csel = '1' then
                 reg_out <= reg_in;  --store data at rising edge
