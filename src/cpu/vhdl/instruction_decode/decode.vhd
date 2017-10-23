@@ -1,6 +1,6 @@
--- register_select.vhd
--- created by Jonas Fuhrmann + Felix Lorenz
--- project: ach ne! @ HAW-Hamburg
+--! @brief register_select.vhd
+--! @author Jonas Fuhrmann + Felix Lorenz
+--! project: ach ne! @ HAW-Hamburg
 
 use WORK.riscv_pack.all;
 library IEEE;
