@@ -33,7 +33,7 @@ begin
 			when others   => report "PC_log mux 0 has undefined signal" severity warning;
 		end case ; 
 		
-		case cntrl_v(0) is  --choose absolute branch or normals pc
+		case cntrl_v(1) is  --choose absolute branch or normals pc
 			when '0' => base_v := pc_v;
 			when '1' => base_v := abso_v;
 			when others   => report "PC_log mux 0 has undefined signal" severity warning;
