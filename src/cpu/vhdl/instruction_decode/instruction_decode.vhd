@@ -1,6 +1,6 @@
--- register_select.vhd
--- created by Jonas Fuhrmann + Felix Lorenz
--- project: ach ne! @ HAW-Hamburg
+--! @brief instruction decode stage
+--! @author Jonas Fuhrmann + Felix Lorenz
+--! project: ach ne! @ HAW-Hamburg
 
 use WORK.riscv_pack.all;
 library IEEE;
@@ -25,16 +25,17 @@ entity instruction_decode is
 	);
 end entity instruction_decode;
 
+--! @brief register selection and decode of instructions
 architecture beh of instruction_decode is
 
-	--immediate mux
+	--! immediate mux
 	signal imm_sel_s		: std_logic;
 	signal imm_s			: DATA_TYPE;
 	signal rs1_s			: DATA_TYPE;
 	signal rs2_s			: DATA_TYPE;
 	signal opb_s			: DATA_TYPE;
 
-	--registers
+	--! registers
 	signal wb_cntrl_reg_cs 	: WB_CNTRL_TYPE := (others => '0');
 	signal wb_cntrl_reg_ns 	: WB_CNTRL_TYPE;
 	signal ma_cntrl_reg_cs 	: MA_CNTRL_TYPE := (others => '0');
@@ -50,6 +51,7 @@ architecture beh of instruction_decode is
 	signal do_reg_cs 		: DATA_TYPE 	:= (others => '0');
 	signal do_reg_ns 		: DATA_TYPE;
 	
+	--! @brief decode unit
 	component decode is
 		port(
 			clk, reset   :  in std_logic;
@@ -64,6 +66,7 @@ architecture beh of instruction_decode is
 		);
 	end component decode;
 	
+	--! @brief register file
 	component register_select is
 	    port(   
 	    	clk, reset   :   in  std_logic;
@@ -104,6 +107,7 @@ begin
         DO => do_reg_ns
 	);
 	
+	--! @brief multiplexer for immediate and operand selection
 	comb_log:
 	process(opb_s, imm_s, imm_sel_s) is
 	begin
