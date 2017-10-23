@@ -42,8 +42,12 @@ subtype IF_CNTRL_TYPE is std_logic_vector(IF_CNTRL_WIDTH-1 downto 0);
 constant WB_CNTRL_WIDTH : natural := 5;
 constant MA_CNTRL_WIDTH : natural := 2;
 constant EX_CNTRL_WIDTH : natural := 17;
+constant ID_CNTRL_WIDTH : natural := 11;
+constant IF_CNTRL_WIDTH : natural := 2;
 subtype WB_CNTRL_TYPE is std_logic_vector(WB_CNTRL_WIDTH-1 downto 0);
 subtype MA_CNTRL_TYPE is std_logic_vector(MA_CNTRL_WIDTH-1 downto 0);
 subtype EX_CNTRL_TYPE is std_logic_vector(EX_CNTRL_WIDTH-1 downto 0);
+subtype ID_CNTRL_TYPE is std_logic_vector(ID_CNTRL_WIDTH-1 downto 0);
+subtype IF_CNTRL_TYPE is std_logic_vector(IF_CNTRL_WIDTH-1 downto 0);
 
 end riscv_pack;
