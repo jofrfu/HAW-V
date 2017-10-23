@@ -26,14 +26,24 @@ type OPCODE_TYPE is (   luio, auipco, jalo, jalro,
 constant DATA_WIDTH : natural := 32;
 constant REGISTER_ADDRESS_WIDTH : natural := 5;
 constant REGISTER_COUNT : natural := 32;
+constant INSTRUCTION_WIDTH : natural := 32;
 
 subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
 subtype ADRESS_TYPE is DATA_TYPE;
 subtype REGISTER_ADDRESS_TYPE is std_logic_vector(REGISTER_ADDRESS_WIDTH-1 downto 0);
+subtype INSTRUCTION_TYPE is std_logic_vector(INSTRUCTION_WIDTH-1 downto 0);
 
 --Instruction Fetch Constants
 constant STD_PC_ADD : DATA_TYPE := TO_STDLOGICVECTOR(4); --! PC must be increased by 4 every clock cycle 
 constant IF_CNTRL_WIDTH : natural := 2;
 subtype IF_CNTRL_TYPE is std_logic_vector(IF_CNTRL_WIDTH-1 downto 0);
+
+--Instruction Decode
+constant WB_CNTRL_WIDTH : natural := 5;
+constant MA_CNTRL_WIDTH : natural := 2;
+constant EX_CNTRL_WIDTH : natural := 17;
+subtype WB_CNTRL_TYPE is std_logic_vector(WB_CNTRL_WIDTH-1 downto 0);
+subtype MA_CNTRL_TYPE is std_logic_vector(MA_CNTRL_WIDTH-1 downto 0);
+subtype EX_CNTRL_TYPE is std_logic_vector(EX_CNTRL_WIDTH-1 downto 0);
 
 end riscv_pack;
