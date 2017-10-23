@@ -1,0 +1,7 @@
+#gitignore for achne project
+.project
+BuildPath.txt
+
+#vhdl sources
+src/cpu/vhdl/*.*
+!src/cpu/vhdl/*/*.vhdl
