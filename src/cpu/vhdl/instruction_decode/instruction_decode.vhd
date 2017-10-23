@@ -10,6 +10,7 @@ library IEEE;
 entity instruction_decode is
 	port(
 		clk, reset   :  in std_logic;
+		branch		 :  in std_logic;
 		IFR			 :  in INSTRUCTION_TYPE;
 		DI	  		 :  in DATA_TYPE;
 		rd			 :  in REGISTER_ADDRESS_TYPE;
