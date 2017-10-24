@@ -1,26 +1,26 @@
 --!@file 	PC_log.vhdl
 --!@biref 	This file contains 
 --!			Standard architecture for PC_log for synthesis
---!@author 	Sebastian Brückner
+--!@author 	Sebastian Brï¿½ckner
 --!@date 	2017
 
 --!@biref 	Standard architecture for PC_log for synthesis
---!@author 	Sebastian Brückner
+--!@author 	Sebastian Brï¿½ckner
 --!@date 	2017
 architecture std_impl of PC_log is 
-	signal pc_cs : ADRESS_TYPE := (others => '0');
-	signal pc_ns : ADRESS_TYPE;
+	signal pc_cs : ADDRESS_TYPE := (others => '0');
+	signal pc_ns : ADDRESS_TYPE;
 	
 begin
 	pc_logic : process(cntrl, rel, abso, pc_cs) is
 		variable cntrl_v : IF_CNTRL_TYPE;
 		variable rel_v 	 : DATA_TYPE;
 		variable abso_v  : DATA_TYPE;
-		variable pc_v 	 : ADRESS_TYPE;
-		variable pc_ns_v : ADRESS_TYPE;
+		variable pc_v 	 : ADDRESS_TYPE;
+		variable pc_ns_v : ADDRESS_TYPE;
 		
-		variable base_v     : ADRESS_TYPE;
-		variable increment_v: ADRESS_TYPE;
+		variable base_v     : ADDRESS_TYPE;
+		variable increment_v: ADDRESS_TYPE;
 	begin
 		cntrl_v := cntrl;
 		rel_v   := rel;

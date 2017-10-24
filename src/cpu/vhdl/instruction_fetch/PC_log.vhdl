@@ -1,11 +1,11 @@
 --!@file 	PC_log.vhdl
 --!@biref 	This file contains the programm counter entity of the CPU
---!@author 	Sebastian Brückner
+--!@author 	Sebastian Brï¿½ckner
 --!@date 	2017
 
 --!@biref 	Programm counter of the CPU
 --!@details Contains the Programm counter logic
---!@author 	Sebastian Brückner
+--!@author 	Sebastian Brï¿½ckner
 --!@date 	2017
 entity PC_log is
 	port(
@@ -15,6 +15,6 @@ entity PC_log is
 		 rel	: in DATA_TYPE;		--! relative branch adress
 		 abso	: in DATA_TYPE;		--! absolute branch adress, or base for relative jump
 		 
-		 pc : out ADRESS_TYPE;		--! programm counter output
+		 pc : out ADDRESS_TYPE;		--! programm counter output
 	);
 end entity PC_log;
