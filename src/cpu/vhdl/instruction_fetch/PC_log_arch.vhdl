@@ -54,7 +54,7 @@ begin
 	reg : process(clk, reset) is
 	begin
 		if clk'event and clk = '1' then
-            if nres = '1' then
+            if reset = '1' then
                 pc_cs <= (others => '0');
             else
                 pc_cs <= pc_ns;  --store data at rising edge

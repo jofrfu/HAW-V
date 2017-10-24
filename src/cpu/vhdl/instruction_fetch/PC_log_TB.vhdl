@@ -67,7 +67,7 @@ process is
     -- result: PC should be 4
     cntrl_s <= "00";
     wait until '1'=clk_s and clk_s'event;
-    if pc_s /= to_unsigned(0, 4) then
+    if pc_s /= std_logic_vector(to_unsigned(4, ADDRESS_WIDTH)) then
     	report "Test failed! Error on PC standard addition!";
     	wait;
     end if;
@@ -77,9 +77,9 @@ process is
     -- action: adds immediate (16 in this case) to PC
     -- result: PC should be 20
 	cntrl_s <= "01";
-	rel_s <= to_unsigned(0, 16);
+	rel_s <= std_logic_vector(to_unsigned(16, ADDRESS_WIDTH));
 	wait until '1'=clk_s and clk_s'event;
-	if pc_s /= to_unsigned(0, 20) then
+	if pc_s /= std_logic_vector(to_unsigned(20, ADDRESS_WIDTH)) then
 		report "Test failed! Error on PC immediate addition!";
 		wait;
 	end if;
@@ -88,11 +88,11 @@ process is
 	-- cntrl: 11
 	-- action: adds immediate (8 in this case) to a register (512 in this case)
 	-- result: PC should be 520
-	cntrl <= "11";
-	rel_s <= to_unisgned(0, 8);
-	abso_s <= to_unsigned(0, 512);
+	cntrl_s <= "11";
+	rel_s <= std_logic_vector(to_unisgned(8, ADDRESS_WIDTH));
+	abso_s <= std_logic_vector(to_unsigned(512, ADDRESS_WIDTH));
 	wait until '1'=clk_s and clk_s'event;
-	if pc_s /= to_unsigned(0, 520) then
+	if pc_s /= std_logic_vector(to_unsigned(520, ADDRESS_WIDTH)) then
 		report "Test failed! Error on PC immediate and register addition!";
 		wait; 
 	end if;
@@ -102,8 +102,8 @@ process is
 	-- action: adds 4 to a register (512 in this case)
 	-- result: PC should be 516, an error message should be shown
 	cntrl <= "10";
-	abso_s <= to_unisgned(0, 512);
-	if pc_s /= to_unsigned(0, 516) then
+	abso_s <= std_logic_vector(to_unisgned(512, ADDRESS_WIDTH));
+	if pc_s /= std_logic_vector(to_unsigned(516, ADDRESS_WIDTH)) then
 		report "Test failed! Error on PC 4 and register addition!";
 		wait;
 	end if;
@@ -117,7 +117,7 @@ process is
     wait until '1'=clk_s and clk_s'event;
     reset_s <= '0';
     
-    if pc_s /= to_unsigned(0, 0) then
+    if pc_s /= std_logic_vector(to_unsigned(0, ADDRESS_WIDTH)) then
     	report "Test failed! Error on resetting PC!";
 		wait;
 	end if;
