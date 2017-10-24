@@ -7,6 +7,12 @@
 --!@details Contains the Programm counter logic
 --!@author 	Sebastian Br�ckner
 --!@date 	2017
+
+use WORK.riscv_pack.all;
+library IEEE;
+    use IEEE.std_logic_1164.all;
+    use IEEE.numeric_std.all;
+
 entity PC_log is
 	port(
 		 clk, reset : in std_logic;

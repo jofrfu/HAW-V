@@ -1,3 +1,4 @@
+use WORK.riscv_pack.all;
 library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
@@ -46,9 +47,9 @@ clk_gen:
 process is
 	begin
 	wait until simulation_running = true;
-	clk <= '0';
+	clk_s <= '0';
 	wait for 20 ns;
-	clk <= '1';
+	clk_s <= '1';
 	wait for 20 ns;
 end process clk_gen;
 
