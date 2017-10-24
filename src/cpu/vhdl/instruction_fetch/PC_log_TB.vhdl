@@ -48,9 +48,13 @@ process is
 	begin
 	wait until simulation_running = true;
 	clk_s <= '0';
-	wait for 20 ns;
-	clk_s <= '1';
-	wait for 20 ns;
+    wait for 40 ns;
+	while simulation_running loop
+		clk_s <= '1';
+		wait for 20 ns;
+		clk_s <= '0';
+		wait for 20 ns;
+	end loop;
 end process clk_gen;
 
 test:
@@ -89,7 +93,7 @@ process is
 	-- action: adds immediate (8 in this case) to a register (512 in this case)
 	-- result: PC should be 520
 	cntrl_s <= "11";
-	rel_s <= std_logic_vector(to_unisgned(8, ADDRESS_WIDTH));
+	rel_s <= std_logic_vector(to_unsigned(8, ADDRESS_WIDTH));
 	abso_s <= std_logic_vector(to_unsigned(512, ADDRESS_WIDTH));
 	wait until '1'=clk_s and clk_s'event;
 	if pc_s /= std_logic_vector(to_unsigned(520, ADDRESS_WIDTH)) then
@@ -101,8 +105,8 @@ process is
 	-- cntrl: 10
 	-- action: adds 4 to a register (512 in this case)
 	-- result: PC should be 516, an error message should be shown
-	cntrl <= "10";
-	abso_s <= std_logic_vector(to_unisgned(512, ADDRESS_WIDTH));
+	cntrl_s <= "10";
+	abso_s <= std_logic_vector(to_unsigned(512, ADDRESS_WIDTH));
 	if pc_s /= std_logic_vector(to_unsigned(516, ADDRESS_WIDTH)) then
 		report "Test failed! Error on PC 4 and register addition!";
 		wait;
@@ -112,7 +116,7 @@ process is
 	-- cntrl: 00
 	-- action: reset the PC
 	-- result: PC should be 0
-	cntrl <= "00";
+	cntrl_s <= "00";
 	reset_s <= '1';
     wait until '1'=clk_s and clk_s'event;
     reset_s <= '0';

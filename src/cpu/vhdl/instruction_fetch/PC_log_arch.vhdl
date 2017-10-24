@@ -13,6 +13,7 @@ library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
+
 architecture std_impl of PC_log is 
 	signal pc_cs : ADDRESS_TYPE := (others => '0');
 	signal pc_ns : ADDRESS_TYPE;
