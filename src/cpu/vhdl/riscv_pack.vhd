@@ -31,6 +31,8 @@ package riscv_pack is
 	constant REGISTER_COUNT : natural := 32;
 	constant INSTRUCTION_WIDTH : natural := 32;
 	constant OP_CODE_WIDTH : natural := 7;
+	constant FUNC3_WIDTH : natural := 3;
+	constant FUNC7_WIDTH : natural := 7;
 	
 	subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
 	subtype ADRESS_TYPE is DATA_TYPE;
@@ -38,6 +40,8 @@ package riscv_pack is
 	subtype REGISTER_COUNT_WIDTH is std_logic_vector(REGISTER_COUNT-1 downto 0);
 	subtype INSTRUCTION_BIT_TYPE is std_logic_vector(INSTRUCTION_WIDTH-1 downto 0);
 	subtype OP_CODE_BIT_TYPE is std_logic_vector(OP_CODE_WIDTH-1 downto 0);
+	subtype FUNC3_TYPE is std_logic_vector(FUNC3_WIDTH downto 0);
+	subtype FUNC7_TYPE is std_logic_vector(FUNC7_WIDTH downto 0);
 	
 	type REG_OUT_TYPE is array(REGISTER_COUNT-1 downto 0) of DATA_TYPE;
 	
