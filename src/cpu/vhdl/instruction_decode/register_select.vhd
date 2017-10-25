@@ -18,7 +18,8 @@ end entity register_select;
 architecture beh of register_select is
 	
 	signal reg_sel_s : REGISTER_COUNT_WIDTH;
-	signal reg_out_s: reg_out_type;
+	signal reg_out_s : reg_out_type;
+	signal opb_s     : DATA_TYPE;
 
 	component reg is
 	    port(   clk, reset, csel : in std_logic;
@@ -51,7 +52,7 @@ begin
 	rs1_mux:
 	process(rs1) is
 	begin
-		if rs1 = to_unsigned(0, REGISTER_ADDRESS_WIDTH) then
+		if rs1 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
 			OPA <= (others => '0');
 		else
 			OPA <= reg_out_s(to_integer(unsigned(rs1)));
@@ -61,13 +62,14 @@ begin
 	rs2_mux:
 	process(rs2) is
 	begin
-		if rs2 = to_unsigned(0, REGISTER_ADDRESS_WIDTH) then
-			OPB <= (others => '0');
+		if rs2 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
+			opb_s <= (others => '0');
 		else
-			OPB <= reg_out_s(to_integer(unsigned(rs2)));
+			opb_s <= reg_out_s(to_integer(unsigned(rs2)));
 		end if;
 	end process rs2_mux;
 
-	DO <= OPB;
+    OPB <= opb_s;
+	DO <= opb_s;
 	
 end architecture beh;
