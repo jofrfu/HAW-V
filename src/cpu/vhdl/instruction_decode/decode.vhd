@@ -71,12 +71,12 @@ begin
             case op_code_v is
                 when luio =>
                     IF_CNTRL_v := "00";    --PC + 4
-                    ID_CNTRL_v := '1' & "00000" & "00000";    --load immediate for opb and r0 for opa
+                    ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load immediate for opb and r0 for opa
                     MA_CNTRL_v := "00";   --no load nor store
                     WB_CNTRL_v := rd_v;   --write result to rd
                 when auipc =>
                     IF_CNTRL_v := "00";    --PC + 4
-                    ID_CNTRL_v := '1' & "00000" & "00000";    --load immediate for opb and r0 for opa
+                    ID_CNTRL_v := '1' & '1' & "00000" & "00000";    --load pc in opa and immediate in opb
                     MA_CNTRL_v := "00";   --no load nor store
                     WB_CNTRL_v := rd_v;   --write result to rd
                 when jalo =>

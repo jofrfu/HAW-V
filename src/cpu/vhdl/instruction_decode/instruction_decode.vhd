@@ -10,8 +10,9 @@ library IEEE;
 entity instruction_decode is
 	port(
 		clk, reset   :  in std_logic;
-		branch		 :  in BRANCH_SIGNAL_TYPE;
+		branch		 :  in std_logic;
 		IFR			 :  in INSTRUCTION_TYPE;
+		PC           :  in DATA_TYPE;
 		DI	  		 :  in DATA_TYPE;
 		rd			 :  in REGISTER_ADDRESS_TYPE;
 		IF_CNTRL	 : out IF_CNTRL_TYPE;
@@ -28,11 +29,16 @@ end entity instruction_decode;
 --! @brief register selection and decode of instructions
 architecture beh of instruction_decode is
 
-	--! immediate mux
+	-- immediate mux
 	signal imm_sel_s		: std_logic;
 	signal imm_s			: DATA_TYPE;
-	signal rs1_s			: DATA_TYPE;
-	signal rs2_s			: DATA_TYPE;
+	-- pc mux
+	signal pc_sel_s         : std_logic;
+	-- register addresses
+	signal rs1_s			: REGISTER_ADDRESS_TYPE;
+	signal rs2_s			: REGISTER_ADDRESS_TYPE;
+	-- operand signals
+    signal opa_s            : DATA_TYPE;
 	signal opb_s			: DATA_TYPE;
 
 	--! registers
@@ -55,7 +61,7 @@ architecture beh of instruction_decode is
 	component decode is
 		port(
 			clk, reset   :  in std_logic;
-			branch		 :  in BRANCH_SIGNAL_TYPE;
+			branch		 :  in std_logic;
 			IFR			 :  in INSTRUCTION_TYPE;
 			IF_CNTRL	 : out IF_CNTRL_TYPE;
 			ID_CNTRL	 : out ID_CNTRL_TYPE;
@@ -85,7 +91,8 @@ begin
 		branch => branch,
 		IFR => IFR,
 		IF_CNTRL => IF_CNTRL,
-		ID_CNTRL(10) => imm_sel,
+		ID_CNTRL(11) => pc_sel_s,
+		ID_CNTRL(10) => imm_sel_s,
 		ID_CNTRL(9 downto 5) => rs2_s,
 		ID_CNTRL(4 downto 0) => rs1_s,
 		WB_CNTRL => wb_cntrl_reg_ns,
@@ -102,21 +109,32 @@ begin
         rs1 => rs1_s, 
         rs2 => rs2_s, 
         rd => rd,
-        OPA => opa_reg_ns, 
+        OPA => opa_s, 
         OPB => opb_s, 
         DO => do_reg_ns
 	);
 	
-	--! @brief multiplexer for immediate and operand selection
-	comb_log:
+	--! @brief multiplexer for immediate and operand b selection
+	imm_mux:
 	process(opb_s, imm_s, imm_sel_s) is
 	begin
-		if imm_sel_s = 1 then
+		if imm_sel_s = '1' then
 			opb_reg_ns <= imm_s;
 		else
 			opb_reg_ns <= opb_s;
 		end if;
-	end process comb_log;
+	end process imm_mux;
+	
+	--! @brief multiplexer for pc and operand a selection
+    pc_mux:
+    process(opa_s, PC, pc_sel_s) is
+    begin
+        if imm_sel_s = '1' then
+            opa_reg_ns <= PC;
+        else
+            opa_reg_ns <= opa_s;
+        end if;
+    end process pc_mux;
 
 	sequ_log:
 	process(clk,reset) is
