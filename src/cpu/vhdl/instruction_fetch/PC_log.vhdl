@@ -21,6 +21,6 @@ entity PC_log is
 		 rel	: in DATA_TYPE;		--! relative branch adress
 		 abso	: in DATA_TYPE;		--! absolute branch adress, or base for relative jump
 		 
-		 pc : out ADDRESS_TYPE;		--! programm counter output
+		 pc : out ADDRESS_TYPE		--! programm counter output
 	);
 end entity PC_log;

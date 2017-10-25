@@ -46,9 +46,9 @@ begin
 			when others   => report "PC_log mux 0 has undefined signal" severity warning;
 		end case ; 
 		
-		pc_ns_v := base_v + increment_v; 
+		pc_ns_v := std_logic_vector(unsigned(base_v) + unsigned(increment_v)); 
 		pc_ns <= pc_ns_v;
-	end process pc_logioc;
+	end process pc_logic;
 	
 	
 	

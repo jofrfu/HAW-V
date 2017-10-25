@@ -3,11 +3,10 @@
 --!@author 	Sebastian Brückner
 --!@date 	2017
 
+use WORK.riscv_pack.all;
 library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
-
-use WORK.riscv_pack.all;
 
 --!@biref 	This is the instruction fetch stage of the CPU
 --!@details This Stage sets the programm counter and loads the new Instructions.
@@ -24,5 +23,6 @@ entity instruction_fetch is
 		 
 		 IFR	: out DATA_TYPE;	--! Instruction fetch register contents
 		 pc     : out DATA_TYPE;	--! programm counter output
+		 pc_reg : out DATA_TYPE
 	);
 end entity instruction_fetch;
