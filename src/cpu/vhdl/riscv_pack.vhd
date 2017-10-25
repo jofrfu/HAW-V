@@ -78,7 +78,8 @@ package body riscv_pack is
 	        when "1101111" => return jalo;
 	        when "1100011" => return brancho;
 	        when "0100011" => return storeo;
-	        when others => report "unknown OP_CODE" severity error;
+	        when others => 
+	           report "unknown OP_CODE" severity error;
 	    end case;
     end function BITS_TO_OP_CODE_TYPE;
     

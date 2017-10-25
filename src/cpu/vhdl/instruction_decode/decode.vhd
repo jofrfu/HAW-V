@@ -11,7 +11,7 @@ entity decode is
 	port(
 		--clk, reset  :  in std_logic;  --neccessary?? TO DO: delete?
 		branch      :  in std_logic;
-		IFR	        :  in INSTRUCTION_TYPE;
+		IFR	        :  in INSTRUCTION_BIT_TYPE;
 		----------------------------------------
 		IF_CNTRL    : out IF_CNTRL_TYPE;
 		ID_CNTRL    : out ID_CNTRL_TYPE;
@@ -42,34 +42,39 @@ begin
         
         variable immediate : DATA_TYPE;
     begin
-        op_code := opCodeBitsToOpCodeType(IFR(OP_CODE_WIDTH-1 downto 0));
+        op_code := BITS_TO_OP_CODE_TYPE(IFR(OP_CODE_WIDTH-1 downto 0));
         imm_bits := IFR(imm_bits'range);
-        immediate := (others => imm_bits'high) --MSB is always the sign bit if immediate is available
+        immediate := (others => imm_bits(imm_bits'left)); --MSB is always the sign bit if immediate is available
         
         case op_code is
-            when opimmo | jalro | loado => -- I-Type
-            
+            when opimmo | jalro | loado | opo => -- I-Type  / opo has R-Type, no immediate so it does not matter where it goes
+                immediate(10 downto 0) := imm_bits(30 downto 20);
             
             when luio | auipco => -- U-Type
-            
-            
-            when opo => -- R-Type
-                -- no immediate, only register operations -> do nothing
+                immediate(30 downto 12) := imm_bits(30 downto 12);
             
             when jalo => -- J-Type
-            
+                immediate(19 downto 12) := imm_bits(19 downto 12);
+                immediate(11) := imm_bits(20);
+                immediate(10 downto 1) := imm_bits(30 downto 21);
+                immediate(0) := '0';
             
             when brancho => -- B-Type
-            
+                immediate(11) := imm_bits(7);
+                immediate(10 downto 5) := imm_bits(30 downto 25);
+                immediate(4 downto 1) := imm_bits(11 downto 8);
+                immediate(0) := '0';
             
             when storeo => -- S-Type
-            
+                immediate(10 downto 5) := imm_bits(30 downto 25);
+                immediate(4 downto 1) := imm_bits(11 downto 8);
+                immediate(0) := imm_bits(7);
 
         end case;
         
         Imm <= immediate;
         
-    end process imm_constr
+    end process imm_constr;
 
     
     
