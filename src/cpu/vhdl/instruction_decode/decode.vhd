@@ -74,7 +74,7 @@ begin
                     ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load immediate for opb and r0 for opa
                     MA_CNTRL_v := "00";   --no load nor store
                     WB_CNTRL_v := rd_v;   --write result to rd
-                when auipc =>
+                when auipco =>
                     IF_CNTRL_v := "00";    --PC + 4
                     ID_CNTRL_v := '1' & '1' & "00000" & "00000";    --load pc in opa and immediate in opb
                     MA_CNTRL_v := "00";   --no load nor store
@@ -92,6 +92,8 @@ begin
                 when opimmo =>
                 
                 when opo =>
+            end case;
+        end if; --branch_v
         
         IF_CNTRL <= IF_CNTRL_v;
         ID_CNTRL <= ID_CNTRL_v;
@@ -106,7 +108,7 @@ begin
         variable op_code_v   : OP_CODE_TYPE;
         variable imm_bits_v  : std_logic_vector( INSTRUCTION_WIDTH-1 downto OP_CODE_WIDTH );
         
-        variable immediate : DATA_TYPE;
+        variable immediate_v : DATA_TYPE;
     begin
         op_code_v := BITS_TO_OP_CODE_TYPE(IFR(OP_CODE_WIDTH-1 downto 0));
         imm_bits_v := IFR(imm_bits_v'range);
