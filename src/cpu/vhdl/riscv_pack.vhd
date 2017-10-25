@@ -18,7 +18,7 @@ package riscv_pack is
 	                            addi, subi, slli, slti, sltui, xori, srli, srai, ori, andi
 	                            --fencei, ecalli csri
 	                            );
-	
+		
 	--! @brief list of op codes
 	--! @detail last o stands for "opcode"                    
 	type OP_CODE_TYPE is (   luio, auipco, jalo, jalro,
@@ -31,8 +31,8 @@ package riscv_pack is
 	constant REGISTER_COUNT : natural := 32;
 	constant INSTRUCTION_WIDTH : natural := 32;
 	constant OP_CODE_WIDTH : natural := 7;
-	constant FUNC3_WIDTH : natural := 3;
-	constant FUNC7_WIDTH : natural := 7;
+	constant FUNCT3_WIDTH : natural := 3;
+	constant FUNCT7_WIDTH : natural := 7;
 	
 	subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
 	subtype ADRESS_TYPE is DATA_TYPE;
@@ -40,8 +40,8 @@ package riscv_pack is
 	subtype REGISTER_COUNT_WIDTH is std_logic_vector(REGISTER_COUNT-1 downto 0);
 	subtype INSTRUCTION_BIT_TYPE is std_logic_vector(INSTRUCTION_WIDTH-1 downto 0);
 	subtype OP_CODE_BIT_TYPE is std_logic_vector(OP_CODE_WIDTH-1 downto 0);
-	subtype FUNC3_TYPE is std_logic_vector(FUNC3_WIDTH downto 0);
-	subtype FUNC7_TYPE is std_logic_vector(FUNC7_WIDTH downto 0);
+	subtype FUNCT3_TYPE is std_logic_vector(FUNCT3_WIDTH downto 0);
+	subtype FUNCT7_TYPE is std_logic_vector(FUNCT7_WIDTH downto 0);
 	
 	type REG_OUT_TYPE is array(REGISTER_COUNT-1 downto 0) of DATA_TYPE;
 	
@@ -59,6 +59,11 @@ package riscv_pack is
 	subtype MA_CNTRL_TYPE is std_logic_vector(MA_CNTRL_WIDTH-1 downto 0);
 	subtype EX_CNTRL_TYPE is std_logic_vector(EX_CNTRL_WIDTH-1 downto 0);
 	subtype ID_CNTRL_TYPE is std_logic_vector(ID_CNTRL_WIDTH-1 downto 0);
+	constant IF_CNTRL_NOP : IF_CNTRL_TYPE := "00"; --PC + 4 as usual
+	constant ID_CNTRL_NOP : ID_CNTRL_TYPE := "00000000000"; -- select r0 and r0 as operands
+	constant EX_CNTRL_NOP : EX_CNTRL_TYPE := "00000000000110011"; --add registers
+	constant MA_CNTRL_NOP : MA_CNTRL_TYPE := "00"; --no memory access
+	constant WB_CNTRL_NOP : WB_CNTRL_TYPE := "00000"; --write result to r0
 	
 	--! @brief functions 
 	--! @brief LUT as function to convert op_code as std_logic_vector to OP_CODE_TYPE

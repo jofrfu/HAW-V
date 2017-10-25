@@ -10,7 +10,7 @@ library IEEE;
 entity instruction_decode is
 	port(
 		clk, reset   :  in std_logic;
-		branch		 :  in std_logic;
+		branch		 :  in BRANCH_SIGNAL_TYPE;
 		IFR			 :  in INSTRUCTION_TYPE;
 		DI	  		 :  in DATA_TYPE;
 		rd			 :  in REGISTER_ADDRESS_TYPE;
@@ -36,11 +36,11 @@ architecture beh of instruction_decode is
 	signal opb_s			: DATA_TYPE;
 
 	--! registers
-	signal wb_cntrl_reg_cs 	: WB_CNTRL_TYPE := (others => '0');
+	signal wb_cntrl_reg_cs 	: WB_CNTRL_TYPE := WB_CNTRL_NOP;
 	signal wb_cntrl_reg_ns 	: WB_CNTRL_TYPE;
-	signal ma_cntrl_reg_cs 	: MA_CNTRL_TYPE := (others => '0');
+	signal ma_cntrl_reg_cs 	: MA_CNTRL_TYPE := MA_CNTRL_NOP;
 	signal ma_cntrl_reg_ns 	: MA_CNTRL_TYPE;
-	signal ex_cntrl_reg_cs 	: EX_CNTRL_TYPE := (others => '0');
+	signal ex_cntrl_reg_cs 	: EX_CNTRL_TYPE := EX_CNTRL_NOP;
 	signal ex_cntrl_reg_ns 	: EX_CNTRL_TYPE;
 	signal imm_reg_cs 		: DATA_TYPE 	:= (others => '0');
 	signal imm_reg_ns 		: DATA_TYPE;
@@ -55,7 +55,7 @@ architecture beh of instruction_decode is
 	component decode is
 		port(
 			clk, reset   :  in std_logic;
-			branch		 :  in std_logic;
+			branch		 :  in BRANCH_SIGNAL_TYPE;
 			IFR			 :  in INSTRUCTION_TYPE;
 			IF_CNTRL	 : out IF_CNTRL_TYPE;
 			ID_CNTRL	 : out ID_CNTRL_TYPE;
