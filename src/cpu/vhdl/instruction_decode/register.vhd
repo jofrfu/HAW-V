@@ -22,7 +22,7 @@ begin
             elsif csel = '1' then
                 reg_out <= reg_in;  --store data at rising edge
             else
-            	reg_out <= reg_out;
+            	null;
             end if;
         end if; 
     end process store;
