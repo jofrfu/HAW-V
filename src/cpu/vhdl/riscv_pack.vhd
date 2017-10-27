@@ -92,4 +92,8 @@ package body riscv_pack is
 	    end case;
     end function BITS_TO_OP_CODE_TYPE;
     
+--! @brief execute
+constant FLAGS_WIDTH : natural := 4;
+subtype FLAGS_TYPE is std_logic_vector(FLAGS_WIDTH-1 downto 0);
+    
 end package body;
