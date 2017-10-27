@@ -16,18 +16,18 @@ entity execute is
     port(
     clk, reset : in std_logic;
     
-    WB_CNTRL   : in WB_CNTRL_TYPE;  --!Controlbits for WB-Stage 
-    MA_CNTRL   : in MA_CNTRL_TYPE;  --!Controlbits for MA-Stage 
-    EX_CNTRL   : in EX_CNTRL_TYPE;  --!Controlbits for EX-Stage will be used here    
-    Imm        : in DATA_TYPE;      --!Immediate
-    OPB        : in DATA_TYPE;      --!Operand B
-    OPA        : in DATA_TYPE;      --!Operand A
-    Do         : in DATA_TYPE;      --!Data Output register
+    WB_CNTRL_IN   : in WB_CNTRL_TYPE;  --!Controlbits for WB-Stage 
+    MA_CNTRL_IN   : in MA_CNTRL_TYPE;  --!Controlbits for MA-Stage 
+    EX_CNTRL_IN   : in EX_CNTRL_TYPE;  --!Controlbits for EX-Stage will be used here    
+    Imm           : in DATA_TYPE;      --!Immediate
+    OPB           : in DATA_TYPE;      --!Operand B
+    OPA           : in DATA_TYPE;      --!Operand A
+    Do            : in DATA_TYPE;      --!Data Output register
     
-    WB_CNTRL   : out WB_CNTRL_TYPE; --!Controlbits for WB-Stage 
-    MA_CNTRL   : out MA_CNTRL_TYPE; --!Controlbits for MB-Stage 
-    RESU_DAR   : out DATA_TYPE;     --!Result of calulation
-    Branch     : out std_logic;     --!For conditioned branching
+    WB_CNTRL_OUT  : out WB_CNTRL_TYPE; --!Controlbits for WB-Stage 
+    MA_CNTRL_OUT  : out MA_CNTRL_TYPE; --!Controlbits for MB-Stage 
+    RESU_DAR      : out DATA_TYPE;     --!Result of calulation
+    Branch        : out std_logic      --!For conditioned branching
     
     );
 end entity execute;    
