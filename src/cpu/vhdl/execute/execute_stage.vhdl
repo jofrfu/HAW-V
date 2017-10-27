@@ -22,12 +22,13 @@ entity execute is
     Imm           : in DATA_TYPE;      --!Immediate
     OPB           : in DATA_TYPE;      --!Operand B
     OPA           : in DATA_TYPE;      --!Operand A
-    Do            : in DATA_TYPE;      --!Data Output register
+    DO_IN         : in DATA_TYPE;      --!Data-output-register
     
     WB_CNTRL_OUT  : out WB_CNTRL_TYPE; --!Controlbits for WB-Stage 
     MA_CNTRL_OUT  : out MA_CNTRL_TYPE; --!Controlbits for MB-Stage 
     RESU_DAR      : out DATA_TYPE;     --!Result of calulation
-    Branch        : out std_logic      --!For conditioned branching
+    Branch        : out std_logic;     --!For conditioned branching
+    DO_OUT        : out DATA_TYPE      --!Data-output-register is passed to next stage
     
     );
 end entity execute;    

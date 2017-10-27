@@ -1,5 +1,5 @@
 --!@file 	execute_arch.vhdl
---!@brief 	This file contains the execute stage entity of the CPU
+--!@brief 	This file contains the execute stage architecture of the CPU
 --!@author 	Matthis Keppner
 --!@date 	2017
 
@@ -18,7 +18,7 @@ architecture std_impl of execute_stage is
             
             Func3    : in FUNCT3_TYPE;
             OP_Code  : in OP_CODE_BIT_TYPE;
-            Flags    : in std_logic; --DO TO right type has to be made
+            Flags    : in FLAGS_TYPE;
 
             Branch   : out std_logic
         );
@@ -32,7 +32,7 @@ architecture std_impl of execute_stage is
             OPA         : in DATA_TYPE;
             EX_CNTRL_IN : in EX_CNTRL_TYPE;
             
-            Flags       : out ;
+            Flags       : out FLAGS_TYPE;
             Resu        : out DATA_TYPE
         );
     end component ALU;
