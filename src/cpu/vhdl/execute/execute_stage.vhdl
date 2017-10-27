@@ -16,17 +16,18 @@ entity execute is
     port(
     clk, reset : in std_logic;
     
-    WB_CNTRL   : in WB_CNTRL_TYPE;  --! 
-    MA_CNTRL   : in MA_CNTRL_TYPE;  --! 
-    EX_CNTRL   : in EX_CNTRL_TYPE;  --! 
-    Imm        : in DATA_TYPE;      --!
-    OPB        : in DATA_TYPE;      --!
-    OPA        : in DATA_TYPE;      --!
-    Do         : in DATA_TYPE;      --!
+    WB_CNTRL   : in WB_CNTRL_TYPE;  --!Controlbits for WB-Stage 
+    MA_CNTRL   : in MA_CNTRL_TYPE;  --!Controlbits for MA-Stage 
+    EX_CNTRL   : in EX_CNTRL_TYPE;  --!Controlbits for EX-Stage will be used here    
+    Imm        : in DATA_TYPE;      --!Immediate
+    OPB        : in DATA_TYPE;      --!Operand B
+    OPA        : in DATA_TYPE;      --!Operand A
+    Do         : in DATA_TYPE;      --!Data Output register
     
-    WB_CNTRL   : out WB_CNTRL_TYPE; --!
-    MA_CNTRL   : out MA_CNTRL_TYPE; --!
-    RESU_DAR   : out DATA_TYPE;     --!
+    WB_CNTRL   : out WB_CNTRL_TYPE; --!Controlbits for WB-Stage 
+    MA_CNTRL   : out MA_CNTRL_TYPE; --!Controlbits for MB-Stage 
+    RESU_DAR   : out DATA_TYPE;     --!Result of calulation
+    Branch     : out std_logic;     --!For conditioned branching
     
     );
 end entity execute;    
