@@ -16,7 +16,7 @@ architecture TB of PC_log_TB is
 		 	rel			: in DATA_TYPE;		--! relative branch adress
 			abso		: in DATA_TYPE;		--! absolute branch adress, or base for relative jump
 			 
-			pc 			: out ADRESS_TYPE;	--! programm counter output
+			pc 			: out ADDRESS_TYPE	--! programm counter output
 		);
 	end component dut;
 	for all : dut use entity work.PC_log(std_impl);

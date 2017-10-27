@@ -1,5 +1,6 @@
 --! RISC-V package
 --! @author Felix Lorenz
+--! @author Sebastian Brueckner
 --! project: ach ne! @ HAW-Hamburg
 
 library IEEE;
@@ -27,6 +28,7 @@ package riscv_pack is
 	                        );
 	                        
 	constant DATA_WIDTH : natural := 32;
+	constant ADDRESS_WIDTH : natural := 32;
 	constant REGISTER_ADDRESS_WIDTH : natural := 5;
 	constant REGISTER_COUNT : natural := 32;
 	constant INSTRUCTION_WIDTH : natural := 32;
