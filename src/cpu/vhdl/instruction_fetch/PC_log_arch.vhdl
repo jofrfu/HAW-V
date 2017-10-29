@@ -1,12 +1,12 @@
---!@file     PC_log.vhdl
---!@biref     This file contains 
---!            Standard architecture for PC_log for synthesis
---!@author     Sebastian Br�ckner
---!@date     2017
+--!@file   PC_log.vhdl
+--!@biref  This file contains 
+--!        Standard architecture for PC_log for synthesis
+--!@author Sebastian Brueckner
+--!@date   2017
 
---!@biref     Standard architecture for PC_log for synthesis
---!@author     Sebastian Br�ckner
---!@date     2017
+--!@biref  Standard architecture for PC_log for synthesis
+--!@author Sebastian Brueckner
+--!@date   2017
 
 use WORK.riscv_pack.all;
 library IEEE;
