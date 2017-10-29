@@ -10,9 +10,8 @@ library IEEE;
 
 --!@biref   This is the memory acess stage
 --!@details Tasks:
---!         1. Store DO register
---!         2. Store RESU/DAR
---!         3. Control LOAD
+--!         1. Write to RAM
+--!         2. Control LOAD
 --!@author  Sebastian Brückner
 --!@date    2017
 entity memmory_access is
