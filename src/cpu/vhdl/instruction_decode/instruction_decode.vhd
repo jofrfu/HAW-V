@@ -129,7 +129,7 @@ begin
     pc_mux:
     process(opa_s, PC, pc_sel_s) is
     begin
-        if imm_sel_s = '1' then
+        if pc_sel_s = '1' then
             opa_reg_ns <= PC;
         else
             opa_reg_ns <= opa_s;
