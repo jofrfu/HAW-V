@@ -6,3 +6,9 @@ BuildPath.txt
 src/cpu/vhdl/**/*.*
 !src/cpu/vhdl/**/*.vhdl
 !src/cpu/vhdl/**/*.do
+
+#ignore doxygen files
+src/cpu/vhdl/latex/
+src/cpu/vhdl/html/
+
+
