@@ -71,27 +71,49 @@ begin
             case op_code_v is
                 when luio =>
                     IF_CNTRL_v := "00";    --PC + 4
-                    ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load immediate for opb and r0 for opa
+                    ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load immediate for opb and r0 for opa (r0 in do)
                     MA_CNTRL_v := "00";   --no load nor store
                     WB_CNTRL_v := rd_v;   --write result to rd
                 when auipco =>
                     IF_CNTRL_v := "00";    --PC + 4
-                    ID_CNTRL_v := '1' & '1' & "00000" & "00000";    --load pc in opa and immediate in opb
+                    ID_CNTRL_v := '1' & '1' & "00000" & "00000";    --load pc in opa and immediate in opb (r0 in do)
                     MA_CNTRL_v := "00";   --no load nor store
                     WB_CNTRL_v := rd_v;   --write result to rd
                 when jalo =>
-                
+                    IF_CNTRL_v := "01";    --PC + rel
+                    ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load r0 in opa and immediate in opb (r0 in do)
+                    MA_CNTRL_v := "00";   --no load nor store
+                    WB_CNTRL_v := "00000";   --jump, no write back
                 when jalro =>
-                
+                    IF_CNTRL_v := "11";    --abs + rel
+                    ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
+                    MA_CNTRL_v := "00";    --no load nor store
+                    WB_CNTRL_v := "00000";   --jump, no write back
                 when brancho =>
-                
+                    IF_CNTRL_v := "00";    --next instruction will be loaded if no branching
+                    ID_CNTRL_v := '0' & '0' & rs2_v & rs1_v;    --load rs1 in opa and rs2 in opb
+                    MA_CNTRL_v := "00";    --no load nor store
+                    WB_CNTRL_v := "00000";   --branch, no write back
                 when loado =>
-                
+                    IF_CNTRL_v := "00";    --PC + 4
+                    ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
+                    MA_CNTRL_v := "01";    --load
+                    WB_CNTRL_v := rd_v;   --write loaded value to rd
                 when storeo =>
-                
+                    IF_CNTRL_v := "00";    --PC + 4
+                    ID_CNTRL_v := '0' & '1' & rs2_v & rs1_v;    --load rs1 in opa, immediate in opb and rs2 in do
+                    MA_CNTRL_v := "10";    --store
+                    WB_CNTRL_v := "00000";   --value will be stored, no write back
                 when opimmo =>
-                
+                    IF_CNTRL_v := "00";    --PC + 4
+                    ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
+                    MA_CNTRL_v := "00";    --no load nor store
+                    WB_CNTRL_v := rd_v;   --write result to rd
                 when opo =>
+                    IF_CNTRL_v := "00";    --PC + 4
+                    ID_CNTRL_v := '0' & '0' & rs2_v & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
+                    MA_CNTRL_v := "00";    --no load nor store
+                    WB_CNTRL_v := rd_v;   --write result to rd
             end case;
         end if; --branch_v
         
