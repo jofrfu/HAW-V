@@ -42,8 +42,8 @@ package riscv_pack is
 	subtype REGISTER_COUNT_WIDTH is std_logic_vector(REGISTER_COUNT-1 downto 0);
 	subtype INSTRUCTION_BIT_TYPE is std_logic_vector(INSTRUCTION_WIDTH-1 downto 0);
 	subtype OP_CODE_BIT_TYPE is std_logic_vector(OP_CODE_WIDTH-1 downto 0);
-	subtype FUNCT3_TYPE is std_logic_vector(FUNCT3_WIDTH downto 0);
-	subtype FUNCT7_TYPE is std_logic_vector(FUNCT7_WIDTH downto 0);
+	subtype FUNCT3_TYPE is std_logic_vector(FUNCT3_WIDTH-1 downto 0);
+	subtype FUNCT7_TYPE is std_logic_vector(FUNCT7_WIDTH-1 downto 0);
 	
 	type REG_OUT_TYPE is array(REGISTER_COUNT-1 downto 0) of DATA_TYPE;
 	
@@ -93,5 +93,9 @@ package body riscv_pack is
 	           report "unknown OP_CODE" severity error;
 	    end case;
     end function BITS_TO_OP_CODE_TYPE;
+    
+--! @brief execute
+constant FLAGS_WIDTH : natural := 4;
+subtype FLAGS_TYPE is std_logic_vector(FLAGS_WIDTH-1 downto 0);
     
 end package body;
