@@ -17,10 +17,11 @@ entity PC_log is
     port(
          clk, reset : in std_logic;
          
-         cntrl  : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
-         rel    : in DATA_TYPE;        --! relative branch adress
-         abso    : in DATA_TYPE;        --! absolute branch adress, or base for relative jump
+         cntrl     : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
+         rel       : in DATA_TYPE;     --! relative branch adress
+         abso      : in DATA_TYPE;     --! absolute branch adress, or base for relative jump
          
-         pc : out ADDRESS_TYPE        --! programm counter output
+         pc_asynch : out ADDRESS_TYPE; --! programm counter output
+         pc_synch  : out ADDRESS_TYPE  --! programm counter output
     );
 end entity PC_log;
