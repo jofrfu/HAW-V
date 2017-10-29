@@ -50,7 +50,8 @@ begin
         pc_ns <= pc_ns_v;
     end process pc_logic;
     
-    pc <= pc_cs;
+    pc_asynch <= pc_ns;     --program counter to memory for intruction fetch
+    pc_synch  <= pc_cs;     --clocked program counter for ID stage
     
     reg : process(clk, reset) is
     begin

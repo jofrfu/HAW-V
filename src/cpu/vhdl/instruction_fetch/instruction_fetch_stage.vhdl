@@ -22,7 +22,7 @@ entity instruction_fetch is
 		 ins 	: in DATA_TYPE;		--! the new instruction is loaded from here
 		 
 		 IFR	: out DATA_TYPE;	--! Instruction fetch register contents
-		 pc     : out DATA_TYPE;	--! programm counter output
-		 pc_reg : out DATA_TYPE
+		 pc_reg : out DATA_TYPE;    --! clocked pc register for ID stage
+         pc     : out ADDRESS_TYPE  --! asynchronous PC for instruction memory
 	);
 end entity instruction_fetch;
