@@ -14,7 +14,7 @@ entity register_select is
             OPA, OPB, DO :   out DATA_TYPE;
             -------- PC ports
             PC           :   in  ADDRESS_TYPE;
-            PC_en        :   in  std_logic
+            PC_en        :   in  PC_EN_TYPE
     );--]port
 end entity register_select;
 
@@ -55,13 +55,25 @@ begin
 	rs1_mux:
 	process(rs1) is
 	begin
-        if PC_en = '1' then
-            OPA <= std_logic_vector(unsigned(PC) + 4);  -- save next program count
-		elsif rs1 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
-			OPA <= (others => '0');
-		else
-			OPA <= reg_out_s(to_integer(unsigned(rs1)));
-		end if;
+        case PC_en is
+            when "00" =>
+                if rs1 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
+                    OPA <= (others => '0');
+                else
+                    OPA <= reg_out_s(to_integer(unsigned(rs1)));
+                end if;
+            when "01" =>
+                OPA <= PC;
+            when "11" =>
+                OPA <= std_logic_vector(unsigned(PC) + 4);  -- save next program count
+            when others =>
+                report "unknown PC_en" severity error;
+                if rs1 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
+                    OPA <= (others => '0');
+                else
+                    OPA <= reg_out_s(to_integer(unsigned(rs1)));
+                end if;
+        end case;
 	end process rs1_mux;
 	
 	rs2_mux:
