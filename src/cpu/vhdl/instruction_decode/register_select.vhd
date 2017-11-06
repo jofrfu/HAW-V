@@ -11,7 +11,10 @@ entity register_select is
     port(   clk, reset   :   in  std_logic;
             DI           :   in  DATA_TYPE;
             rs1, rs2, rd :   in  REGISTER_ADDRESS_TYPE;
-            OPA, OPB, DO :   out DATA_TYPE
+            OPA, OPB, DO :   out DATA_TYPE;
+            -------- PC ports
+            PC           :   in  ADDRESS_TYPE;
+            PC_en        :   in  std_logic
     );--]port
 end entity register_select;
 
@@ -52,7 +55,9 @@ begin
 	rs1_mux:
 	process(rs1) is
 	begin
-		if rs1 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
+        if PC_en = '1' then
+            OPA <= std_logic_vector(unsigned(PC) + 4);  -- save next program count
+		elsif rs1 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
 			OPA <= (others => '0');
 		else
 			OPA <= reg_out_s(to_integer(unsigned(rs1)));
