@@ -1,5 +1,8 @@
 --! RISC-V package
 --! @author Felix Lorenz
+--! @author Sebastian Brueckner
+--! @author Jonas Fuhrmann
+--! @author Matthis Keppner
 --! project: ach ne! @ HAW-Hamburg
 
 library IEEE;
@@ -27,6 +30,7 @@ package riscv_pack is
 	                        );
 	                        
 	constant DATA_WIDTH : natural := 32;
+	constant ADDRESS_WIDTH : natural := 32;
 	constant REGISTER_ADDRESS_WIDTH : natural := 5;
 	constant REGISTER_COUNT : natural := 32;
 	constant INSTRUCTION_WIDTH : natural := 32;
@@ -51,7 +55,7 @@ package riscv_pack is
 	subtype IF_CNTRL_TYPE is std_logic_vector(IF_CNTRL_WIDTH-1 downto 0);
 	
 	--! @brief Instruction Decode
-	constant WB_CNTRL_WIDTH : natural := 5;
+	constant WB_CNTRL_WIDTH : natural := 6;
 	constant MA_CNTRL_WIDTH : natural := 2;
 	constant EX_CNTRL_WIDTH : natural := 17;
 	constant ID_CNTRL_WIDTH : natural := 12;
@@ -63,7 +67,7 @@ package riscv_pack is
 	constant ID_CNTRL_NOP : ID_CNTRL_TYPE := "000000000000"; -- select r0 and r0 as operands
 	constant EX_CNTRL_NOP : EX_CNTRL_TYPE := "00000000000110011"; --add registers
 	constant MA_CNTRL_NOP : MA_CNTRL_TYPE := "00"; --no memory access
-	constant WB_CNTRL_NOP : WB_CNTRL_TYPE := "00000"; --write result to r0
+	constant WB_CNTRL_NOP : WB_CNTRL_TYPE := "000000"; --write result to r0
 	
 	--! @brief functions 
 	--! @brief LUT as function to convert op_code as std_logic_vector to OP_CODE_TYPE
