@@ -22,7 +22,8 @@ entity instruction_decode is
 		Imm			 : out DATA_TYPE;
 		OPB			 : out DATA_TYPE;
 		OPA			 : out DATA_TYPE;
-		DO			 : out DATA_TYPE
+		DO			 : out DATA_TYPE;
+        PC_o         : out ADDRESS_TYPE
 	);
 end entity instruction_decode;
 
@@ -56,6 +57,8 @@ architecture beh of instruction_decode is
 	signal opa_reg_ns 		: DATA_TYPE;
 	signal do_reg_cs 		: DATA_TYPE 	:= (others => '0');
 	signal do_reg_ns 		: DATA_TYPE;
+    signal pc_reg_cs        : ADDRESS_TYPE  := (others => '0');
+    signal pc_reg_ns        : ADDRESS_TYPE;
 	
 	--! @brief decode unit
 	component decode is
@@ -142,6 +145,7 @@ begin
                 opb_reg_cs 		<= (others => '0');
                 opa_reg_cs 		<= (others => '0');
                 do_reg_cs 		<= (others => '0');
+                pc_reg_cs       <= (others => '0');
             else
             	wb_cntrl_reg_cs <= wb_cntrl_reg_ns;
                 ma_cntrl_reg_cs <= ma_cntrl_reg_ns;
@@ -150,9 +154,12 @@ begin
                 opb_reg_cs 		<= opb_reg_ns;
                 opa_reg_cs 		<= opa_reg_ns;
                 do_reg_cs 		<= do_reg_ns;
+                pc_reg_cs       <= pc_reg_ns;
             end if;
         end if; 
 	end process sequ_log;
 	
+    pc_reg_ns <= pc;
+    PC_o <= pc_reg_cs;
 
 end architecture beh;
