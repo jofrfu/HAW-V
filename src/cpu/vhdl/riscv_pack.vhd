@@ -98,6 +98,8 @@ package body riscv_pack is
     
 --! @brief execute
 constant FLAGS_WIDTH : natural := 4;
+constant WORD_CNTRL_WIDTH  : natural := 2;
 subtype FLAGS_TYPE is std_logic_vector(FLAGS_WIDTH-1 downto 0);
+subtype WORD_CNTRL_TYPE  is std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0);
     
 end package body;
