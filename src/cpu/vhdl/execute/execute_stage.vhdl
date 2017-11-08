@@ -16,20 +16,21 @@ entity execute is
     port(
     clk, reset : in std_logic;
     
-    WB_CNTRL_IN   : in WB_CNTRL_TYPE;  --!Controlbits for WB-Stage 
-    MA_CNTRL_IN   : in MA_CNTRL_TYPE;  --!Controlbits for MA-Stage 
-    EX_CNTRL_IN   : in EX_CNTRL_TYPE;  --!Controlbits for EX-Stage will be used here    
-    Imm           : in DATA_TYPE;      --!Immediate
-    OPB           : in DATA_TYPE;      --!Operand B
-    OPA           : in DATA_TYPE;      --!Operand A
-    DO_IN         : in DATA_TYPE;      --!Data-output-register
-    PC_IN         : in ADDRESS_TYPE;   --!PC Register
+    WB_CNTRL_IN   : in WB_CNTRL_TYPE;    --!Controlbits for WB-Stage 
+    MA_CNTRL_IN   : in MA_CNTRL_TYPE;    --!Controlbits for MA-Stage 
+    EX_CNTRL_IN   : in EX_CNTRL_TYPE;    --!Controlbits for EX-Stage will be used here    
+    Imm           : in DATA_TYPE;        --!Immediate
+    OPB           : in DATA_TYPE;        --!Operand B
+    OPA           : in DATA_TYPE;        --!Operand A
+    DO_IN         : in DATA_TYPE;        --!Data-output-register
+    PC_IN         : in ADDRESS_TYPE;     --!PC Register
     
-    WB_CNTRL_OUT  : out WB_CNTRL_TYPE; --!Controlbits for WB-Stage 
-    MA_CNTRL_OUT  : out MA_CNTRL_TYPE; --!Controlbits for MB-Stage 
-    RESU_DAR      : out DATA_TYPE;     --!Result of calulation
-    Branch        : out std_logic;     --!For conditioned branching
-    DO_OUT        : out DATA_TYPE;     --!Data-output-register is passed to next stage
-    PC_OUT        : out ADDRESS_TYPE   --!PC Register
+    WB_CNTRL_OUT  : out WB_CNTRL_TYPE;   --!Controlbits for WB-Stage 
+    MA_CNTRL_OUT  : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
+	WORD_CNTRL_OUT: out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
+    RESU_DAR      : out DATA_TYPE;       --!Result of calulation
+    Branch        : out std_logic;       --!For conditioned branching
+    DO_OUT        : out DATA_TYPE;       --!Data-output-register is passed to next stage
+    PC_OUT        : out ADDRESS_TYPE     --!PC Register
     );
 end entity execute;    
