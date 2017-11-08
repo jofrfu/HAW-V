@@ -1,5 +1,5 @@
 --! @brief instruction decode stage
---! @author Jonas Fuhrmann + Felix Lorenz
+--! @author Jonas Fuhrmann + Felix Lorenz + Matthis Keppner
 --! project: ach ne! @ HAW-Hamburg
 
 use WORK.riscv_pack.all;
@@ -33,7 +33,7 @@ architecture beh of instruction_decode is
 	signal imm_sel_s		: std_logic;
 	signal imm_s			: DATA_TYPE;
 	-- pc signal
-	signal pc_en_s          : PC_EN_TYPE;
+	signal pc_en_s          : std_logic;
 	-- register addresses
 	signal rs1_s			: REGISTER_ADDRESS_TYPE;
 	signal rs2_s			: REGISTER_ADDRESS_TYPE;
@@ -81,7 +81,7 @@ architecture beh of instruction_decode is
 	        OPA, OPB, DO :   out DATA_TYPE;
             -------- PC ports
             PC           :   in  ADDRESS_TYPE;
-            PC_en        :   in  PC_EN_TYPE
+            PC_en        :   in  std_logic
 	    );--]port
 	end component register_select;
 	
@@ -94,7 +94,7 @@ begin
 		branch => branch,
 		IFR => IFR,
 		IF_CNTRL => IF_CNTRL,
-		ID_CNTRL(12 downto 11) => pc_en_s,
+		ID_CNTRL(11) => pc_en_s,
 		ID_CNTRL(10) => imm_sel_s,
 		ID_CNTRL(9 downto 5) => rs2_s,
 		ID_CNTRL(4 downto 0) => rs1_s,

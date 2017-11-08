@@ -1,6 +1,8 @@
 --! RISC-V package
 --! @author Felix Lorenz
 --! @author Sebastian Brueckner
+--! @author Jonas Fuhrmann
+--! @author Matthis Keppner
 --! project: ach ne! @ HAW-Hamburg
 
 library IEEE;
@@ -53,22 +55,19 @@ package riscv_pack is
 	subtype IF_CNTRL_TYPE is std_logic_vector(IF_CNTRL_WIDTH-1 downto 0);
 	
 	--! @brief Instruction Decode
-	constant WB_CNTRL_WIDTH : natural := 5;
+	constant WB_CNTRL_WIDTH : natural := 6;
 	constant MA_CNTRL_WIDTH : natural := 2;
 	constant EX_CNTRL_WIDTH : natural := 17;
-	constant ID_CNTRL_WIDTH : natural := 13;
-    constant PC_EN_WIDTH    : natural := 2;
+	constant ID_CNTRL_WIDTH : natural := 12;
 	subtype WB_CNTRL_TYPE is std_logic_vector(WB_CNTRL_WIDTH-1 downto 0);
 	subtype MA_CNTRL_TYPE is std_logic_vector(MA_CNTRL_WIDTH-1 downto 0);
 	subtype EX_CNTRL_TYPE is std_logic_vector(EX_CNTRL_WIDTH-1 downto 0);
 	subtype ID_CNTRL_TYPE is std_logic_vector(ID_CNTRL_WIDTH-1 downto 0);
 	constant IF_CNTRL_NOP : IF_CNTRL_TYPE := "00"; --PC + 4 as usual
-	constant ID_CNTRL_NOP : ID_CNTRL_TYPE := "0000000000000"; -- select r0 and r0 as operands
+	constant ID_CNTRL_NOP : ID_CNTRL_TYPE := "000000000000"; -- select r0 and r0 as operands
 	constant EX_CNTRL_NOP : EX_CNTRL_TYPE := "00000000000110011"; --add registers
 	constant MA_CNTRL_NOP : MA_CNTRL_TYPE := "00"; --no memory access
-	constant WB_CNTRL_NOP : WB_CNTRL_TYPE := "00000"; --write result to r0
-    
-    subtype PC_EN_TYPE is std_logic_vector(PC_EN_WIDTH-1 downto 0);
+	constant WB_CNTRL_NOP : WB_CNTRL_TYPE := "000000"; --write result to r0
 	
 	--! @brief functions 
 	--! @brief LUT as function to convert op_code as std_logic_vector to OP_CODE_TYPE
