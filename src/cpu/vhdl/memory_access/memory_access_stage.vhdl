@@ -41,7 +41,7 @@ entity memory_access is
         WRITE_EN    : out std_logic;
         DATA_OUT    : out DATA_TYPE;
         ADDRESS     : out ADDRESS_TYPE;
-  		WORD_LENGTH : out WORD_CNTRL_TYPE;
+  		WORD_LENGTH : out WORD_CNTRL_TYPE
     );
 end entity memory_access;
 
@@ -60,6 +60,7 @@ begin
 
 	load_mux:
 	process(RESU, DATA_IN, MA_CNTRL(1)) is
+	begin
 		if MA_CNTRL(1) = '1' then
 			di_ns <= RESU;
 		else
