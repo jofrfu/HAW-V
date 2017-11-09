@@ -16,13 +16,13 @@ entity instruction_fetch is
 	port(
 		 clk, reset : in std_logic;
 		 
-		 cntrl  : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
-		 rel	: in DATA_TYPE;		--! relative branch address
-		 abso	: in DATA_TYPE;		--! absolute branch address, or base for relative jump
-		 ins 	: in DATA_TYPE;		--! the new instruction is loaded from here
+		 cntrl     : in IF_CNTRL_TYPE;  --! Control the operation mode of the PC logic
+		 rel	   : in DATA_TYPE;		--! relative branch address
+		 abso	   : in DATA_TYPE;		--! absolute branch address, or base for relative jump
+		 ins 	   : in DATA_TYPE;		--! the new instruction is loaded from here
 		 
-		 IFR	: out DATA_TYPE;	--! Instruction fetch register contents
-		 pc_reg : out DATA_TYPE;    --! clocked pc register for ID stage
-         pc     : out ADDRESS_TYPE  --! asynchronous PC for instruction memory
-	);
+         IFR	   : out DATA_TYPE;	    --! Instruction fetch register contents
+         pc_asynch : out ADDRESS_TYPE;  --! clocked pc register for ID stage
+         pc_synch  : out ADDRESS_TYPE   --! asynchronous PC for instruction memory
+    );
 end entity instruction_fetch;
