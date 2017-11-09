@@ -54,7 +54,7 @@ begin
 	end process rd_demux;
 	
 	rs1_mux:
-	process(rs1) is
+	process(rs1,pc_en) is
 	begin
         if PC_en = '1' then
             OPA <= PC;
