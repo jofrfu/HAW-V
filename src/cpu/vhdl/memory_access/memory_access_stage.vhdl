@@ -62,9 +62,9 @@ begin
 	process(RESU, DATA_IN, MA_CNTRL(1)) is
 	begin
 		if MA_CNTRL(1) = '1' then
-			di_ns <= RESU;
-		else
 			di_ns <= DATA_IN;
+		else
+			di_ns <= RESU;
 		end if;
 	end process load_mux;
 	
