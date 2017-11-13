@@ -114,6 +114,13 @@ begin
                     ID_CNTRL_v := '0' & '0' & rs2_v & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
                     MA_CNTRL_v := "00";    --no load nor store
                     WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
+                when others =>
+                    report "decode.vhd - decode: unknown OP_CODE" severity error;
+                    IF_CNTRL_v := "01";    --rel + PC
+                    ID_CNTRL_v := ID_CNTRL_NOP; --discard instruction in pipeline
+                    EX_CNTRL_v := EX_CNTRL_NOP;
+                    MA_CNTRL_v := MA_CNTRL_NOP;
+                    WB_CNTRL_v := WB_CNTRL_NOP;
             end case;
         end if; --branch_v
         
@@ -160,7 +167,10 @@ begin
                 immediate_v(10 downto 5) := imm_bits_v(30 downto 25);
                 immediate_v(4 downto 1) := imm_bits_v(11 downto 8);
                 immediate_v(0) := imm_bits_v(7);
-
+                
+            when others =>
+                report "decode.vhd - imm_constr: unknown OP_CODE" severity error;
+                immediate_v := (others => '0');
         end case;
         
         Imm <= immediate_v;
