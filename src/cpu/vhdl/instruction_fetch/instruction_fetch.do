@@ -1,4 +1,5 @@
 onerror {resume}
+vsim -gui -novopt work.instruction_fetch_TB
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /instruction_fetch_tb/clk_s
 add wave -noupdate /instruction_fetch_tb/reset_s
@@ -30,3 +31,4 @@ configure wave -timeline 0
 configure wave -timelineunits ns
 update
 WaveRestoreZoom {8934 ns} {9846 ns}
+run -all
