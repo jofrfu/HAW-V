@@ -11,8 +11,6 @@ use WORK.riscv_pack.all;
 
 entity ALU is 
     port(
-        clk, reset : in std_logic;
-        
         OPB         : in DATA_TYPE;
         OPA         : in DATA_TYPE;
         EX_CNTRL_IN : in EX_CNTRL_TYPE;
@@ -204,7 +202,7 @@ begin
         sltu_resu <= resu_v;
     end process sltu_proc;
     
-    --!@brief ALU of the execute stage
+    --! @brief ALU of the execute stage
     --! @detail calculates OPA (+) OPB;
     choose:
     process (EX_CNTRL_IN) is
