@@ -21,6 +21,8 @@ package riscv_pack is
 	                            addi, subi, slli, slti, sltui, xori, srli, srai, ori, andi
 	                            --fencei, ecalli csri
 	                            );
+                               
+    
 		
 	--! @brief list of op codes
 	--! @detail last o stands for "opcode", testerror indicates error for sim and test                    
@@ -29,6 +31,64 @@ package riscv_pack is
 	                        --miscmemo,systemo
                             testerror
 	                        );
+                            
+    constant BEQ_FUNC3    : std_logic_vector(2 downto 0) := "000";
+    constant BNE_FUNC3    : std_logic_vector(2 downto 0) := "001";
+    constant BLT_FUNC3    : std_logic_vector(2 downto 0) := "100";
+    constant BGE_FUNC3    : std_logic_vector(2 downto 0) := "101";
+    constant BLTU_FUNC3   : std_logic_vector(2 downto 0) := "110";
+    constant BGEU_FUNC3   : std_logic_vector(2 downto 0) := "111";
+    constant LB_FUNC3     : std_logic_vector(2 downto 0) := "000";
+    constant LH_FUNC3     : std_logic_vector(2 downto 0) := "001";
+    constant LW_FUNC3     : std_logic_vector(2 downto 0) := "010";
+    constant LBU_FUNC3    : std_logic_vector(2 downto 0) := "100";
+    constant LHU_FUNC3    : std_logic_vector(2 downto 0) := "101";
+    constant SB_FUNC3     : std_logic_vector(2 downto 0) := "000";
+    constant SH_FUNC3     : std_logic_vector(2 downto 0) := "001";
+    constant SW_FUNC3     : std_logic_vector(2 downto 0) := "010";
+    constant ADDI_FUNC3   : std_logic_vector(2 downto 0) := "000";
+    constant SLTI_FUNC3   : std_logic_vector(2 downto 0) := "010";
+    constant SLTIU_FUNC3  : std_logic_vector(2 downto 0) := "011";
+    constant XORI_FUNC3   : std_logic_vector(2 downto 0) := "100";
+    constant ORI_FUNC3    : std_logic_vector(2 downto 0) := "110";
+    constant ANDI_FUNC3   : std_logic_vector(2 downto 0) := "111";
+    constant SLLI_FUNC3   : std_logic_vector(2 downto 0) := "001";
+    constant SRLI_FUNC3   : std_logic_vector(2 downto 0) := "101";
+    constant SRAI_FUNC3   : std_logic_vector(2 downto 0) := "101";
+    constant ADD_FUNC3    : std_logic_vector(2 downto 0) := "000";
+    constant SUB_FUNC3    : std_logic_vector(2 downto 0) := "000";
+    constant SLL_FUNC3    : std_logic_vector(2 downto 0) := "001";
+    constant SLT_FUNC3    : std_logic_vector(2 downto 0) := "010";
+    constant SLTU_FUNC3   : std_logic_vector(2 downto 0) := "011";
+    constant XOR_FUNC3    : std_logic_vector(2 downto 0) := "100";
+    constant SRL_FUNC3    : std_logic_vector(2 downto 0) := "101";
+    constant SRA_FUNC3    : std_logic_vector(2 downto 0) := "101";
+    constant OR_FUNC3     : std_logic_vector(2 downto 0) := "110";
+    constant AND_FUNC3    : std_logic_vector(2 downto 0) := "111";
+    constant FENCE_FUNC3  : std_logic_vector(2 downto 0) := "000";
+    constant FENCEI_FUNC3 : std_logic_vector(2 downto 0) := "001";
+    constant ECALL_FUNC3  : std_logic_vector(2 downto 0) := "000";
+    constant EBREAK_FUNC3 : std_logic_vector(2 downto 0) := "000";
+    constant CSRRW_FUNC3  : std_logic_vector(2 downto 0) := "001";
+    constant CSRRS_FUNC3  : std_logic_vector(2 downto 0) := "010";
+    constant CSRRC_FUNC3  : std_logic_vector(2 downto 0) := "011";
+    constant CSRRWI_FUNC3 : std_logic_vector(2 downto 0) := "101";
+    constant CSRRSI_FUNC3 : std_logic_vector(2 downto 0) := "110";
+    constant CSRRCI_FUNC3 : std_logic_vector(2 downto 0) := "111";
+    
+    constant SLLI_FUNC7   : std_logic_vector(6 downto 0) := "0000000";
+    constant SRLI_FUNC7   : std_logic_vector(6 downto 0) := "0000000";
+    constant SRAI_FUNC7   : std_logic_vector(6 downto 0) := "0100000";
+    constant ADD_FUNC7    : std_logic_vector(6 downto 0) := "0000000";
+    constant SUB_FUNC7    : std_logic_vector(6 downto 0) := "0100000";
+    constant SLL_FUNC7    : std_logic_vector(6 downto 0) := "0000000";
+    constant SLT_FUNC7    : std_logic_vector(6 downto 0) := "0000000";
+    constant SLTU_FUNC7   : std_logic_vector(6 downto 0) := "0000000";
+    constant XOR_FUNC7    : std_logic_vector(6 downto 0) := "0000000";
+    constant SRL_FUNC7    : std_logic_vector(6 downto 0) := "0000000";
+    constant SRA_FUNC7    : std_logic_vector(6 downto 0) := "0100000";
+    constant OR_FUNC7     : std_logic_vector(6 downto 0) := "0000000";
+    constant AND_FUNC7    : std_logic_vector(6 downto 0) := "0000000";                        
 	                        
 	constant DATA_WIDTH : natural := 32;
 	constant ADDRESS_WIDTH : natural := 32;
