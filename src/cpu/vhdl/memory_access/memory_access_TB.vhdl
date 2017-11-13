@@ -16,6 +16,7 @@ component dut is
         WB_CNTRL_IN : in WB_CNTRL_TYPE;
         MA_CNTRL    : in MA_CNTRL_TYPE;
         WORD_CNTRL  : in WORD_CNTRL_TYPE;
+        SIGN_EN     : in std_logic;
         RESU        : in DATA_TYPE;
         DO          : in DATA_TYPE;
         PC_IN       : in ADDRESS_TYPE;
@@ -46,6 +47,7 @@ for all : dut use entity work.memory_access(beh);
     signal WB_CNTRL_IN_s : WB_CNTRL_TYPE       := (others => '0');
     signal MA_CNTRL_s    : MA_CNTRL_TYPE       := (others => '0');
     signal WORD_CNTRL_s  : WORD_CNTRL_TYPE     := (others => '0');
+    signal SIGN_EN_s     : std_logic           := '0';
     signal RESU_s        : DATA_TYPE           := (others => '0');
     signal DO_s          : DATA_TYPE           := (others => '0');
     signal PC_IN_s       : ADDRESS_TYPE        := (others => '0');
@@ -71,6 +73,7 @@ begin
         WB_CNTRL_IN_s,
         MA_CNTRL_s,
         WORD_CNTRL_s,
+        SIGN_EN_s,
         RESU_s,
         DO_s,
         PC_IN_s,
