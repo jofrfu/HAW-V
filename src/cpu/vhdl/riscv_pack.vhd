@@ -100,6 +100,18 @@ package riscv_pack is
     ) 
     return INSTRUCTION_BIT_TYPE;
     
+    --!@brief create IFR I-Type special for shift operation
+    --!@detail immediate(11 downto 5) is funct7 and immediate(4 downto 0) the shift amount
+    function IFR_I_TYPE_SHIFT(
+        funct7  : FUNCT7_TYPE;
+        shamt   : integer; --TODO: range
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        rd      : integer range 0 to REGISTER_COUNT-1; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE;
+    
     --!@brief create IFR S-Type
     function IFR_S_TYPE(
         imm     : integer; --TODO: range
@@ -164,7 +176,7 @@ package body riscv_pack is
     function OP_CODE_TYPE_TO_BITS(op_code : OP_CODE_TYPE) return OP_CODE_BIT_TYPE is
     begin
         case op_code is
-            when opimmo => 
+            when opimmo  => return "0010011";
             --when miscmemo => return "0001111";
             --when systemo => return "1110011";
             when jalro   => return "1100111";
@@ -176,7 +188,7 @@ package body riscv_pack is
             when brancho => return "1100011";
             when storeo  => return "0100011";
             when others => 
-	           report "unknown OP_CODE" severity error;
+	           report "riscv_pack.vhd: unknown OP_CODE" severity error;
                return "0000000";
         end case;
     end function OP_CODE_TYPE_TO_BITS;
@@ -214,6 +226,25 @@ package body riscv_pack is
              & std_logic_vector(to_unsigned(rd, REGISTER_ADDRESS_WIDTH)) 
              & OP_CODE_TYPE_TO_BITS(op_code);
     end function IFR_I_TYPE;
+    
+    function IFR_I_TYPE_SHIFT(
+        funct7  : FUNCT7_TYPE;
+        shamt   : integer; --TODO: range
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        rd      : integer range 0 to REGISTER_COUNT-1; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE is
+    begin
+        return funct7
+             & std_logic_vector(to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)) 
+             & std_logic_vector(to_unsigned(rs1, REGISTER_ADDRESS_WIDTH)) 
+             & funct3 
+             & std_logic_vector(to_unsigned(rd, REGISTER_ADDRESS_WIDTH)) 
+             & OP_CODE_TYPE_TO_BITS(op_code);
+    end function IFR_I_TYPE_SHIFT;
+    
     
     function IFR_S_TYPE(
         imm     : integer; --TODO: range
