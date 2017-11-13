@@ -36,8 +36,12 @@ architecture beh of ALU is
     signal sra_resu     : DATA_TYPE  := (others => '0');   
     signal slt_resu     : DATA_TYPE  := (others => '0');
     signal sltu_resu    : DATA_TYPE  := (others => '0');
+    
+    signal flags_s      : FLAGS_TYPE;
 
 begin
+    
+    Flags <= flags_s;
 
     alu_proc:
     process (OPA, OPB, nadd_sub) is
@@ -48,27 +52,30 @@ begin
     variable resu_v   : std_logic_vector(DATA_WIDTH downto 0);
     variable flags_v  : FLAGS_TYPE;
     
+    variable temp_v   : DATA_TYPE;
+    
     begin
     
         OPA_v := '0' & OPA;
         OPB_v := '0' & OPB;
         for i in DATA_WIDTH-1 downto 0 loop
-            OPB_v(i) := alu_OPB(i) xor nadd_sub;
+            OPB_v(i) := OPB(i) xor nadd_sub;
         end loop;
         
-        resu_v := std_logic_vector(to_unsigned(OPA_v) + to_unsigned(OPB_v), DATA_WIDTH);
-        flags_v(0) := resu_v'high;
+        resu_v := std_logic_vector(unsigned(OPA_v) + unsigned(OPB_v));
+        flags_v(0) := resu_v(resu_v'left);
         flags_v(1) := resu_v(resu_v'left - 1);
-        if resu_v = std_logic_vector(to_unsigned(0), DATA_WIDTH+1) then
+        if resu_v = std_logic_vector(to_unsigned(0, DATA_WIDTH+1)) then
             flags_v(2) := '1';
         else
             flags_v(2) := '0';
         end if;
         -- todo: change adder to adder which supports carry outputs
-        flags_v(3) := std_logic_vector(to_unsigned(OPA_v(OPA_v'left-1 downto 0)) + to_unsigned(OPB_v(OPB_v'left-1 downto 0)))'high xor resu_v'high;
+        temp_v := std_logic_vector(unsigned(OPA_v(OPA_v'left-1 downto 0)) + unsigned(OPB_v(OPB_v'left-1 downto 0)));
+        flags_v(3) := temp_v(temp_v'left) xor resu_v(resu_v'left);
         
-        alu_resu <= resu_v;
-        Flags <= flags_v;
+        alu_resu <= resu_v(resu_v'left-1 downto 0);
+        flags_s <= flags_v;
     end process alu_proc;
     
     and_proc:
@@ -130,7 +137,7 @@ begin
         OPA_v := OPA;
         OPB_v := OPB;
         
-        resu_v := std_logic_vector(shift_left(unsigned(OPA_v), OPB_v(4 downto 0)), DATA_WIDTH);
+        resu_v := std_logic_vector( shift_left(unsigned(OPA_v), to_integer(unsigned(OPB_v(4 downto 0)))));
     
         sll_resu <= resu_v;
     end process sll_proc;
@@ -146,7 +153,7 @@ begin
         OPA_v := OPA;
         OPB_v := OPB;
         
-        resu_v := std_logic_vector(shift_right(unsigned(OPA_v), OPB_v(4 downto 0)), DATA_WIDTH);
+        resu_v := std_logic_vector(shift_right(unsigned(OPA_v), to_integer(unsigned(OPB_v(4 downto 0)))));
     
         srl_resu <= resu_v;
     end process srl_proc;
@@ -162,36 +169,36 @@ begin
         OPA_v := OPA;
         OPB_v := OPB;
         
-        resu_v := std_logic_vector(shift_right(signed(OPA_v), OPB_v(4 downto 0)), DATA_WIDTH);
+        resu_v := std_logic_vector(shift_right(signed(OPA_v), to_integer(unsigned(OPB_v(4 downto 0)))));
     
         sra_resu <= resu_v;
     end process sra_proc;
     
     slt_proc:
-    process(Flags) is
+    process(flags_s) is
         variable flags_v : FLAGS_TYPE;
         variable resu_v  : DATA_TYPE; 
     begin
-        flags_v := Flags;
+        flags_v := flags_s;
         if flags_v(3) /= flags_v(1) then
-            resu_v := std_logic_vector(to_unsigned(1), DATA_WIDTH);
+            resu_v := std_logic_vector(to_unsigned(1, DATA_WIDTH));
         else
-            resu_v := std_logic_vector(to_unsigned(0), DATA_WIDTH);
+            resu_v := std_logic_vector(to_unsigned(0, DATA_WIDTH));
         end if;
         
         slt_resu <= resu_v;
     end process slt_proc;
     
     sltu_proc:
-    process(Flags) is
+    process(flags_s) is
         variable flags_v : FLAGS_TYPE;
         variable resu_v  : DATA_TYPE; 
     begin
-        flags_v := Flags;
+        flags_v := flags_s;
         if flags_v(0) = '0' then
-            resu_v := std_logic_vector(to_unsigned(1), DATA_WIDTH);
+            resu_v := std_logic_vector(to_unsigned(1, DATA_WIDTH));
         else
-            resu_v := std_logic_vector(to_unsigned(0), DATA_WIDTH);
+            resu_v := std_logic_vector(to_unsigned(0, DATA_WIDTH));
         end if;
         
         sltu_resu <= resu_v;
@@ -201,9 +208,9 @@ begin
     --! @detail calculates OPA (+) OPB;
     choose:
     process (EX_CNTRL_IN) is
-        variable func7_v  : FUNC7_TYPE;
-        variable func3_v  : FUNC3_TYPE;
-        variable op_bits_v: OP_CODE_TYPE;
+        variable func7_v  : FUNCT7_TYPE;
+        variable func3_v  : FUNCT3_TYPE;
+        variable op_bits_v: OP_CODE_BIT_TYPE;
         variable op_code_v: OP_CODE_TYPE;
         variable resu_v   : DATA_TYPE;
         variable nadd_sub_v : std_logic;        
@@ -211,8 +218,8 @@ begin
 
         op_bits_v           := EX_CNTRL_IN(OP_CODE_WIDTH-1 downto 0);
         op_code_v           := BITS_TO_OP_CODE_TYPE(op_bits_v);
-        funct3_v            := EX_CNTRL_IN(9 downto 7);
-        funct7_v            := EX_CNTRL_IN(16 downto 10);
+        func3_v             := EX_CNTRL_IN(9 downto 7);
+        func7_v             := EX_CNTRL_IN(16 downto 10);
         nadd_sub_v          := '0';
         resu_v              := (others => '0');
         
@@ -238,7 +245,6 @@ begin
                             when others =>
                                 report "Unknown left shift command!" severity warning;
                         end case;
-                    end case;
                     
                     when "010" =>
                         case func7_v is
@@ -248,7 +254,6 @@ begin
                             when others =>
                                 report "Unknown signed compare command!" severity warning;
                         end case;
-                    end case;
                     
                     when "011" =>
                         case func7_v is
@@ -258,7 +263,6 @@ begin
                             when others =>
                                 report "Unknown unsigned compare command!" severity warning;
                         end case;
-                    end case;
                     
                     when "100" =>
                         case func7_v is
@@ -267,7 +271,6 @@ begin
                             when others =>
                                 report "Unknown xor command!" severity warning;
                         end case;
-                    end case;
                     
                     when "101" =>
                         case func7_v is
@@ -278,7 +281,6 @@ begin
                             when others =>
                                 report "Unknown right shift command!" severity warning;
                         end case;
-                    end case;
                     
                     when "110" =>
                         case func7_v is
@@ -287,7 +289,6 @@ begin
                             when others =>
                                 report "Unknown or command!" severity warning;
                         end case;
-                    end case;
                     
                     when "111" =>
                         case func7_v is
@@ -296,11 +297,11 @@ begin
                             when others =>
                                 report "Unknown and command!" severity warning;
                         end case;
-                    end case;
                 
                     when others =>
                         report "Unknown funct3!" severity warning;
-                end case;
+                    
+                    end case;
             
             when opimmo =>
                 case func3_v is
@@ -316,34 +317,32 @@ begin
                             when others => -- SLTI
                                 nadd_sub_v := '1';
                                 resu_v := slt_resu;
-                    end case;
+                        end case;
                     
                     when "011" =>
                         case func7_v is
                             when others => -- SLTIU
                                 nadd_sub_v := '1';
                                 resu_v := sltu_resu;
-                    end case;
+                        end case;
                     
                     when "100" =>
                         case func7_v is
                             when others => -- XORI
                                 resu_v := xor_resu;
-                    end case;
+                        end case;
                     
                     when "110" =>
                         case func7_v is
                             when others => -- ORI
                                 resu_v := or_resu;
                         end case;
-                    end case;
                     
                     when "111" =>
                         case func7_v is
                             when others => -- ANDI
                                 resu_v := and_resu;
                         end case;
-                    end case;
                     
                     when "001" =>
                         case func7_v is
@@ -352,7 +351,6 @@ begin
                             when others =>
                                 report "Unknown left shift command!" severity warning;
                         end case;
-                    end case;
                     
                     when "101" =>
                         case func7_v is
@@ -363,7 +361,6 @@ begin
                             when others =>
                                 report "Unknown right shift command!" severity warning;
                         end case;
-                    end case;
                 
                     when others =>
                         report "Unknown funct3!" severity warning;
