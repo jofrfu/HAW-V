@@ -23,10 +23,11 @@ package riscv_pack is
 	                            );
 		
 	--! @brief list of op codes
-	--! @detail last o stands for "opcode"                    
+	--! @detail last o stands for "opcode", testerror indicates error for sim and test                    
 	type OP_CODE_TYPE is (   luio, auipco, jalo, jalro,
-	                        brancho, loado, storeo, opimmo, opo
+	                        brancho, loado, storeo, opimmo, opo,
 	                        --miscmemo,systemo
+                            testerror
 	                        );
 	                        
 	constant DATA_WIDTH : natural := 32;
@@ -69,9 +70,72 @@ package riscv_pack is
 	constant MA_CNTRL_NOP : MA_CNTRL_TYPE := "00"; --no memory access
 	constant WB_CNTRL_NOP : WB_CNTRL_TYPE := "000000"; --write result to r0
 	
-	--! @brief functions 
+	--functions 
 	--! @brief LUT as function to convert op_code as std_logic_vector to OP_CODE_TYPE
     function BITS_TO_OP_CODE_TYPE (bitvector : OP_CODE_BIT_TYPE) return OP_CODE_TYPE;
+    
+    --!@brief LUT as function to convert OP_CODE_TYPE to OP_CODE_BIT_TYPE
+    function OP_CODE_TYPE_TO_BITS(op_code : OP_CODE_TYPE) return OP_CODE_BIT_TYPE;
+    
+    --IFR consruction functions
+    
+    --!@brief create IFR R-Type
+    function IFR_R_TYPE(
+        funct7  : FUNCT7_TYPE;
+        rs2     : integer range 0 to REGISTER_COUNT-1; 
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        rd      : integer range 0 to REGISTER_COUNT-1; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE; 
+    
+    --!@brief create IFR I-Type
+    function IFR_I_TYPE(
+        imm     : integer; --TODO: range
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        rd      : integer range 0 to REGISTER_COUNT-1; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE;
+    
+    --!@brief create IFR S-Type
+    function IFR_S_TYPE(
+        imm     : integer; --TODO: range
+        rs2     : integer range 0 to REGISTER_COUNT-1;        
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE;
+    
+    --!@brief create IFR B-Type
+    function IFR_B_TYPE(
+        imm     : integer;
+        rs2     : integer range 0 to REGISTER_COUNT-1;        
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE;
+    
+    --!@brief create IFR U-Type
+    function IFR_U_TYPE(
+            imm     : integer;             
+            rd      : integer range 0 to REGISTER_COUNT-1; 
+            op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE;
+    
+    --!@brief create IFR J-Type
+    function IFR_J_TYPE(
+            imm     : integer;             
+            rd      : integer range 0 to REGISTER_COUNT-1; 
+            op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE;
+    
 
 end riscv_pack;
 
@@ -93,8 +157,134 @@ package body riscv_pack is
 	        when "0100011" => return storeo;
 	        when others => 
 	           report "unknown OP_CODE" severity error;
+               return testerror;
 	    end case;
     end function BITS_TO_OP_CODE_TYPE;
+    
+    function OP_CODE_TYPE_TO_BITS(op_code : OP_CODE_TYPE) return OP_CODE_BIT_TYPE is
+    begin
+        case op_code is
+            when opimmo => 
+            --when miscmemo => return "0001111";
+            --when systemo => return "1110011";
+            when jalro   => return "1100111";
+            when loado   => return "0000011";
+            when luio    => return "0110111";
+            when auipco  => return "0010111";
+            when opo     => return "0110011";
+            when jalo    => return "1101111";
+            when brancho => return "1100011";
+            when storeo  => return "0100011";
+            when others => 
+	           report "unknown OP_CODE" severity error;
+               return "0000000";
+        end case;
+    end function OP_CODE_TYPE_TO_BITS;
+    
+    function IFR_R_TYPE(
+        funct7  : FUNCT7_TYPE;
+        rs2     : integer range 0 to REGISTER_COUNT-1; 
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        rd      : integer range 0 to REGISTER_COUNT-1; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE is
+    begin
+        return funct7
+             & std_logic_vector(to_unsigned(rs2, REGISTER_ADDRESS_WIDTH)) 
+             & std_logic_vector(to_unsigned(rs1, REGISTER_ADDRESS_WIDTH)) 
+             & funct3
+             & std_logic_vector(to_unsigned(rd, REGISTER_ADDRESS_WIDTH)) 
+             & OP_CODE_TYPE_TO_BITS(op_code);
+    end function IFR_R_TYPE;
+    
+    function IFR_I_TYPE(
+        imm     : integer; 
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        rd      : integer range 0 to REGISTER_COUNT-1; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE is
+    begin
+        return std_logic_vector(to_signed(imm, 12)) 
+             & std_logic_vector(to_unsigned(rs1, REGISTER_ADDRESS_WIDTH)) 
+             & funct3 
+             & std_logic_vector(to_unsigned(rd, REGISTER_ADDRESS_WIDTH)) 
+             & OP_CODE_TYPE_TO_BITS(op_code);
+    end function IFR_I_TYPE;
+    
+    function IFR_S_TYPE(
+        imm     : integer; --TODO: range
+        rs2     : integer range 0 to REGISTER_COUNT-1;        
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE is
+        variable imm_v : std_logic_vector(11 downto 0);
+    begin
+        imm_v := std_logic_vector(to_signed(imm, 12));
+        return imm_v(11 downto 5) 
+             & std_logic_vector(to_unsigned(rs2, REGISTER_ADDRESS_WIDTH)) 
+             & std_logic_vector(to_unsigned(rs1, REGISTER_ADDRESS_WIDTH))
+             & funct3
+             & imm_v(4 downto 0) 
+             & OP_CODE_TYPE_TO_BITS(op_code);
+    end function IFR_S_TYPE;
+    
+    function IFR_B_TYPE(
+        imm     : integer;
+        rs2     : integer range 0 to REGISTER_COUNT-1;        
+        rs1     : integer range 0 to REGISTER_COUNT-1; 
+        funct3  : FUNCT3_TYPE; 
+        op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE is
+        variable imm_v : std_logic_vector(12 downto 0);
+    begin
+        imm_v := std_logic_vector(to_signed(imm, 13));
+        return imm_v(12) 
+             & imm_v(10 downto 5)
+             & std_logic_vector(to_unsigned(rs2, REGISTER_ADDRESS_WIDTH)) 
+             & std_logic_vector(to_unsigned(rs1, REGISTER_ADDRESS_WIDTH))
+             & funct3
+             & imm_v(4 downto 1) 
+             & imm_v(11)
+             & OP_CODE_TYPE_TO_BITS(op_code);
+    end function IFR_B_TYPE;
+    
+    function IFR_U_TYPE(
+            imm     : integer;             
+            rd      : integer range 0 to REGISTER_COUNT-1; 
+            op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE is
+        variable imm_v : std_logic_vector(31 downto 0);
+    begin
+        imm_v := std_logic_vector(to_signed(imm, 32));
+        return imm_v(31 downto 12)
+             & std_logic_vector(to_unsigned(rd, REGISTER_ADDRESS_WIDTH)) 
+             & OP_CODE_TYPE_TO_BITS(op_code);
+    end function IFR_U_TYPE;
+    
+    function IFR_J_TYPE(
+            imm     : integer;             
+            rd      : integer range 0 to REGISTER_COUNT-1; 
+            op_code : OP_CODE_TYPE
+    ) 
+    return INSTRUCTION_BIT_TYPE is
+        variable imm_v : std_logic_vector(20 downto 0);
+    begin
+        imm_v := std_logic_vector(to_signed(imm, 21));
+        return imm_v(20)
+             & imm_v(10 downto 1)
+             & imm_v(11)
+             & imm_v(19 downto 12)
+             & std_logic_vector(to_unsigned(rd, REGISTER_ADDRESS_WIDTH)) 
+             & OP_CODE_TYPE_TO_BITS(op_code);
+    end function IFR_J_TYPE;
     
 --! @brief execute
 constant FLAGS_WIDTH : natural := 4;
