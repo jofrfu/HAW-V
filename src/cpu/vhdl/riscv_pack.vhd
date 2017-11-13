@@ -137,7 +137,10 @@ package riscv_pack is
     --!@brief LUT as function to convert OP_CODE_TYPE to OP_CODE_BIT_TYPE
     function OP_CODE_TYPE_TO_BITS(op_code : OP_CODE_TYPE) return OP_CODE_BIT_TYPE;
     
-    --IFR consruction functions
+    
+    -------------------------------
+    -- IFR consruction functions --
+    -------------------------------
     
     --!@brief create IFR R-Type
     function IFR_R_TYPE(
@@ -207,6 +210,7 @@ package riscv_pack is
             op_code : OP_CODE_TYPE
     ) 
     return INSTRUCTION_BIT_TYPE;
+    
     
 
 end riscv_pack;

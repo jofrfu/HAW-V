@@ -42,10 +42,10 @@ add wave -noupdate -radix binary /decode_tb/ex_op_code
 add wave -noupdate -divider -height 40 MA_CNTRL
 add wave -noupdate -radix binary -childformat {{/decode_tb/MA_CNTRL_s(1) -radix binary} {/decode_tb/MA_CNTRL_s(0) -radix binary}} -radixshowbase 0 -subitemconfig {/decode_tb/MA_CNTRL_s(1) {-radix binary -radixshowbase 0} /decode_tb/MA_CNTRL_s(0) {-radix binary -radixshowbase 0}} /decode_tb/MA_CNTRL_s
 add wave -noupdate -divider -height 40 WB_CNTRL
-add wave -noupdate -radix decimal /decode_tb/wb_rd
 add wave -noupdate /decode_tb/pc_Mux
+add wave -noupdate -radix decimal /decode_tb/wb_rd
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {452 ps} 0}
+WaveRestoreCursors {{Cursor 1} {399 ps} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 224
 configure wave -valuecolwidth 241
