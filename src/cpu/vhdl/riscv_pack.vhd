@@ -387,8 +387,4 @@ package body riscv_pack is
              & OP_CODE_TYPE_TO_BITS(op_code);
     end function IFR_J_TYPE;
     
---! @brief execute
-constant FLAGS_WIDTH : natural := 4;
-subtype FLAGS_TYPE is std_logic_vector(FLAGS_WIDTH-1 downto 0);
-    
 end package body;
