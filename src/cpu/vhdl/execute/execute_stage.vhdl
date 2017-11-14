@@ -63,7 +63,7 @@ architecture beh of execute_stage is
     
     component branch_checker is
         port(
-            FUNC3    : in FUNCT3_TYPE;
+            FUNCT3    : in FUNCT3_TYPE;
             OP_CODE  : in OP_CODE_BIT_TYPE;
             FLAGS    : in FLAGS_TYPE;
 

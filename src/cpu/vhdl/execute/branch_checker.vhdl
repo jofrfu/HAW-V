@@ -11,7 +11,7 @@ use WORK.riscv_pack.all;
 
 entity branch_checker is
     port(
-        FUNC3    : in FUNCT3_TYPE;
+        FUNCT3    : in FUNCT3_TYPE;
         OP_CODE  : in OP_CODE_BIT_TYPE;
         FLAGS    : in FLAGS_TYPE;
 
@@ -27,9 +27,9 @@ architecture beh of branch_checker is
 begin
 
     check:
-    process(FUNC3, OP_CODE, FLAGS) is
+    process(FUNCT3, OP_CODE, FLAGS) is
 
-    variable func3_v  : FUNCT3_TYPE;
+    variable funct3_v  : FUNCT3_TYPE;
     variable op_bits_v: OP_CODE_BIT_TYPE;
     variable op_code_v: OP_CODE_TYPE;
     variable flags_v  : FLAGS_TYPE;
@@ -38,14 +38,14 @@ begin
     variable word_cntrl_v : WORD_CNTRL_TYPE;
     variable sign_enable_v : std_logic;
     begin
-        func3_v             := FUNC3;
+        funct3_v            := FUNCT3;
         op_bits_v           := OP_CODE;
         op_code_v           := BITS_TO_OP_CODE_TYPE(op_bits_v);
         flags_v             := FLAGS;
         
         case op_code_v is
             when brancho =>
-                case func3_v is
+                case funct3_v is
                     when "000" => -- BEQ
                         if flags_v(2) = '1' then -- check Z = 1
                             branch_v := '1';
@@ -90,7 +90,7 @@ begin
                         sign_enable_v       := '0';
                 end case;
             when loado =>
-                case func3_v is
+                case funct3_v is
                     when "000" => -- lb
                         word_cntrl_v := BYTE;
                         sign_enable_v:= '1';
@@ -113,7 +113,7 @@ begin
                         sign_enable_v       := '0';
                 end case;
             when storeo =>
-                case func3_v is
+                case funct3_v is
                     when "000" => -- sb
                         word_cntrl_v := BYTE;
                     when "001" => -- sh
