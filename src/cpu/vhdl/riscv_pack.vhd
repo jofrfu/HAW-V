@@ -130,6 +130,12 @@ package riscv_pack is
 	constant MA_CNTRL_NOP : MA_CNTRL_TYPE := "00"; --no memory access
 	constant WB_CNTRL_NOP : WB_CNTRL_TYPE := "000000"; --write result to r0
 	
+	--! @brief execute
+	constant FLAGS_WIDTH : natural := 4;
+	constant WORD_CNTRL_WIDTH  : natural := 2;
+	subtype FLAGS_TYPE is std_logic_vector(FLAGS_WIDTH-1 downto 0);
+	subtype WORD_CNTRL_TYPE  is std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0);
+	
 	--functions 
 	--! @brief LUT as function to convert op_code as std_logic_vector to OP_CODE_TYPE
     function BITS_TO_OP_CODE_TYPE (bitvector : OP_CODE_BIT_TYPE) return OP_CODE_TYPE;

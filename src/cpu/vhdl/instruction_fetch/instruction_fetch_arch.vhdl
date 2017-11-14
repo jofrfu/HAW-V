@@ -42,8 +42,8 @@ begin
         cntrl => cntrl,
         rel => rel,
         abso => abso,
-        pc_asynch => open, --reserved for instruction memory
-        pc_synch => pc_reg
+        pc_asynch => pc_asynch, --reserved for instruction memory
+        pc_synch => pc_synch
     );
     
     reg : 
