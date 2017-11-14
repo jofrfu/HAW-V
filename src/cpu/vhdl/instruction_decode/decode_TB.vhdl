@@ -86,23 +86,31 @@ architecture TB of decode_TB is
                     return false;
                 end if;
 
-                if EX_CNTRL(16 downto 10) /= "0000000" then
-                    if EX_CNTRL(9 downto 7) /= SRAI_FUNCT3 then
-                        report "decode_TB.vhdl - opimmo: Missmacht in func7" severity error;
-                        return false;
-                    elsif EX_CNTRL(16 downto 10) /= SRAI_FUNCT7 then --SRAI is special
-                        report "decode_TB.vhdl - opimmo: Missmacht in SRAI func7" severity error;
-                        return false;
-                    end if;
-                end if;
+                case EX_CNTRL(9 downto 7) is
+                    when SLLI_FUNCT3 =>
+                        if EX_CNTRL(16 downto 10) /= SLLI_FUNCT7 then
+                            report "decode_TB.vhdl - opimmo: SLLI funct7 mismatch" severity error;
+                            return false;
+                        end if;
+                    when SRLI_FUNCT3 => --TODO cant distinguish SRAI and SRLI
+                        if  EX_CNTRL(16 downto 10) /= SRLI_FUNCT7 or
+                            EX_CNTRL(16 downto 10) /= SRLI_FUNCT7 then
+                                report "decode_TB.vhdl - opimmo: SLLI funct7 mismatch" severity error;
+                                return false;
+                        end if;
+                    when others => 
+                        null;
+                end case;
                 
             when others => 
-                report "decode_TB.vhdl - opimmo: Immediate was disabled" severity error;
+                report "decode_TB.vhdl - unknown opcode" severity error;
                 return false;
         end case;
+        
+        return true;
     end function decode_response_check;
 
-    constant WAIT_TIME   : time := 1 ns;
+    constant WAIT_TIME   : time := 20 ns;
     
     signal branch_s      : std_logic := '0';
     signal IFR_s	     : INSTRUCTION_BIT_TYPE := (others => '0');
@@ -134,6 +142,8 @@ architecture TB of decode_TB is
     begin
         --everything without branching
         branch_s <= '0';
+        IFR_s <= (others => '0');
+        wait for WAIT_TIME;
         
         ---------------------------------------------------
         --  TEST Integer Register Immediate Instructions -- 
@@ -144,13 +154,13 @@ architecture TB of decode_TB is
         IFR_s <= IFR_I_TYPE(-1, 2, "000", 1, opimmo);
         wait for WAIT_TIME;
         if not decode_response_check(-1, opimmo, 2, 0, 1, "000", IF_CNTRL_s, ID_CNTRL_s, WB_CNTRL_s, MA_CNTRL_s, EX_CNTRL_s, Imm_s) then
-            report "decode_TB.vhdl - opimmo: Immediate was disabled" severity error;
+            report "decode_reponse_check failed addi" severity error;
             wait;
         end if;
         
         --slti x3, x4, 5
         IFR_s <= IFR_I_TYPE(5, 3, "010", 4, opimmo);
-
+        wait for WAIT_TIME;
         
         -- slli x4, x3, 20
         IFR_s <= IFR_I_TYPE_SHIFT("0000000", 20, 3, "001", 4, opimmo );
