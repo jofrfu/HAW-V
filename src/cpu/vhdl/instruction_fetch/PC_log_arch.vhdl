@@ -46,7 +46,7 @@ begin
             when others => report "PC_log mux 1 has undefined signal" severity warning;
         end case ; 
         
-        if cntrl_v = "01" then
+        if cntrl_v = "10" then
             report "Wrong Control Bits in PC_log, 4 + abs does not make any sense!!!" severity warning;
         end if;
         
