@@ -22,11 +22,16 @@ architecture TB of decode_TB is
     end component dut;
     for all : dut use entity work.decode(beh);
     
-    function CHECK_OPCODE( --TODO 13.11.17 17:57 Sebastian Brueckner Unfinished
-        Imm_wanted      : in DATA_TYPE;
+    --!@brief Check response of the decode stage
+    --!@details If a register adress (rs1,rs2,rd) is unused in the instruction
+    --!         the argument should be set to zero
+    --!         Instructions that do not feature a funct7 are expected
+    --!         to be handeled with an all Zero funct7
+    function decode_response_check( --TODO 13.11.17 17:57 Sebastian Brueckner Unfinished, add immediate check, add other opcodes 
+        Imm_wanted      : in integer;
         opcode          : in OP_CODE_TYPE;
         rs1, rs2, rd    : in natural; --TODO 13.11.17 17:34 Sebastian Brueckner: There should be an integer subtype with rang 0 to 31
-         
+        funct3_wanted   : in FUNCT3_TYPE;
         ---
         IF_CNTRL    : in IF_CNTRL_TYPE;
         ID_CNTRL    : in ID_CNTRL_TYPE;
@@ -38,13 +43,14 @@ architecture TB of decode_TB is
     return boolean is
     begin
     
+    
         if (rs1 /= to_integer(unsigned(ID_CNTRL(4 downto 0)))) then
-            report "decode_TB.vhdl - register select: mismatch rs1 OP_A" severity error;
+            report "decode_TB.vhdl - ID_CNTRL: register select: mismatch rs1 OP_A" severity error;
             return false;
         end if;
         
         if rs2 /= to_integer(unsigned(ID_CNTRL(9 downto 5))) then
-            report "decode_TB.vhdl - register select: mismatch rs2 OP_B" severity error;
+            report "decode_TB.vhdl - ID_CNTRL: register select: mismatch rs2 OP_B" severity error;
             return false;
         end if;
         
@@ -53,9 +59,14 @@ architecture TB of decode_TB is
             return false;
         end if;
         
+        if EX_CNTRL(9 downto 7) /= funct3_wanted then
+            report "decode_TB.vhdl - EX_CNTRL: funct  3 mismatch" severity error;
+            return false;
+        end if;
+        
         case opcode is
             when opimmo =>
-                if Imm /= Imm_wanted then --check if imm contruction worked
+                if Imm /= std_logic_vector(to_signed(Imm_wanted, DATA_WIDTH)) then --check if imm contruction worked
                     report "decode_TB.vhdl - opimmo: Immediate mismatch" severity error;
                     return false;
                 end if;
@@ -74,12 +85,22 @@ architecture TB of decode_TB is
                     report "decode_TB.vhdl - opimmo: Immediate was disabled" severity error;
                     return false;
                 end if;
+
+                if EX_CNTRL(16 downto 10) /= "0000000" then
+                    if EX_CNTRL(9 downto 7) /= SRAI_FUNCT3 then
+                        report "decode_TB.vhdl - opimmo: Missmacht in func7" severity error;
+                        return false;
+                    elsif EX_CNTRL(16 downto 10) /= SRAI_FUNCT7 then --SRAI is special
+                        report "decode_TB.vhdl - opimmo: Missmacht in SRAI func7" severity error;
+                        return false;
+                    end if;
+                end if;
+                
             when others => 
                 report "decode_TB.vhdl - opimmo: Immediate was disabled" severity error;
                 return false;
         end case;
-        
-    end function CHECK_OPCODE;
+    end function decode_response_check;
 
     constant WAIT_TIME   : time := 1 ns;
     
@@ -122,6 +143,10 @@ architecture TB of decode_TB is
         -- addi x2, x1, -1
         IFR_s <= IFR_I_TYPE(-1, 2, "000", 1, opimmo);
         wait for WAIT_TIME;
+        if not decode_response_check(-1, opimmo, 2, 0, 1, "000", IF_CNTRL_s, ID_CNTRL_s, WB_CNTRL_s, MA_CNTRL_s, EX_CNTRL_s, Imm_s) then
+            report "decode_TB.vhdl - opimmo: Immediate was disabled" severity error;
+            wait;
+        end if;
         
         --slti x3, x4, 5
         IFR_s <= IFR_I_TYPE(5, 3, "010", 4, opimmo);
