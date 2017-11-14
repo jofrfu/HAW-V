@@ -1,4 +1,5 @@
 onerror {resume}
+vsim -gui -novopt work.decode_TB
 quietly virtual signal -install /decode_tb { /decode_tb/ID_CNTRL_s(4 downto 0)} OPA
 quietly virtual signal -install /decode_tb { /decode_tb/ID_CNTRL_s(9 downto 5)} OPB
 quietly virtual signal -install /decode_tb { /decode_tb/EX_CNTRL_s(16 downto 10)} funct7
@@ -62,3 +63,4 @@ configure wave -timeline 0
 configure wave -timelineunits ps
 update
 WaveRestoreZoom {226 ps} {1818 ps}
+run -all
