@@ -206,8 +206,8 @@ begin
     --! @detail calculates OPA (+) OPB;
     choose:
     process (EX_CNTRL_IN) is
-        variable func7_v  : FUNCT7_TYPE;
-        variable func3_v  : FUNCT3_TYPE;
+        variable funct7_v  : FUNCT7_TYPE;
+        variable funct3_v  : FUNCT3_TYPE;
         variable op_bits_v: OP_CODE_BIT_TYPE;
         variable op_code_v: OP_CODE_TYPE;
         variable resu_v   : DATA_TYPE;
@@ -216,16 +216,16 @@ begin
 
         op_bits_v           := EX_CNTRL_IN(OP_CODE_WIDTH-1 downto 0);
         op_code_v           := BITS_TO_OP_CODE_TYPE(op_bits_v);
-        func3_v             := EX_CNTRL_IN(9 downto 7);
-        func7_v             := EX_CNTRL_IN(16 downto 10);
+        funct3_v             := EX_CNTRL_IN(9 downto 7);
+        funct7_v             := EX_CNTRL_IN(16 downto 10);
         nadd_sub_v          := '0';
         resu_v              := (others => '0');
         
         case op_code_v is
             when opo =>
-                case func3_v is
+                case funct3_v is
                     when "000" => -- standard arithmetic
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- add
                                 nadd_sub_v := '0';
                                 resu_v := alu_resu;
@@ -237,7 +237,7 @@ begin
                         end case;
                      
                     when "001" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SLL
                                 resu_v := sll_resu;
                             when others =>
@@ -245,7 +245,7 @@ begin
                         end case;
                     
                     when "010" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SLT
                                 nadd_sub_v := '1';
                                 resu_v := slt_resu;
@@ -254,7 +254,7 @@ begin
                         end case;
                     
                     when "011" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SLTU
                                 nadd_sub_v := '1';
                                 resu_v := sltu_resu;
@@ -263,7 +263,7 @@ begin
                         end case;
                     
                     when "100" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- XOR
                                 resu_v := xor_resu;
                             when others =>
@@ -271,7 +271,7 @@ begin
                         end case;
                     
                     when "101" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SRL
                                 resu_v := srl_resu;
                             when "0100000" => -- SRA
@@ -281,7 +281,7 @@ begin
                         end case;
                     
                     when "110" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- OR
                                 resu_v := or_resu;
                             when others =>
@@ -289,7 +289,7 @@ begin
                         end case;
                     
                     when "111" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- AND
                                 resu_v := and_resu;
                             when others =>
@@ -302,48 +302,48 @@ begin
                     end case;
             
             when opimmo =>
-                case func3_v is
+                case funct3_v is
                     when "000" => -- imm arithmetic
-                        case func7_v is
+                        case funct7_v is
                             when others => -- addi
                                 nadd_sub_v := '0';
                                 resu_v := alu_resu;
                         end case;
                     
                     when "010" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- SLTI
                                 nadd_sub_v := '1';
                                 resu_v := slt_resu;
                         end case;
                     
                     when "011" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- SLTIU
                                 nadd_sub_v := '1';
                                 resu_v := sltu_resu;
                         end case;
                     
                     when "100" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- XORI
                                 resu_v := xor_resu;
                         end case;
                     
                     when "110" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- ORI
                                 resu_v := or_resu;
                         end case;
                     
                     when "111" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- ANDI
                                 resu_v := and_resu;
                         end case;
                     
                     when "001" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SLLI
                                 resu_v := sll_resu;
                             when others =>
@@ -351,7 +351,7 @@ begin
                         end case;
                     
                     when "101" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SRLI
                                 resu_v := srl_resu;
                             when "0100000" => -- SRAI
