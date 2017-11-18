@@ -265,6 +265,12 @@ architecture TB of decode_TB is
     
     test:
     process is
+        variable immediate      : integer;
+        variable opcode         : OP_CODE_TYPE;
+        variable rs2, rs1, rd   : integer range 0 to REGISTER_COUNT-1;
+        variable funct3         : FUNCT3_TYPE;
+        variable funct7         : FUNCT7_TYPE;
+        variable shamt          : integer range 0 to REGISTER_COUNT-1;
     begin
         --everything without branching
         branch_s <= '0';
@@ -274,29 +280,48 @@ architecture TB of decode_TB is
         --  TEST Integer Register Immediate Instructions -- 
         ---------------------------------------------------
         
-        --addi
         -- addi x2, x1, -1
-        IFR_s <= IFR_I_TYPE(-1, 1, ADDI_FUNCT3, 2, opimmo);
+        immediate    := -1;
+        opcode       := opimmo;
+        rs1          := 1;
+        rd           := 2;
+        funct3       := ADDI_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
         wait for WAIT_TIME;
-        if not decode_response_check(-1, opimmo, NO_REG, 1, 2, ADDI_FUNCT3, NO_FUNCT7) then
+        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
             report "decode_reponse_check failed addi" severity error;
             wait;
         end if;
         wait for WAIT_TIME;
         
         --slti x3, x4, 5
-        IFR_s <= IFR_I_TYPE(5, 4, SLTI_FUNCT3, 3, opimmo);
+        immediate    := 5;
+        opcode       := opimmo;
+        rs1          := 4;
+        rd           := 3;
+        funct3       := SLTI_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
         wait for WAIT_TIME;
-        if not decode_response_check(5, opimmo, NO_REG, 4, 3, SLTI_FUNCT3, NO_FUNCT7) then
+        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
             report "decode_reponse_check failed slti" severity error;
             wait;
         end if;
         wait for WAIT_TIME;
         
         -- slli x4, x3, 20
-        IFR_s <= IFR_I_TYPE_SHIFT(SLLI_FUNCT7, 20, 3, SLL_FUNCT3, 4, opimmo );
-        wait for WAIT_TIME;               --this is the special immediate funct7 & shamt
-        if not decode_response_check(to_integer(unsigned(SLLI_FUNCT7) & to_unsigned(20, REGISTER_ADDRESS_WIDTH)), opimmo, NO_REG, 3, 4, SLL_FUNCT3, SLLI_FUNCT7) then
+        shamt        := 20;
+        funct7       := SLLI_FUNCT7;
+        immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
+        opcode       := opimmo;
+        rs1          := 3;
+        rd           := 4;
+        funct3       := SLLI_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;               
+        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, funct7) then
             report "decode_reponse_check failed slli" severity error;
             wait;
         end if;
