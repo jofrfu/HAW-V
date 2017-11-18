@@ -84,7 +84,6 @@ package riscv_pack is
     constant SUB_FUNCT7    : std_logic_vector(6 downto 0) := "0100000";
     constant SLL_FUNCT7    : std_logic_vector(6 downto 0) := "0000000";
     constant SLT_FUNCT7    : std_logic_vector(6 downto 0) := "0000000";
-    constant SLTU_FUNCT7   : std_logic_vector(6 downto 0) := "0000000";
     constant XOR_FUNCT7    : std_logic_vector(6 downto 0) := "0000000";
     constant SRL_FUNCT7    : std_logic_vector(6 downto 0) := "0000000";
     constant SRA_FUNCT7    : std_logic_vector(6 downto 0) := "0100000";

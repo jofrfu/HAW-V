@@ -138,10 +138,19 @@ architecture TB of decode_TB is
         end case;--]rs1 check
                
         --funct3 check
-        if EX_CNTRL_s(9 downto 7) /= funct3_wanted then
-            report "decode_TB.vhdl - funct3 check: funct 3 mismatch" severity error;
-            return false;
-        end if;
+        case opcode is
+            when luio | auipco | jalo | jalro =>
+                --no funct3 available
+                null;
+            when brancho | loado | storeo | opimmo | opo =>                
+                if EX_CNTRL_s(9 downto 7) /= funct3_wanted then
+                    report "decode_TB.vhdl - funct3 check: funct 3 mismatch" severity error;
+                    return false;
+                end if;
+            when others =>
+                report "decode_TB.vhdl - funct3 check: opcode not supported" severity error;
+                return false;
+        end case;
                 
         --funct7 check
         case opcode is
@@ -233,8 +242,14 @@ architecture TB of decode_TB is
       
         --immediate check
         case opcode is
-            when luio | auipco | jalo | jalro | loado | storeo | opimmo =>
-                if Imm_s /= std_logic_vector(to_signed(Imm_wanted, DATA_WIDTH)) then --check if imm contruction worked
+            when jalo | jalro | loado | storeo | opimmo =>
+                if Imm_s /= std_logic_vector(to_signed(Imm_wanted, DATA_WIDTH)) then
+                    report "decode_TB.vhdl - Immediate mismatch" severity error;
+                    return false;
+                end if;
+            when luio | auipco =>
+                --immediate is shifted by 12 bits because the immediate will be loaded in the upper bits
+                if Imm_s /= std_logic_vector(SHIFT_LEFT(to_signed(Imm_wanted, DATA_WIDTH), 12)) then
                     report "decode_TB.vhdl - Immediate mismatch" severity error;
                     return false;
                 end if;
@@ -276,11 +291,7 @@ architecture TB of decode_TB is
         branch_s <= '0';
         wait for WAIT_TIME;
         
-        ---------------------------------------------------
-        --  TEST Integer Register Immediate Instructions -- 
-        ---------------------------------------------------
-        
-        -- addi x2, x1, -1
+        -- addi x2, x1, -1              rs1, rd and immediate will stay the same, TODO: test all registers and immediates
         immediate    := -1;
         opcode       := opimmo;
         rs1          := 1;
@@ -295,11 +306,7 @@ architecture TB of decode_TB is
         end if;
         wait for WAIT_TIME;
         
-        --slti x3, x4, 5
-        immediate    := 5;
-        opcode       := opimmo;
-        rs1          := 4;
-        rd           := 3;
+        --slti x2, x1, -1
         funct3       := SLTI_FUNCT3;
         
         IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
@@ -310,13 +317,54 @@ architecture TB of decode_TB is
         end if;
         wait for WAIT_TIME;
         
-        -- slli x4, x3, 20
+        --sltiu x2, x1, -1
+        funct3       := SLTIU_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "decode_reponse_check failed sltiu" severity error;
+            wait;
+        end if;
+        wait for WAIT_TIME;
+        
+        --andi x2, x1, -1
+        funct3       := ANDI_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "decode_reponse_check failed andi" severity error;
+            wait;
+        end if;
+        wait for WAIT_TIME;
+        
+        --ori x2, x1, -1
+        funct3       := ORI_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "decode_reponse_check failed ori" severity error;
+            wait;
+        end if;
+        wait for WAIT_TIME;
+        
+        --xori x2, x1, -1
+        funct3       := XORI_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "decode_reponse_check failed xori" severity error;
+            wait;
+        end if;
+        wait for WAIT_TIME;
+        
+        -- slli x2, x1, -1
         shamt        := 20;
         funct7       := SLLI_FUNCT7;
         immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
-        opcode       := opimmo;
-        rs1          := 3;
-        rd           := 4;
         funct3       := SLLI_FUNCT3;
         
         IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
@@ -326,6 +374,53 @@ architecture TB of decode_TB is
             wait;
         end if;
         wait for WAIT_TIME;
+        
+        -- srli x2, x1, -1
+        funct7       := SRLI_FUNCT7;
+        immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
+        funct3       := SRLI_SRAI_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;               
+        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, funct7) then
+            report "decode_reponse_check failed srli" severity error;
+            wait;
+        end if;
+        wait for WAIT_TIME;
+        
+        -- srai x2, x1, -1
+        funct7       := SRAI_FUNCT7;
+        immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
+        funct3       := SRLI_SRAI_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;               
+        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, funct7) then
+            report "decode_reponse_check failed srai" severity error;
+            wait;
+        end if;
+        wait for WAIT_TIME;
+        
+        --lui x2, -1
+        immediate   := -1;
+        opcode      := luio;
+        
+        IFR_s <= IFR_U_TYPE(immediate, rd, opcode);
+        wait for WAIT_TIME;
+        if not decode_response_check(immediate, opcode, NO_REG, NO_REG, rd, NO_FUNCT3, NO_FUNCT7) then
+            report "decode_reponse_check failed lui" severity error;
+            wait;
+        end if;
+        
+        --auipc x2, -1
+        opcode      := auipco;
+        
+        IFR_s <= IFR_U_TYPE(immediate, rd, opcode);
+        wait for WAIT_TIME;
+        if not decode_response_check(immediate, opcode, NO_REG, NO_REG, rd, NO_FUNCT3, NO_FUNCT7) then
+            report "decode_reponse_check failed auipc" severity error;
+            wait;
+        end if;
         
         report "decode test successful" severity note;
         wait;
