@@ -32,6 +32,7 @@ package riscv_pack is
                             testerror
 	                        );
                             
+    constant NO_FUNCT3     : std_logic_vector(2 downto 0) := "000";
     constant BEQ_FUNCT3    : std_logic_vector(2 downto 0) := "000";
     constant BNE_FUNCT3    : std_logic_vector(2 downto 0) := "001";
     constant BLT_FUNCT3    : std_logic_vector(2 downto 0) := "100";
@@ -53,8 +54,7 @@ package riscv_pack is
     constant ORI_FUNCT3    : std_logic_vector(2 downto 0) := "110";
     constant ANDI_FUNCT3   : std_logic_vector(2 downto 0) := "111";
     constant SLLI_FUNCT3   : std_logic_vector(2 downto 0) := "001";
-    constant SRLI_FUNCT3   : std_logic_vector(2 downto 0) := "101";
-    constant SRAI_FUNCT3   : std_logic_vector(2 downto 0) := "101";
+    constant SRLI_SRAI_FUNCT3   : std_logic_vector(2 downto 0) := "101";
     constant ADD_FUNCT3    : std_logic_vector(2 downto 0) := "000";
     constant SUB_FUNCT3    : std_logic_vector(2 downto 0) := "000";
     constant SLL_FUNCT3    : std_logic_vector(2 downto 0) := "001";
@@ -76,6 +76,7 @@ package riscv_pack is
     constant CSRRSI_FUNCT3 : std_logic_vector(2 downto 0) := "110";
     constant CSRRCI_FUNCT3 : std_logic_vector(2 downto 0) := "111";
     
+    constant NO_FUNCT7     : std_logic_vector(6 downto 0) := "0000000";
     constant SLLI_FUNCT7   : std_logic_vector(6 downto 0) := "0000000";
     constant SRLI_FUNCT7   : std_logic_vector(6 downto 0) := "0000000";
     constant SRAI_FUNCT7   : std_logic_vector(6 downto 0) := "0100000";
