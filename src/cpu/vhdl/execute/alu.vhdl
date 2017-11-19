@@ -22,59 +22,75 @@ end entity ALU;
 
 architecture beh of ALU is
 
-    signal alu_resu     : DATA_TYPE  := (others => '0');
+    component adder is
+        port(
+            OPA         : in  DATA_TYPE;
+            OPB         : in  DATA_TYPE;
+            nadd_sub    : in  std_logic;
+            
+            RESULT      : out DATA_TYPE;
+            CARRY       : out std_logic_vector(DATA_WIDTH downto 0)
+        );
+    end component adder;
+    for all : adder use entity work.carry_ripple(beh);
     
     signal nadd_sub     : std_logic;
 
-    signal and_resu     : DATA_TYPE  := (others => '0');   
-    signal or_resu      : DATA_TYPE  := (others => '0'); 
-    signal xor_resu     : DATA_TYPE  := (others => '0');   
-    signal sll_resu     : DATA_TYPE  := (others => '0');   
-    signal srl_resu     : DATA_TYPE  := (others => '0');    
-    signal sra_resu     : DATA_TYPE  := (others => '0');   
-    signal slt_resu     : DATA_TYPE  := (others => '0');
-    signal sltu_resu    : DATA_TYPE  := (others => '0');
+    signal and_resu     : DATA_TYPE;   
+    signal or_resu      : DATA_TYPE; 
+    signal xor_resu     : DATA_TYPE;   
+    signal sll_resu     : DATA_TYPE;   
+    signal srl_resu     : DATA_TYPE;    
+    signal sra_resu     : DATA_TYPE;   
+    signal slt_resu     : DATA_TYPE;
+    signal sltu_resu    : DATA_TYPE;
     
     signal flags_s      : FLAGS_TYPE;
+    
+    -- adder signals
+    signal add_result   : DATA_TYPE;
+    signal add_carry    : std_logic_vector(DATA_WIDTH downto 0);
 
 begin
+
+    adder_i : adder
+    port map(
+        OPA,
+        OPB,
+        nadd_sub,
+        
+        add_result,
+        add_carry
+    );
     
     Flags <= flags_s;
 
-    alu_proc:
-    process (OPA, OPB, nadd_sub) is
+    flag_proc:
+    process (add_result, add_carry) is
     
-    variable OPA_v    : std_logic_vector(DATA_WIDTH downto 0); --extend to 33 for carry/borrow bit
-    variable OPB_v    : std_logic_vector(DATA_WIDTH downto 0);
-    
-    variable resu_v   : std_logic_vector(DATA_WIDTH downto 0);
-    variable flags_v  : FLAGS_TYPE;
-    
-    variable temp_v   : DATA_TYPE;
-    
+        variable add_result_v : DATA_TYPE := (others => '0');
+        variable add_carry_v  : std_logic_vector(DATA_WIDTH downto 0) := (others => '0');
+        variable flags_v      : FLAGS_TYPE;
+            
     begin
-    
-        OPA_v := '0' & OPA;
-        OPB_v := '0' & OPB;
-        for i in DATA_WIDTH-1 downto 0 loop
-            OPB_v(i) := OPB(i) xor nadd_sub;
-        end loop;
+        -- carry flag
+        flags_v(0) := add_carry_v(add_carry_v'left);
         
-        resu_v := std_logic_vector(unsigned(OPA_v) + unsigned(OPB_v));
-        flags_v(0) := resu_v(resu_v'left);
-        flags_v(1) := resu_v(resu_v'left - 1);
-        if resu_v = std_logic_vector(to_unsigned(0, DATA_WIDTH+1)) then
+        -- negative flag
+        flags_v(1) := add_result_v(add_result_v'left);
+        
+        -- zero flag
+        if add_result_v = std_logic_vector(to_unsigned(0, DATA_WIDTH)) then
             flags_v(2) := '1';
         else
             flags_v(2) := '0';
         end if;
-        -- todo: change adder to adder which supports carry outputs
-        temp_v := std_logic_vector(unsigned(OPA_v(OPA_v'left-1 downto 0)) + unsigned(OPB_v(OPB_v'left-1 downto 0)));
-        flags_v(3) := temp_v(temp_v'left) xor resu_v(resu_v'left);
         
-        alu_resu <= resu_v(resu_v'left-1 downto 0);
+        -- overflow flag
+        flags_v(3) := add_carry_v(add_carry_v'left) xor add_carry_v(add_carry_v'left-1);
+        
         flags_s <= flags_v;
-    end process alu_proc;
+    end process flag_proc;
     
     and_proc:
     process (OPA, OPB) is
@@ -216,8 +232,8 @@ begin
 
         op_bits_v           := EX_CNTRL_IN(OP_CODE_WIDTH-1 downto 0);
         op_code_v           := BITS_TO_OP_CODE_TYPE(op_bits_v);
-        funct3_v             := EX_CNTRL_IN(9 downto 7);
-        funct7_v             := EX_CNTRL_IN(16 downto 10);
+        funct3_v            := EX_CNTRL_IN(9 downto 7);
+        funct7_v            := EX_CNTRL_IN(16 downto 10);
         nadd_sub_v          := '0';
         resu_v              := (others => '0');
         
@@ -228,10 +244,10 @@ begin
                         case funct7_v is
                             when "0000000" => -- add
                                 nadd_sub_v := '0';
-                                resu_v := alu_resu;
+                                resu_v := add_result;
                             when "0100000" => -- sub
                                 nadd_sub_v := '1';
-                                resu_v := alu_resu;
+                                resu_v := add_result;
                             when others =>
                                 report "Unknown alu command!" severity warning;
                         end case;
@@ -307,7 +323,7 @@ begin
                         case funct7_v is
                             when others => -- addi
                                 nadd_sub_v := '0';
-                                resu_v := alu_resu;
+                                resu_v := add_result;
                         end case;
                     
                     when "010" =>
@@ -366,12 +382,12 @@ begin
                 
             when brancho => -- flags
                 nadd_sub_v := '1';
-                resu_v := alu_resu;
+                resu_v := add_result;
             
             when others =>
                 report "Maybe unknown opcode!" severity note;
                 nadd_sub_v := '0';
-                resu_v := alu_resu;
+                resu_v := add_result;
         end case;
        
        nadd_sub <= nadd_sub_v;
