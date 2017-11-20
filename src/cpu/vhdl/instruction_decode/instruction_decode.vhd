@@ -11,7 +11,7 @@ entity instruction_decode is
 	port(
 		clk, reset   :  in std_logic;
 		branch		 :  in std_logic;
-		IFR			 :  in INSTRUCTION_TYPE;
+		IFR			 :  in INSTRUCTION_BIT_TYPE;
 		PC           :  in DATA_TYPE;
 		DI	  		 :  in DATA_TYPE;
 		rd			 :  in REGISTER_ADDRESS_TYPE;
@@ -63,9 +63,8 @@ architecture beh of instruction_decode is
 	--! @brief decode unit
 	component decode is
 		port(
-			clk, reset   :  in std_logic;
 			branch		 :  in std_logic;
-			IFR			 :  in INSTRUCTION_TYPE;
+			IFR			 :  in INSTRUCTION_BIT_TYPE;
 			IF_CNTRL	 : out IF_CNTRL_TYPE;
 			ID_CNTRL	 : out ID_CNTRL_TYPE;
 			WB_CNTRL	 : out WB_CNTRL_TYPE;
@@ -74,6 +73,7 @@ architecture beh of instruction_decode is
 			Imm			 : out DATA_TYPE
 		);
 	end component decode;
+    for all : decode use entity work.decode(beh);
 	
 	--! @brief register file
 	component register_select is
@@ -87,13 +87,12 @@ architecture beh of instruction_decode is
             PC_en        :   in  std_logic
 	    );--]port
 	end component register_select;
+    for all : register_select use entity work.register_select(beh);
 	
 begin
 	
 	decode_i : decode
 	port map(
-		clk => clk,
-		reset => reset,
 		branch => branch,
 		IFR => IFR,
 		IF_CNTRL => IF_CNTRL,
@@ -106,21 +105,25 @@ begin
 		EX_CNTRL => ex_cntrl_reg_ns,
 		Imm	=> imm_s
 	);
+    
+    imm_reg_ns <= imm_s;    
 	
 	reg_sel_i : register_select
 	port map(
-		clk => clk, 
-		reset => reset,
-	    DI => DI,
-        rs1 => rs1_s, 
-        rs2 => rs2_s, 
-        rd => rd,
-        OPA => opa_s, 
-        OPB => opb_s, 
-        DO => do_reg_ns,
-        PC_en => pc_en_s,
-        PC => PC
+		clk, 
+		reset,
+	    DI,
+        rs1_s, 
+        rs2_s, 
+        rd,
+        opa_s, 
+        opb_s, 
+        do_reg_ns,
+        pc,
+        pc_en_s
 	);
+    
+    opa_reg_ns <= opa_s;
 	
 	--! @brief multiplexer for immediate and operand b selection
 	imm_mux:
@@ -160,6 +163,14 @@ begin
 	end process sequ_log;
 	
     pc_reg_ns <= pc;
-    PC_o <= pc_reg_cs;
+    PC_o      <= pc_reg_cs;
+    WB_CNTRL  <= wb_cntrl_reg_cs;
+    MA_CNTRL  <= ma_cntrl_reg_cs;
+    EX_CNTRL  <= ex_cntrl_reg_cs;
+    Imm       <= imm_reg_cs 	;
+    OPB       <= opb_reg_cs 	;
+    OPA       <= opa_reg_cs 	;
+    DO        <= do_reg_cs 	;
+    
 
 end architecture beh;
