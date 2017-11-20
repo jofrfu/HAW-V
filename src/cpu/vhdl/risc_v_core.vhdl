@@ -10,7 +10,7 @@ use WORK.riscv_pack.all;
 
 entity risc_v_core is
     port(
-        clk, reset   : in std_logic;
+        clk, reset   : in std_logic
     );
 end entity risc_v_core;
 
@@ -29,7 +29,7 @@ architecture beh of risc_v_core is
              pc_synch  : out ADDRESS_TYPE   --! asynchronous PC for instruction memory
         );
     end component instruction_fetch;
-    for all : instruction_fetch use entity instruction_fetch(std_impl);
+    for all : instruction_fetch use entity work.instruction_fetch(std_impl);
     
     signal IFR_s : DATA_TYPE;
     signal pc_asynch_s : ADDRESS_TYPE;
@@ -39,7 +39,7 @@ architecture beh of risc_v_core is
         port(
             clk, reset   :  in std_logic;
             branch		 :  in std_logic;
-            IFR			 :  in INSTRUCTION_TYPE;
+            IFR			 :  in INSTRUCTION_BIT_TYPE;
             PC           :  in DATA_TYPE;
             DI	  		 :  in DATA_TYPE;
             rd			 :  in REGISTER_ADDRESS_TYPE;
@@ -55,7 +55,7 @@ architecture beh of risc_v_core is
             PC_o         : out ADDRESS_TYPE
         );
     end component instruction_decode;
-    for all : instruction_decode use entity instruction_decode(beh);
+    for all : instruction_decode use entity work.instruction_decode(beh);
 
     signal IF_CNTRL_s           : IF_CNTRL_TYPE;
     signal WB_CNTRL_ID_to_EX    : WB_CNTRL_TYPE;
@@ -92,7 +92,7 @@ architecture beh of risc_v_core is
             PC_OUT        : out ADDRESS_TYPE     --!PC Register
         );
     end component execute_stage;
-    for all : execute_stage use entity execute_stage(beh);
+    for all : execute_stage use entity work.execute_stage(beh);
     
     signal WB_CNTRL_EX_to_MA : WB_CNTRL_TYPE;
     signal MA_CNTRL_EX_to_MA : MA_CNTRL_TYPE;
@@ -134,7 +134,7 @@ architecture beh of risc_v_core is
             WORD_LENGTH : out WORD_CNTRL_TYPE
         );
     end component memory_access;
-    for all : memory_access use entity memory_access(beh);
+    for all : memory_access use entity work.memory_access(beh);
     
     signal WB_CNTRL_MA_to_WB    : WB_CNTRL_TYPE;
     signal DI_s                 : DATA_TYPE;
@@ -159,7 +159,7 @@ architecture beh of risc_v_core is
             WRITE_BACK  : out DATA_TYPE
         );
     end component write_back;
-    for all : write_back use entity write_back(beh);
+    for all : write_back use entity work.write_back(beh);
     
     signal REG_ADDR_s   : REGISTER_ADDRESS_TYPE;
     signal WRITE_BACK_s : DATA_TYPE;
@@ -180,7 +180,7 @@ architecture beh of risc_v_core is
             doutb : out STD_LOGIC_VECTOR ( 31 downto 0 )
         );
     end component memory;
-    for all : memory use blk_mem_gen_0(stub);
+    for all : memory use entity work.blk_mem_gen_0(stub);
     
     signal DOUT_A_s : DATA_TYPE;
     signal DOUT_B_s : DATA_TYPE;
@@ -198,7 +198,7 @@ begin
         ABS_OUT_s,
         
         -- instruction memory
-        DOUT_A_s
+        DOUT_A_s,
         
         -- outputs
         IFR_s,
@@ -222,7 +222,7 @@ begin
         IF_CNTRL_s,
         WB_CNTRL_ID_to_EX,
         MA_CNTRL_ID_to_EX,
-        EX_CNTRL_ID_to_EX
+        EX_CNTRL_ID_to_EX,
         
         -- data outs
         IMM_s,
@@ -249,7 +249,7 @@ begin
         OPA_s,
         
         DO_ID_to_EX,
-        PC_ID_to_EX
+        PC_ID_to_EX,
         
         -- cntrl outs
         WB_CNTRL_EX_to_MA,
@@ -261,7 +261,7 @@ begin
         RESU_DAR_s,
         BRANCH_s,
         ABS_OUT_s,
-        REL_OUT_s
+        REL_OUT_s,
         
         DO_EX_to_MA,
         PC_EX_to_MA
@@ -312,13 +312,13 @@ begin
         if WRITE_EN_v = '1' then
             case WORD_LENGTH_v is
                 when BYTE =>
-                    BYTE_WRITE_EN_v = "0001";
+                    BYTE_WRITE_EN_v := "0001";
                 when HALF =>
-                    BYTE_WRITE_EN_v = "0011";
+                    BYTE_WRITE_EN_v := "0011";
                 when WORD =>
-                    BYTE_WRITE_EN_v = "1111";
-                when DOUBLE =>
-                    BYTE_WRITE_EN_v = "1111";
+                    BYTE_WRITE_EN_v := "1111";
+                when others =>
+                    BYTE_WRITE_EN_v := "0000";
                     report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
             end case;
         else
@@ -330,12 +330,31 @@ begin
     
     write_back_i : write_back
     port map(
-    
+        WB_CNTRL_MA_to_WB,
+        DI_s,
+        PC_MA_to_WB,
+        
+        REG_ADDR_s,
+        WRITE_BACK_s
     );
     
     memory_i : memory
     port map(
-    
+        -- port a: Intstructions
+        clk,
+        '1',            -- enable : always on instruction ram
+        "0000",         -- wen    : no write on instruction ram
+        pc_asynch_s,    -- address: pc on instruction ram
+        (others => '0'),-- DIN    : no write on instruction ram
+        DOUT_A_s,       -- DOUT   : instruction
+        
+        -- port b: Data
+        clk,
+        ENABLE_s,       -- enable : enable from MA
+        BYTE_WRITE_EN_s,-- wen    : converted write enable from MA
+        ADDRESS_s,      -- address: address from MA
+        DATA_OUT_s,     -- DIN    : DATA_OUT from MA
+        DOUT_B_s        -- DOUT   : DATA_IN on MA
     );
 
-end architecture risc_v_core;
+end architecture beh;
