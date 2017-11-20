@@ -84,6 +84,7 @@ package riscv_pack is
     constant SUB_FUNCT7    : std_logic_vector(6 downto 0) := "0100000";
     constant SLL_FUNCT7    : std_logic_vector(6 downto 0) := "0000000";
     constant SLT_FUNCT7    : std_logic_vector(6 downto 0) := "0000000";
+    constant SLTU_FUNCT7   : std_logic_vector(6 downto 0) := "0000000";
     constant XOR_FUNCT7    : std_logic_vector(6 downto 0) := "0000000";
     constant SRL_FUNCT7    : std_logic_vector(6 downto 0) := "0000000";
     constant SRA_FUNCT7    : std_logic_vector(6 downto 0) := "0100000";
@@ -192,6 +193,7 @@ package riscv_pack is
     return INSTRUCTION_BIT_TYPE;
     
     --!@brief create IFR B-Type
+    --!@detail only even numbers shall be used for immediate
     function IFR_B_TYPE(
         imm     : integer;
         rs2     : integer range 0 to REGISTER_COUNT-1;        
@@ -210,6 +212,7 @@ package riscv_pack is
     return INSTRUCTION_BIT_TYPE;
     
     --!@brief create IFR J-Type
+    --!@detail only even numbers shall be used for immediate
     function IFR_J_TYPE(
             imm     : integer;             
             rd      : integer range 0 to REGISTER_COUNT-1; 

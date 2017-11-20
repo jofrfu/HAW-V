@@ -49,16 +49,40 @@ architecture TB of decode_TB is
     ) 
     return boolean is
     begin
-            
+        --branch check -> check for nop when branch bit is set
+        if branch_s = '1' then
+            if IF_CNTRL_s /= "01" then
+                report "decode_TB.vhdl - branch check: pc update should have been 01" severity error;
+                return false;
+            end if;
+            if ID_CNTRL_s /= ID_CNTRL_NOP then
+                report "decode_TB.vhdl - branch check: ID_CNTRL was not nop state" severity error;
+                return false;
+            end if;
+            if EX_CNTRL_s /= EX_CNTRL_NOP then
+                report "decode_TB.vhdl - branch check: EX_CNTRL was not nop state" severity error;
+                return false;
+            end if;
+            if MA_CNTRL_s /= MA_CNTRL_NOP then 
+                report "decode_TB.vhdl - branch check: MA_CNTRL was not nop state" severity error;
+                return false;
+            end if;
+            if WB_CNTRL_s /= WB_CNTRL_NOP then
+                report "decode_TB.vhdl - branch check: WB_CNTRL was not nop state" severity error;
+                return false;
+            end if;
+            return true;
+        end if;
+             
         --pc_log check
         case opcode is  
-            when luio | auipco | loado | storeo | opimmo | opo =>
+            when luio | auipco | loado | storeo | opimmo | opo | brancho =>
                 --pc must be pc+4
                 if IF_CNTRL_s /= "00" then --pc+4
                     report "decode_TB.vhdl - pc_log check: pc update should have been 00 " severity error;
                     return false;
                 end if;
-            when jalo | brancho =>
+            when jalo =>
                 --pc must be pc+rel
                 if IF_CNTRL_s /= "01" then --pc+4
                     report "decode_TB.vhdl - pc_log check: pc update should have been 01" severity error;
@@ -287,140 +311,351 @@ architecture TB of decode_TB is
         variable funct7         : FUNCT7_TYPE;
         variable shamt          : integer range 0 to REGISTER_COUNT-1;
     begin
-        --everything without branching
-        branch_s <= '0';
-        wait for WAIT_TIME;
+        --first loop everything without branching, secound loop with branching
+        for i in std_logic range '0' to '1' loop
         
-        -- addi x2, x1, -1              rs1, rd and immediate will stay the same, TODO: test all registers and immediates
-        immediate    := -1;
-        opcode       := opimmo;
-        rs1          := 1;
-        rd           := 2;
-        funct3       := ADDI_FUNCT3;
+            if i = '1' then
+                report "branch activated here" severity note;
+            end if;
+            
+            branch_s <= i;
+            wait for WAIT_TIME;
+            
+            -- addi x2, x1, -1              rs1, rd and immediate will stay the same, TODO: test all registers and immediates
+            immediate    := -1;
+            opcode       := opimmo;
+            rs1          := 1;
+            rd           := 2;
+            funct3       := ADDI_FUNCT3;
+            
+            IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed addi" severity error;
+                wait;
+            end if;
+            wait for WAIT_TIME;
+            
+            --slti x2, x1, -1
+            funct3       := SLTI_FUNCT3;
+            
+            IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed slti" severity error;
+                wait;
+            end if;
+            wait for WAIT_TIME;
+            
+            --sltiu x2, x1, -1
+            funct3       := SLTIU_FUNCT3;
+            
+            IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed sltiu" severity error;
+                wait;
+            end if;
+            wait for WAIT_TIME;
+            
+            --andi x2, x1, -1
+            funct3       := ANDI_FUNCT3;
+            
+            IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed andi" severity error;
+                wait;
+            end if;
+            wait for WAIT_TIME;
+            
+            --ori x2, x1, -1
+            funct3       := ORI_FUNCT3;
+            
+            IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed ori" severity error;
+                wait;
+            end if;
+            wait for WAIT_TIME;
+            
+            --xori x2, x1, -1
+            funct3       := XORI_FUNCT3;
+            
+            IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed xori" severity error;
+                wait;
+            end if;
+            wait for WAIT_TIME;
+            
+            -- slli x2, x1, -1
+            shamt        := 20;
+            funct7       := SLLI_FUNCT7;
+            immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
+            funct3       := SLLI_FUNCT3;
+            
+            IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;               
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed slli" severity error;
+                wait;
+            end if;
+            wait for WAIT_TIME;
+            
+            -- srli x2, x1, -1
+            funct7       := SRLI_FUNCT7;
+            immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
+            funct3       := SRLI_SRAI_FUNCT3;
+            
+            IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;               
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed srli" severity error;
+                wait;
+            end if;
+            wait for WAIT_TIME;
+            
+            -- srai x2, x1, -1
+            funct7       := SRAI_FUNCT7;
+            immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
+            funct3       := SRLI_SRAI_FUNCT3;
+            
+            IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;               
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed srai" severity error;
+                wait;
+            end if;
+            wait for WAIT_TIME;
+            
+            --lui x2, -1
+            immediate   := -1;
+            opcode      := luio;
+            
+            IFR_s <= IFR_U_TYPE(immediate, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, NO_REG, rd, NO_FUNCT3, NO_FUNCT7) then
+                report "decode_reponse_check failed lui" severity error;
+                wait;
+            end if;
+            
+            --auipc x2, -1
+            opcode      := auipco;
+            
+            IFR_s <= IFR_U_TYPE(immediate, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, NO_REG, rd, NO_FUNCT3, NO_FUNCT7) then
+                report "decode_reponse_check failed auipc" severity error;
+                wait;
+            end if;                
+           
+            --add x2, x1, x3
+            funct7  := ADD_FUNCT7;
+            funct3  := ADD_FUNCT3;
+            opcode  := opo;
+            rs2     := 3;
+            rs1     := 1;
+            rd      := 2;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed add" severity error;
+                wait;
+            end if;
+            
+            --sub x2, x1, x3
+            funct7  := SUB_FUNCT7;
+            funct3  := SUB_FUNCT3;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed sub" severity error;
+                wait;
+            end if;
+            
+            --sll x2, x1, x3
+            funct7  := SLL_FUNCT7;
+            funct3  := SLL_FUNCT3;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed sll" severity error;
+                wait;
+            end if;
+            
+            --slt x2, x1, x3
+            funct7  := SLT_FUNCT7;
+            funct3  := SLT_FUNCT3;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed slt" severity error;
+                wait;
+            end if;
+            
+            --sltu x2, x1, x3
+            funct7  := SLTU_FUNCT7;
+            funct3  := SLTU_FUNCT3;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed sltu" severity error;
+                wait;
+            end if;
+            
+            --xor x2, x1, x3
+            funct7  := XOR_FUNCT7;
+            funct3  := XOR_FUNCT3;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed xor" severity error;
+                wait;
+            end if;
+            
+            --srl x2, x1, x3
+            funct7  := SRL_FUNCT7;
+            funct3  := SRL_FUNCT3;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed srl" severity error;
+                wait;
+            end if;
+            
+            --sra x2, x1, x3
+            funct7  := SRA_FUNCT7;
+            funct3  := SRA_FUNCT3;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed sra" severity error;
+                wait;
+            end if;
+            
+            --or x2, x1, x3
+            funct7  := OR_FUNCT7;
+            funct3  := OR_FUNCT3;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed or" severity error;
+                wait;
+            end if;
+            
+            --and x2, x1, x3
+            funct7  := AND_FUNCT7;
+            funct3  := AND_FUNCT3;
+
+            IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+                report "decode_reponse_check failed and" severity error;
+                wait;
+            end if;
+            
+            --jal x2, -4
+            opcode      := jalo;
+            immediate   := -4;      --only even numbers can be used with J-Type
+            rd          := 2;
+                    
+            IFR_s <= IFR_J_TYPE(immediate, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, NO_REG, rd, NO_FUNCT3, NO_FUNCT7) then
+                report "decode_reponse_check failed jal" severity error;
+                wait;
+            end if;      
+            
+            --jalr x2, x1, -1
+            opcode      := jalro;
+            immediate   := -1;
+            rs1         := 1;
+            funct3      := "000";
+                    
+            IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed jalr" severity error;
+                wait;
+            end if;      
+            
+            --beq x1, x3, -4
+            opcode      := brancho;
+            immediate    := -4;         --only even numbers can be used with B-Type
+            rs1         := 1;
+            rs2         := 3;
+            funct3      := BEQ_FUNCT3;
+                    
+            IFR_s <= IFR_B_TYPE(immediate, rs2, rs1, funct3, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed beq" severity error;
+                wait;
+            end if;   
+
+            --bne x1, x3, -4
+            funct3      := BNE_FUNCT3;
+                    
+            IFR_s <= IFR_B_TYPE(immediate, rs2, rs1, funct3, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed bne" severity error;
+                wait;
+            end if;  
+            
+            --blt x1, x3, -4
+            funct3      := BLT_FUNCT3;
+                    
+            IFR_s <= IFR_B_TYPE(immediate, rs2, rs1, funct3, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed blt" severity error;
+                wait;
+            end if;  
+            
+            --bltu x1, x3, -4
+            funct3      := BLTU_FUNCT3;
+                    
+            IFR_s <= IFR_B_TYPE(immediate, rs2, rs1, funct3, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed bltu" severity error;
+                wait;
+            end if;  
+            
+            --bge x1, x3, -4
+            funct3      := BGE_FUNCT3;
+                    
+            IFR_s <= IFR_B_TYPE(immediate, rs2, rs1, funct3, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed bge" severity error;
+                wait;
+            end if;  
+            
+            --bgeu x1, x3, -4
+            funct3      := BGEU_FUNCT3;
+                    
+            IFR_s <= IFR_B_TYPE(immediate, rs2, rs1, funct3, opcode);
+            wait for WAIT_TIME;
+            if not decode_response_check(immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+                report "decode_reponse_check failed bgeu" severity error;
+                wait;
+            end if;  
         
-        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
-        wait for WAIT_TIME;
-        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "decode_reponse_check failed addi" severity error;
-            wait;
-        end if;
-        wait for WAIT_TIME;
-        
-        --slti x2, x1, -1
-        funct3       := SLTI_FUNCT3;
-        
-        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
-        wait for WAIT_TIME;
-        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "decode_reponse_check failed slti" severity error;
-            wait;
-        end if;
-        wait for WAIT_TIME;
-        
-        --sltiu x2, x1, -1
-        funct3       := SLTIU_FUNCT3;
-        
-        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
-        wait for WAIT_TIME;
-        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "decode_reponse_check failed sltiu" severity error;
-            wait;
-        end if;
-        wait for WAIT_TIME;
-        
-        --andi x2, x1, -1
-        funct3       := ANDI_FUNCT3;
-        
-        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
-        wait for WAIT_TIME;
-        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "decode_reponse_check failed andi" severity error;
-            wait;
-        end if;
-        wait for WAIT_TIME;
-        
-        --ori x2, x1, -1
-        funct3       := ORI_FUNCT3;
-        
-        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
-        wait for WAIT_TIME;
-        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "decode_reponse_check failed ori" severity error;
-            wait;
-        end if;
-        wait for WAIT_TIME;
-        
-        --xori x2, x1, -1
-        funct3       := XORI_FUNCT3;
-        
-        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
-        wait for WAIT_TIME;
-        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "decode_reponse_check failed xori" severity error;
-            wait;
-        end if;
-        wait for WAIT_TIME;
-        
-        -- slli x2, x1, -1
-        shamt        := 20;
-        funct7       := SLLI_FUNCT7;
-        immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
-        funct3       := SLLI_FUNCT3;
-        
-        IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
-        wait for WAIT_TIME;               
-        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, funct7) then
-            report "decode_reponse_check failed slli" severity error;
-            wait;
-        end if;
-        wait for WAIT_TIME;
-        
-        -- srli x2, x1, -1
-        funct7       := SRLI_FUNCT7;
-        immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
-        funct3       := SRLI_SRAI_FUNCT3;
-        
-        IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
-        wait for WAIT_TIME;               
-        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, funct7) then
-            report "decode_reponse_check failed srli" severity error;
-            wait;
-        end if;
-        wait for WAIT_TIME;
-        
-        -- srai x2, x1, -1
-        funct7       := SRAI_FUNCT7;
-        immediate    := to_integer(unsigned(funct7) & to_unsigned(shamt, REGISTER_ADDRESS_WIDTH)); --this is the special immediate funct7 & shamt
-        funct3       := SRLI_SRAI_FUNCT3;
-        
-        IFR_s <= IFR_I_TYPE_SHIFT(funct7, shamt, rs1, funct3, rd, opcode);
-        wait for WAIT_TIME;               
-        if not decode_response_check(immediate, opcode, NO_REG, rs1, rd, funct3, funct7) then
-            report "decode_reponse_check failed srai" severity error;
-            wait;
-        end if;
-        wait for WAIT_TIME;
-        
-        --lui x2, -1
-        immediate   := -1;
-        opcode      := luio;
-        
-        IFR_s <= IFR_U_TYPE(immediate, rd, opcode);
-        wait for WAIT_TIME;
-        if not decode_response_check(immediate, opcode, NO_REG, NO_REG, rd, NO_FUNCT3, NO_FUNCT7) then
-            report "decode_reponse_check failed lui" severity error;
-            wait;
-        end if;
-        
-        --auipc x2, -1
-        opcode      := auipco;
-        
-        IFR_s <= IFR_U_TYPE(immediate, rd, opcode);
-        wait for WAIT_TIME;
-        if not decode_response_check(immediate, opcode, NO_REG, NO_REG, rd, NO_FUNCT3, NO_FUNCT7) then
-            report "decode_reponse_check failed auipc" severity error;
-            wait;
-        end if;
+        end loop;
         
         report "decode test successful" severity note;
         wait;
