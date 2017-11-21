@@ -57,7 +57,7 @@ begin
     pc_asynch <= pc_ns;     --program counter to memory for intruction fetch
     pc_synch  <= pc_cs;     --clocked program counter for ID stage
     
-    reg : process(clk, reset) is
+    reg : process(clk) is
     begin
         if clk'event and clk = '1' then
             if reset = '1' then
