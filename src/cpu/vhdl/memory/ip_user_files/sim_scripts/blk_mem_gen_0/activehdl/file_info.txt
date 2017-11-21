@@ -1,0 +1,4 @@
+xpm_memory.sv,systemverilog,xil_defaultlib,C:/Xilinx/Vivado/2017.3/data/ip/xpm/xpm_memory/hdl/xpm_memory.sv,
+xpm_VCOMP.vhd,vhdl,xpm,C:/Xilinx/Vivado/2017.3/data/ip/xpm/xpm_VCOMP.vhd,
+blk_mem_gen_0_sim_netlist.vhdl,vhdl,xil_defaultlib,../../../../blk_mem_gen_0/blk_mem_gen_0_sim_netlist.vhdl,
+glbl.v,Verilog,xil_defaultlib,glbl.v
