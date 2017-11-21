@@ -26,18 +26,18 @@ begin
     add:
     process(OPA, OPB, nadd_sub) is
     
-    variable OPA_v      : std_logic_vector(DATA_WIDTH   downto 0);
-    variable OPB_v      : std_logic_vector(DATA_WIDTH   downto 0);
-    variable nadd_sub_v : std_logic;
-    
-    variable RESULT_v   : std_logic_vector(DATA_WIDTH   downto 0);
-    variable CARRY_v    : std_logic_vector(DATA_WIDTH+1 downto 0);
-    
-    variable resu_temp_v    : std_logic_vector(DATA_WIDTH downto 0);
-    variable carr_temp_v    : std_logic_vector(DATA_WIDTH downto 0);     
+        variable OPA_v      : DATA_TYPE;
+        variable OPB_v      : DATA_TYPE;
+        variable nadd_sub_v : std_logic;
+        
+        variable RESULT_v   : DATA_TYPE;
+        variable CARRY_v    : std_logic_vector(DATA_WIDTH downto 0);
+        
+        variable resu_temp_v    : DATA_TYPE;
+        variable carr_temp_v    : DATA_TYPE;     
     begin
-        OPA_v := '0' & OPA;
-        OPB_v := '0' & OPB;
+        OPA_v := OPA;
+        OPB_v := OPB;
         nadd_sub_v := nadd_sub;
         
         -- for two's complement - invert
@@ -57,10 +57,28 @@ begin
             CARRY_v(i+1)   := carr_temp_v(i) or (resu_temp_v(i) and CARRY_v(i));
         end loop;
         
-        -- exclude first carry
-        CARRY <= CARRY_v(CARRY_v'left downto 1);
-        -- exclude carry in upper position
-        RESULT <= RESULT_v(RESULT_v'left-1 downto 0);
+        CARRY <= CARRY_v;
+        RESULT <= RESULT_v;
     end process add;
 
 end architecture carry_ripple;
+
+architecture carry_look_ahead of adder is
+begin
+
+    add:
+    process(OPA, OPB, nadd_sub) is
+        variable OPA_v      : std_logic_vector(DATA_WIDTH   downto 0);
+        variable OPB_v      : std_logic_vector(DATA_WIDTH   downto 0);
+        variable nadd_sub_v : std_logic;
+        
+        variable RESULT_v   : std_logic_vector(DATA_WIDTH   downto 0);
+        variable CARRY_v    : std_logic_vector(DATA_WIDTH+1 downto 0);
+    begin
+        OPA_v := '0' & OPA;
+        OPB_v := '0' & OPB;
+        nadd_sub_v := nadd_sub;
+        
+    end process add;
+
+end architecture carry_look_ahead;
