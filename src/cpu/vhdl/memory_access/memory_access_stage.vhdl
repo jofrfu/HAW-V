@@ -61,7 +61,7 @@ architecture beh of memory_access is
 begin
 
 	load_mux:
-	process(RESU, DATA_IN, MA_CNTRL(1)) is
+	process(RESU, DATA_IN_s, MA_CNTRL(1)) is
 	begin
 		if MA_CNTRL(1) = '1' then
 			di_ns <= DATA_IN_s;
@@ -71,7 +71,7 @@ begin
 	end process load_mux;
     
     sign_ext:
-    process(WORD_CNTRL, SIGN_EN) is
+    process(WORD_CNTRL, SIGN_EN, DATA_IN) is
         variable MIN_SIGN_v : natural;
         variable MSB_index_v: natural;
     begin
@@ -98,7 +98,7 @@ begin
     end process sign_ext;
 	
 	sequ_log:
-	process(clk, reset) is
+	process(clk) is
 	begin
 		if clk'event and clk = '1' then
             if reset = '1' then
