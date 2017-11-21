@@ -112,7 +112,7 @@ begin
     );
     
     seq_log:
-    process(clk, reset) is
+    process(clk) is
     
     begin
     
