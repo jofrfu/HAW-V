@@ -32,7 +32,7 @@ architecture beh of ALU is
             CARRY       : out std_logic_vector(DATA_WIDTH downto 0)
         );
     end component adder;
-    for all : adder use entity work.carry_ripple(beh);
+    for all : adder use entity work.adder(carry_ripple);
     
     signal nadd_sub     : std_logic;
 

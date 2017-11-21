@@ -9,7 +9,7 @@ library IEEE;
 
 use WORK.riscv_pack.all;
 
-entity carry_ripple is
+entity adder is
     port(
         OPA         : in  DATA_TYPE;
         OPB         : in  DATA_TYPE;
@@ -18,12 +18,12 @@ entity carry_ripple is
         RESULT      : out DATA_TYPE;
         CARRY       : out std_logic_vector(DATA_WIDTH downto 0)
     );
-end entity carry_ripple;
+end entity adder;
 
-architecture beh of carry_ripple is
+architecture carry_ripple of adder is
 begin
 
-    adder:
+    add:
     process(OPA, OPB, nadd_sub) is
     
     variable OPA_v      : std_logic_vector(DATA_WIDTH   downto 0);
@@ -61,6 +61,6 @@ begin
         CARRY <= CARRY_v(CARRY_v'left downto 1);
         -- exclude carry in upper position
         RESULT <= RESULT_v(RESULT_v'left-1 downto 0);
-    end process adder;
+    end process add;
 
-end architecture beh;
+end architecture carry_ripple;
