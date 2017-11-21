@@ -16,7 +16,8 @@ entity adder is
         nadd_sub    : in  std_logic;
         
         RESULT      : out DATA_TYPE;
-        CARRY       : out std_logic_vector(DATA_WIDTH downto 0)
+        CARRY       : out std_logic;
+        OVERFLOW    : out std_logic
     );
 end entity adder;
 
@@ -49,36 +50,101 @@ begin
         CARRY_v(0) := nadd_sub_v;
         
         -- adder        
-        for i in 0 to RESULT_v'left loop
-            resu_temp_v(i) := OPA_v(i) xor OPB_v(i);
-            carr_temp_v(i) := OPA_v(i) and OPB_v(i);
-            
-            RESULT_v(i)    := resu_temp_v(i) xor CARRY_v(i);
-            CARRY_v(i+1)   := carr_temp_v(i) or (resu_temp_v(i) and CARRY_v(i));
-        end loop;
+        resu_temp_v := OPA_v xor OPB_v;
+        carr_temp_v := OPA_v and OPB_v;
         
-        CARRY <= CARRY_v;
+        RESULT_v    := resu_temp_v xor CARRY_v(CARRY_v'left-1 downto 0);
+        CARRY_v(CARRY_v'left downto 1) := carr_temp_v or (resu_temp_v and CARRY_v(CARRY_v'left-1 downto 0));
+        --
+        CARRY <= CARRY_v(CARRY_v'left);
+        OVERFLOW <= CARRY_v(CARRY_v'left) xor CARRY_v(CARRY_v'left-1);
         RESULT <= RESULT_v;
     end process add;
 
 end architecture carry_ripple;
 
-architecture carry_look_ahead of adder is
+architecture carry_lookahead of adder is
 begin
 
     add:
     process(OPA, OPB, nadd_sub) is
-        variable OPA_v      : std_logic_vector(DATA_WIDTH   downto 0);
-        variable OPB_v      : std_logic_vector(DATA_WIDTH   downto 0);
+        variable OPA_v      : DATA_TYPE;
+        variable OPB_v      : DATA_TYPE;
         variable nadd_sub_v : std_logic;
         
-        variable RESULT_v   : std_logic_vector(DATA_WIDTH   downto 0);
-        variable CARRY_v    : std_logic_vector(DATA_WIDTH+1 downto 0);
+        variable RESULT_v   : DATA_TYPE;
+        variable CARRY_v    : std_logic_vector(DATA_WIDTH downto 0);
+        
+        variable sum_v              : DATA_TYPE;
+        variable carry_generate_v   : DATA_TYPE;
+        variable carry_propagate_v  : DATA_TYPE;
     begin
-        OPA_v := '0' & OPA;
-        OPB_v := '0' & OPB;
+        OPA_v := OPA;
+        OPB_v := OPB;
         nadd_sub_v := nadd_sub;
         
+        -- for two's complement - invert
+        for i in OPB_v'left downto 0 loop
+            OPB_v(i) := OPB_v(i) xor nadd_sub_v;
+        end loop;
+
+        -- for two's complement - add one
+        CARRY_v(0) := nadd_sub_v;
+        
+        -- helper signals
+        sum_v := OPA_v xor OPB_v;
+        carry_generate_v := OPA_v and OPB_v;
+        carry_propagate_v:= OPA_v or OPB_v;
+                
+        -- adder     
+        CARRY_v(CARRY_v'left downto 1) := carry_generate_v or (carry_propagate_v and CARRY_v(CARRY_v'left-1 downto 0));
+        
+        RESULT_v(0) := sum_v(0) xor CARRY_v(0);
+        RESULT_v(RESULT_v'left downto 1) := sum_v(sum_v'left downto 1) xor CARRY_v(sum_v'left downto 1);
+        
+        CARRY <= CARRY_v(CARRY_v'left);
+        OVERFLOW <= CARRY_v(CARRY_v'left) xor CARRY_v(CARRY_v'left-1);
+        RESULT <= RESULT_v;
     end process add;
 
-end architecture carry_look_ahead;
+end architecture carry_lookahead;
+
+architecture numeric_adder of adder is
+    
+begin
+
+    add:
+    process(OPA, OPB, nadd_sub) is 
+        variable OPA_v      : DATA_TYPE;
+        variable OPB_v      : DATA_TYPE;
+        variable nadd_sub_v : std_logic;
+        
+        variable RESULT_v   : std_logic_vector(DATA_WIDTH downto 0);
+        variable OVERFLOW_v : std_logic;
+    begin
+        OPA_v := OPA;
+        OPB_v := OPB;
+        nadd_sub_v := nadd_sub;
+            
+        -- for two's complement - invert
+        for i in OPB_v'left downto 0 loop
+            OPB_v(i) := OPB_v(i) xor nadd_sub_v;
+        end loop;
+        
+        -- add 33BIT for CARRY and add 1BIT as CARRY IN
+        RESULT_v := std_logic_vector(unsigned('0' & OPA_v) + unsigned(OPB_v) + nadd_sub_v);
+        
+        -- check MSBs: (A=B=1 and R=0) or (A=B=0 and R=1)
+        if (OPA_v(OPA_v'left) = '1' and OPB_v(OPB_v'left) = '1' and RESULT_v(RESULT_v'left-1) = '0') or
+           (OPA_v(OPA_v'left) = '0' and OPB_v(OPB_v'left) = '0' and RESULT_v(RESULT_v'left-1) = '1') then
+            OVERFLOW_v := '1';
+        else
+            OVERFLOW_v := '0';
+        end if;
+        
+        CARRY <= RESULT_v(RESULT_v'left);
+        OVERFLOW <= OVERFLOW_v;
+        RESULT <= RESULT_v(RESULT_v'left-1 downto 0);
+    end process add;
+    
+end architecture numeric_adder;
