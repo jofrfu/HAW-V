@@ -229,7 +229,7 @@ begin
     --! @brief ALU of the execute stage
     --! @detail calculates OPA (+) OPB;
     choose:
-    process (EX_CNTRL_IN) is
+    process (EX_CNTRL_IN, add_result, and_resu, or_resu, xor_resu, sll_resu, srl_resu, sra_resu, slt_resu, sltu_resu) is
         variable funct7_v  : FUNCT7_TYPE;
         variable funct3_v  : FUNCT3_TYPE;
         variable op_bits_v: OP_CODE_BIT_TYPE;
