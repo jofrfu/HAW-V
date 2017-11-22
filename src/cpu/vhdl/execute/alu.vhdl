@@ -33,7 +33,7 @@ architecture beh of ALU is
             OVERFLOW    : out std_logic
         );
     end component adder;
-    for all : adder use entity work.adder(carry_ripple);
+    for all : adder use entity work.adder(numeric_adder);
     
     signal nadd_sub     : std_logic;
 
