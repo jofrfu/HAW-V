@@ -82,6 +82,7 @@ begin
                 when BYTE =>
                     MIN_SIGN_v := 8;
                     MSB_index_v:= 7;
+                    
                 when HALF =>
                     MIN_SIGN_v := 16;
                     MSB_index_v:= 15;
@@ -91,8 +92,9 @@ begin
                     MSB_index_v:= 31;
             end case;
             
-            for i in DATA_WIDTH-1 downto MIN_SIGN_v loop
+            for i in DATA_WIDTH-1 downto 0 loop
                 DATA_IN_s(i) <= DATA_IN(MSB_index_v);
+                exit when i = MIN_SIGN_v;
             end loop;
         end if;
     end process sign_ext;
