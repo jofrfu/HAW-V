@@ -11,9 +11,9 @@ use WORK.riscv_pack.all;
 
 entity branch_checker is
     port(
-        FUNCT3    : in FUNCT3_TYPE;
-        OP_CODE  : in OP_CODE_BIT_TYPE;
-        FLAGS    : in FLAGS_TYPE;
+        FUNCT3      : in FUNCT3_TYPE;
+        OP_CODE     : in OP_CODE_BIT_TYPE;
+        FLAGS       : in FLAGS_TYPE;
 
         WORD_CNTRL  : out WORD_CNTRL_TYPE;
         SIGN_EN     : out std_logic;
@@ -41,10 +41,10 @@ begin
         funct3_v            := FUNCT3;
         op_bits_v           := OP_CODE;
         op_code_v           := BITS_TO_OP_CODE_TYPE(op_bits_v);
-        flags_v             := FLAGS;
+        flags_v             := FLAGS;        
         
         case op_code_v is
-            when brancho =>
+            when brancho =>                
                 case funct3_v is
                     when "000" => -- BEQ
                         if flags_v(2) = '1' then -- check Z = 1
@@ -85,10 +85,10 @@ begin
                         
                     when others =>
                         report "Unknown branch command!" severity warning;
-                        branch_v            := '0';
-                        word_cntrl_v        := WORD;
-                        sign_enable_v       := '0';
+                        branch_v            := '0';                                               
                 end case;
+                word_cntrl_v        := WORD;
+                sign_enable_v       := '0'; 
             when loado =>
                 case funct3_v is
                     when "000" => -- lb
@@ -108,10 +108,10 @@ begin
                         sign_enable_v:= '0';
                     when others =>
                         report "Unkown word length on load!" severity warning;
-                        branch_v            := '0';
                         word_cntrl_v        := WORD;
                         sign_enable_v       := '0';
                 end case;
+                branch_v            := '0';                        
             when storeo =>
                 case funct3_v is
                     when "000" => -- sb
@@ -122,10 +122,10 @@ begin
                         word_cntrl_v := WORD;
                     when others =>
                         report "Unknown word length on store!" severity warning;
-                        branch_v            := '0';
                         word_cntrl_v        := WORD;
-                        sign_enable_v       := '0';
                 end case;
+                branch_v            := '0';
+                sign_enable_v       := '0';
             when others =>
                 report "Maybe unknown branch/word cntrl!" severity note;
                 branch_v            := '0';
