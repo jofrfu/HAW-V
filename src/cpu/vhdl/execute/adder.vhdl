@@ -54,7 +54,7 @@ begin
         carr_temp_v := OPA_v and OPB_v;
         
         for i in 0 to RESULT_v'left loop
-            RESULT_v(i)    := resu_temp_v(i) xor CARRY_v(0);
+            RESULT_v(i)    := resu_temp_v(i) xor CARRY_v(i);
             CARRY_v(i+1)   := carr_temp_v(i) or (resu_temp_v(i) and CARRY_v(i));
         end loop;
         --
