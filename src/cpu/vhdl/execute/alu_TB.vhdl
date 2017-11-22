@@ -56,7 +56,7 @@ begin
         variable test_id    : natural;
         variable test_state : boolean := true;
         variable wlb        : line;
-        
+        --dummy:                                        alu_test(             ,           , XXX_FUNCT7, XXX_FUNCT3, opcod,    "0000",             , true );   --
         procedure alu_test(
             opa     : in integer; 
             opb     : in integer; 
@@ -64,7 +64,8 @@ begin
             funct3  : in FUNCT3_TYPE;
             opcode  : in OP_CODE_TYPE;
             flg_exp : in FLAGS_TYPE;   --VZNC
-            res_exp : in integer
+            res_exp : in integer;
+            no_flag : in boolean
         ) is
             variable areFlagsCorrect : boolean;
             variable isResultCorrect : boolean;
@@ -75,7 +76,7 @@ begin
             OPA_s <= std_logic_vector(to_signed(opa, DATA_WIDTH));
             ECI_s <= funct7 & funct3 & OP_CODE_TYPE_TO_BITS(opcode);
             wait for WAIT_TIME;
-            areFlagsCorrect := FLG_s = flg_exp;
+            areFlagsCorrect := (FLG_s = flg_exp) or no_flag;
             isResultCorrect := RES_s = std_logic_vector(to_signed(res_exp, DATA_WIDTH));
             wasTestSuccesful:= areFlagsCorrect and isResultCorrect;
             
@@ -118,22 +119,77 @@ begin
         
         -- tests to determine the correct function of the arithmetic units in the alu
         -- flags   V Z N C
-        -- test adder
+        -- test adder   flags behaviour are also tested here
         --test_id 0 to 4
-        alu_test( 13,           17,         ADD_FUNCT7, ADD_FUNCT3, opo,    "0000", 30          );     -- normal       
-        alu_test( 0,            0,          ADD_FUNCT7, ADD_FUNCT3, opo,    "0100", 0           );     -- zero
-        alu_test( 127,          -507,       ADD_FUNCT7, ADD_FUNCT3, opo,    "0010", -380        );     -- negative
-        alu_test( 2147483647,   1,          ADD_FUNCT7, ADD_FUNCT3, opo,    "1010", -2147483648 );     -- overflow
-        alu_test( -1,           2,          ADD_FUNCT7, ADD_FUNCT3, opo,    "0001", 1           );     -- carry
-         
-        -- test sub, note: C=1 means no borrow, normal subtraction, 
-        --test_id 5 to 9
-        alu_test( 128,          65,         SUB_FUNCT7, SUB_FUNCT3, opo,    "0001", 63          );   -- normal
-        alu_test( 654321,       654321,     SUB_FUNCT7, SUB_FUNCT3, opo,    "0101", 0           );   -- zero
-        alu_test( -103,         881,        SUB_FUNCT7, SUB_FUNCT3, opo,    "0011", -984        );   -- negative
-        alu_test( -2147483648,  1,          SUB_FUNCT7, SUB_FUNCT3, opo,    "1001", 2147483647  );   -- overflow
-        alu_test( 0,            -1111,      SUB_FUNCT7, SUB_FUNCT3, opo,    "0000", 1111        );   -- carry (missing)
+        alu_test( 13          , 17        , ADD_FUNCT7, ADD_FUNCT3, opo,    "0000", 30          , false);     -- normal       
+        alu_test( 0           , 0         , ADD_FUNCT7, ADD_FUNCT3, opo,    "0100", 0           , false);     -- zero
+        alu_test( 127         , -507      , ADD_FUNCT7, ADD_FUNCT3, opo,    "0010", -380        , false);     -- negative
+        alu_test( 2147483647  , 1         , ADD_FUNCT7, ADD_FUNCT3, opo,    "1010", -2147483648 , false);     -- overflow
+        alu_test( -1          , 2         , ADD_FUNCT7, ADD_FUNCT3, opo,    "0001", 1           , false);     -- carry
+                                                                                                  
+        -- test sub, note: C=1 means no borrow, normal subtraction,                               
+        --test_id 5 to 9                                                                          
+        alu_test( 128         , 65        , SUB_FUNCT7, SUB_FUNCT3, opo,    "0001", 63          , false);   -- normal
+        alu_test( 654321      , 654321    , SUB_FUNCT7, SUB_FUNCT3, opo,    "0101", 0           , false);   -- zero
+        alu_test( -103        , 881       , SUB_FUNCT7, SUB_FUNCT3, opo,    "0011", -984        , false);   -- negative
+        alu_test( -2147483648 , 1         , SUB_FUNCT7, SUB_FUNCT3, opo,    "1001", 2147483647  , false);   -- overflow
+        alu_test( 0           , -1111     , SUB_FUNCT7, SUB_FUNCT3, opo,    "0000", 1111        , false);   -- carry (missing)
         
+        --test slt
+        --test_id 10 to 13
+        alu_test( -2147483648 , 2147483647, SLT_FUNCT7, SLT_FUNCT3, opo,    "0000", 1           , true );   
+        alu_test( 0           , 0         , SLT_FUNCT7, SLT_FUNCT3, opo,    "0000", 0           , true );
+        alu_test( -5          , -1        , SLT_FUNCT7, SLT_FUNCT3, opo,    "0000", 1           , true );
+        alu_test( 32          , 31        , SLT_FUNCT7, SLT_FUNCT3, opo,    "0000", 0           , true );
+        
+        --test sltu
+        --test_id 14 to 17
+        alu_test( -2147483648 , 2147483647, SLTU_FUNCT7,SLTU_FUNCT3,opo,    "0000", 0           , true );   
+        alu_test( 0           , 0         , SLTU_FUNCT7,SLTU_FUNCT3,opo,    "0000", 0           , true );
+        alu_test( -5          , -1        , SLTU_FUNCT7,SLTU_FUNCT3,opo,    "0000", 1           , true );
+        alu_test( 32          , 31        , SLTU_FUNCT7,SLTU_FUNCT3,opo,    "0000", 0           , true );
+        
+        --test and
+        --test_id 18 to 21
+        alu_test( -1          , 0         , AND_FUNCT7, AND_FUNCT3, opo,    "0000", 0           , true );   
+        alu_test( 0           , -1        , AND_FUNCT7, AND_FUNCT3, opo,    "0000", 0           , true );  
+        alu_test( -1          , -1        , AND_FUNCT7, AND_FUNCT3, opo,    "0000", -1          , true );  
+        alu_test( 0           , 0         , AND_FUNCT7, AND_FUNCT3, opo,    "0000", 0           , true ); 
+        
+        --test or
+        --test_id 22 to 25
+        alu_test( -1          , 0         , OR_FUNCT7 , OR_FUNCT3 , opo,    "0000", -1          , true );   
+        alu_test( 0           , -1        , OR_FUNCT7 , OR_FUNCT3 , opo,    "0000", -1          , true );  
+        alu_test( -1          , -1        , OR_FUNCT7 , OR_FUNCT3 , opo,    "0000", -1          , true ); 
+        alu_test( 0           , 0         , OR_FUNCT7 , OR_FUNCT3 , opo,    "0000", 0           , true ); 
+        
+        --test xor
+        --test_id 26 to 29
+        alu_test( -1          , 0         , XOR_FUNCT7, XOR_FUNCT3, opo,    "0000", -1          , true );   
+        alu_test( 0           , -1        , XOR_FUNCT7, XOR_FUNCT3, opo,    "0000", -1          , true );  
+        alu_test( -1          , -1        , XOR_FUNCT7, XOR_FUNCT3, opo,    "0000", 0           , true ); 
+        alu_test( 0           , 0         , XOR_FUNCT7, XOR_FUNCT3, opo,    "0000", 0           , true ); 
+        
+        --test sll
+        --test_id 30 to 33
+        alu_test( 1           , 8         , SLL_FUNCT7, SLL_FUNCT3, opo,    "0000", 256         , true );
+        alu_test( 1           , 31        , SLL_FUNCT7, SLL_FUNCT3, opo,    "0000", -2147483648 , true );
+        alu_test( 123456      , 0         , SLL_FUNCT7, SLL_FUNCT3, opo,    "0000", 123456      , true );
+        alu_test( 10930       , 17        , SLL_FUNCT7, SLL_FUNCT3, opo,    "0000", 1432616960  , true );        
+        
+        --test srl
+        --test_id 34 to 37
+        alu_test( -2147483648 , 19        , SRL_FUNCT7, SRL_FUNCT3, opo,    "0000", 4096        , true );
+        alu_test( -2147483648 , 31        , SRL_FUNCT7, SRL_FUNCT3, opo,    "0000", 1           , true );
+        alu_test( 71354785    , 0         , SRL_FUNCT7, SRL_FUNCT3, opo,    "0000", 71354785    , true );
+        alu_test( 1432616960  , 17        , SRL_FUNCT7, SRL_FUNCT3, opo,    "0000", 10930       , true );   
+        
+        --test sra
+        --test_id 38 to 41
+        alu_test( -2147483648 , 19        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", -4096       , true );
+        alu_test( -2147483648 , 31        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", -1          , true );
+        alu_test( 71354785    , 0         , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", 71354785    , true );
+        alu_test( 1432616960  , 17        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", 10930       , true );  
         
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);        
