@@ -98,9 +98,10 @@ begin
         carry_generate_v := OPA_v and OPB_v;
         carry_propagate_v:= OPA_v or OPB_v;
                 
-        -- adder     
-        CARRY_v(CARRY_v'left downto 1) := carry_generate_v or (carry_propagate_v and CARRY_v(CARRY_v'left-1 downto 0));
-        
+        -- adder
+        for i in 0 to RESULT_v'left loop
+            CARRY_v(i+1) := carry_generate_v(i) or (carry_propagate_v(i) and CARRY_v(i));
+        end loop;
         RESULT_v(0) := sum_v(0) xor CARRY_v(0);
         RESULT_v(RESULT_v'left downto 1) := sum_v(sum_v'left downto 1) xor CARRY_v(sum_v'left downto 1);
         
