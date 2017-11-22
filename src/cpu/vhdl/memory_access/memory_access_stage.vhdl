@@ -93,8 +93,11 @@ begin
             end case;
             
             for i in DATA_WIDTH-1 downto 0 loop
-                DATA_IN_s(i) <= DATA_IN(MSB_index_v);
-                exit when i = MIN_SIGN_v;
+                if i >= MIN_SIGN_v then
+                    DATA_IN_s(i) <= DATA_IN(MSB_index_v);
+                else
+                    DATA_IN_s(i) <= DATA_IN(i);
+                end if;
             end loop;
         end if;
     end process sign_ext;
