@@ -29,10 +29,11 @@ architecture beh of ALU is
             nadd_sub    : in  std_logic;
             
             RESULT      : out DATA_TYPE;
-            CARRY       : out std_logic_vector(DATA_WIDTH downto 0)
+            CARRY       : out std_logic;
+            OVERFLOW    : out std_logic
         );
     end component adder;
-    for all : adder use entity work.carry_ripple(beh);
+    for all : adder use entity work.adder(numeric_adder);
     
     signal nadd_sub     : std_logic;
 
@@ -49,7 +50,8 @@ architecture beh of ALU is
     
     -- adder signals
     signal add_result   : DATA_TYPE;
-    signal add_carry    : std_logic_vector(DATA_WIDTH downto 0);
+    signal add_carry    : std_logic;
+    signal add_overflow : std_logic;
 
 begin
 
@@ -60,21 +62,27 @@ begin
         nadd_sub,
         
         add_result,
-        add_carry
+        add_carry,
+        add_overflow
     );
     
     Flags <= flags_s;
 
     flag_proc:
-    process (add_result, add_carry) is
+    process (add_result, add_carry, add_overflow) is
     
-        variable add_result_v : DATA_TYPE := (others => '0');
-        variable add_carry_v  : std_logic_vector(DATA_WIDTH downto 0) := (others => '0');
-        variable flags_v      : FLAGS_TYPE;
+        variable add_result_v   : DATA_TYPE := (others => '0');
+        variable add_carry_v    : std_logic := '0';
+        variable add_overflow_v : std_logic := '0';
+        variable flags_v        : FLAGS_TYPE;
             
     begin
+        add_result_v   := add_result;
+        add_carry_v    := add_carry;
+        add_overflow_v := add_overflow;
+    
         -- carry flag
-        flags_v(0) := add_carry_v(add_carry_v'left);
+        flags_v(0) := add_carry_v;
         
         -- negative flag
         flags_v(1) := add_result_v(add_result_v'left);
@@ -87,7 +95,7 @@ begin
         end if;
         
         -- overflow flag
-        flags_v(3) := add_carry_v(add_carry_v'left) xor add_carry_v(add_carry_v'left-1);
+        flags_v(3) := add_overflow_v;
         
         flags_s <= flags_v;
     end process flag_proc;
@@ -221,7 +229,7 @@ begin
     --! @brief ALU of the execute stage
     --! @detail calculates OPA (+) OPB;
     choose:
-    process (EX_CNTRL_IN) is
+    process (EX_CNTRL_IN, add_result, and_resu, or_resu, xor_resu, sll_resu, srl_resu, sra_resu, slt_resu, sltu_resu) is
         variable funct7_v  : FUNCT7_TYPE;
         variable funct3_v  : FUNCT3_TYPE;
         variable op_bits_v: OP_CODE_BIT_TYPE;
