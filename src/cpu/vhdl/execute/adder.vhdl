@@ -53,8 +53,10 @@ begin
         resu_temp_v := OPA_v xor OPB_v;
         carr_temp_v := OPA_v and OPB_v;
         
-        RESULT_v    := resu_temp_v xor CARRY_v(CARRY_v'left-1 downto 0);
-        CARRY_v(CARRY_v'left downto 1) := carr_temp_v or (resu_temp_v and CARRY_v(CARRY_v'left-1 downto 0));
+        for i in 0 to RESULT_v'left loop
+            RESULT_v(i)    := resu_temp_v(i) xor CARRY_v(0);
+            CARRY_v(i+1)   := carr_temp_v(i) or (resu_temp_v(i) and CARRY_v(i));
+        end loop;
         --
         CARRY <= CARRY_v(CARRY_v'left);
         OVERFLOW <= CARRY_v(CARRY_v'left) xor CARRY_v(CARRY_v'left-1);
