@@ -54,7 +54,7 @@ begin
 	end process rd_demux;
 	
 	rs1_mux:
-	process(rs1,pc_en) is
+	process(rs1, pc_en, PC, reg_out_s) is
 	begin
         if PC_en = '1' then
             OPA <= PC;
@@ -66,7 +66,7 @@ begin
 	end process rs1_mux;
 	
 	rs2_mux:
-	process(rs2) is
+	process(rs2, reg_out_s) is
 	begin
 		if rs2 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
 			opb_s <= (others => '0');
