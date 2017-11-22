@@ -45,6 +45,8 @@ begin
 			reg_out => reg_out_s(i)
 		);
 	end generate;
+    
+    reg_out_s(0) <= std_logic_vector(to_unsigned(0,DATA_WIDTH));
 	
 	rd_demux:
 	process(rd) is
@@ -58,8 +60,6 @@ begin
 	begin
         if PC_en = '1' then
             OPA <= PC;
-        elsif rs1 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
-            OPA <= (others => '0');
         else
             OPA <= reg_out_s(to_integer(unsigned(rs1)));
         end if;
@@ -68,11 +68,7 @@ begin
 	rs2_mux:
 	process(rs2, reg_out_s) is
 	begin
-		if rs2 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
-			opb_s <= (others => '0');
-		else
-			opb_s <= reg_out_s(to_integer(unsigned(rs2)));
-		end if;
+		opb_s <= reg_out_s(to_integer(unsigned(rs2)));
 	end process rs2_mux;
 
     OPB <= opb_s;
