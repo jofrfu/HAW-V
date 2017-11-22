@@ -47,7 +47,7 @@ begin
     );
     
     reg : 
-    process(clk, reset) is
+    process(clk) is
     begin
         if clk'event and clk = '1' then
             if reset = '1' then

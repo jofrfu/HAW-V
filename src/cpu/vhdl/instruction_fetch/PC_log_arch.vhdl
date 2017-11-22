@@ -46,6 +46,10 @@ begin
             when others => report "PC_log mux 1 has undefined signal" severity warning;
         end case ; 
         
+        if cntrl_v = "10" then
+            report "Wrong Control Bits in PC_log, 4 + abs does not make any sense!!!" severity warning;
+        end if;
+        
         pc_ns_v := std_logic_vector(unsigned(base_v) + unsigned(increment_v)); 
         pc_ns <= pc_ns_v;
     end process pc_logic;
@@ -53,7 +57,7 @@ begin
     pc_asynch <= pc_ns;     --program counter to memory for intruction fetch
     pc_synch  <= pc_cs;     --clocked program counter for ID stage
     
-    reg : process(clk, reset) is
+    reg : process(clk) is
     begin
         if clk'event and clk = '1' then
             if reset = '1' then
