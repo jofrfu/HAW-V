@@ -1,6 +1,6 @@
 --!@file   alu_TB.vhdl
 --!@brief  Contains TB for the alu
---!@author Sebastian Brueckner + Felix Lorenz
+--!@author Felix Lorenz
 --!@date   2017
 
 use WORK.riscv_pack.all;
@@ -132,7 +132,7 @@ begin
         alu_test( 654321,       654321,     SUB_FUNCT7, SUB_FUNCT3, opo,    "0101", 0           );   -- zero
         alu_test( -103,         881,        SUB_FUNCT7, SUB_FUNCT3, opo,    "0011", -984        );   -- negative
         alu_test( -2147483648,  1,          SUB_FUNCT7, SUB_FUNCT3, opo,    "1001", 2147483647  );   -- overflow
-        --not sure here: alu_test( test_id, test_state, -1111,       -1112,  ADD_FUNCT7, ADD_FUNCT3, opo,    "0000", 1,          OPB_s, OPA_s, ECI_s);   -- carry (missing)
+        alu_test( 0,            -1111,      SUB_FUNCT7, SUB_FUNCT3, opo,    "0000", 1111        );   -- carry (missing)
         
         
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);
