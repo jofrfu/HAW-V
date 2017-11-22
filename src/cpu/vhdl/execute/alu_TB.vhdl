@@ -122,18 +122,18 @@ begin
         -- tests to determine the correct function of the arithmetic units in the alu
         -- flags   V Z N C
         -- test adder
-        alu_test( test_id, test_state, 13, 17, ADD_FUNCT7, ADD_FUNCT3, opo, "0000", 30, OPB_s, OPA_s, ECI_s);                    -- normal       
-        alu_test( test_id, test_state,  1, -1, ADD_FUNCT7, ADD_FUNCT3, opo, "0100", 0, OPB_s, OPA_s, ECI_s);                     -- zero
-        alu_test( test_id, test_state, 127, -507, ADD_FUNCT7, ADD_FUNCT3, opo, "0000", -380, OPB_s, OPA_s, ECI_s);               -- negative
-        alu_test( test_id, test_state, 2147483647, 1, ADD_FUNCT7, ADD_FUNCT3, opo, "1010", -2147483648, OPB_s, OPA_s, ECI_s);    -- overflow
-        alu_test( test_id, test_state, -1, 2, ADD_FUNCT7, ADD_FUNCT3, opo, "0001", 1, OPB_s, OPA_s, ECI_s);                      -- carry
+        alu_test( test_id, test_state,  13,         17,     ADD_FUNCT7, ADD_FUNCT3, opo,    "0000", 30,         OPB_s, OPA_s, ECI_s);   -- normal       
+        alu_test( test_id, test_state,  0,          0,      ADD_FUNCT7, ADD_FUNCT3, opo,    "0100", 0,          OPB_s, OPA_s, ECI_s);   -- zero
+        alu_test( test_id, test_state,  127,        -507,   ADD_FUNCT7, ADD_FUNCT3, opo,    "0010", -380,       OPB_s, OPA_s, ECI_s);   -- negative
+        alu_test( test_id, test_state,  2147483647, 1,      ADD_FUNCT7, ADD_FUNCT3, opo,    "1010", -2147483648,OPB_s, OPA_s, ECI_s);   -- overflow
+        alu_test( test_id, test_state, -1,          2,      ADD_FUNCT7, ADD_FUNCT3, opo,    "0001", 1,          OPB_s, OPA_s, ECI_s);   -- carry
          
         -- test sub, note: C=1 means no borrow, normal subtraction
-        alu_test( test_id, test_state, 128, 65, ADD_FUNCT7, ADD_FUNCT3, opo, "0001", 63, OPB_s, OPA_s, ECI_s);                   -- normal
-        alu_test( test_id, test_state, -1, -1, ADD_FUNCT7, ADD_FUNCT3, opo, "0101", 0, OPB_s, OPA_s, ECI_s);                     -- zero
-        alu_test( test_id, test_state, 103, 881, ADD_FUNCT7, ADD_FUNCT3, opo, "0001", -778, OPB_s, OPA_s, ECI_s);                -- negative
-        alu_test( test_id, test_state, 2147483647, -1, ADD_FUNCT7, ADD_FUNCT3, opo, "1001", -2147483648, OPB_s, OPA_s, ECI_s);   -- overflow
-        alu_test( test_id, test_state, -1111, -1112, ADD_FUNCT7, ADD_FUNCT3, opo, "0000", 1, OPB_s, OPA_s, ECI_s);               -- carry (missing)
+        alu_test( test_id, test_state, 128,         65,     ADD_FUNCT7, ADD_FUNCT3, opo,    "0001", 63,         OPB_s, OPA_s, ECI_s);   -- normal
+        alu_test( test_id, test_state, 654321,      654321, ADD_FUNCT7, ADD_FUNCT3, opo,    "0101", 0,          OPB_s, OPA_s, ECI_s);   -- zero
+        alu_test( test_id, test_state, -103,        881,    ADD_FUNCT7, ADD_FUNCT3, opo,    "0011", -984,       OPB_s, OPA_s, ECI_s);   -- negative
+        alu_test( test_id, test_state, -2147483648, -1,     ADD_FUNCT7, ADD_FUNCT3, opo,    "1001", 2147483647,OPB_s, OPA_s, ECI_s);   -- overflow
+        --not sure here: alu_test( test_id, test_state, -1111,       -1112,  ADD_FUNCT7, ADD_FUNCT3, opo,    "0000", 1,          OPB_s, OPA_s, ECI_s);   -- carry (missing)
         
         
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);
