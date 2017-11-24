@@ -166,21 +166,22 @@ architecture beh of risc_v_core is
     
     component memory is
         Port ( 
-            clka : in STD_LOGIC;
             ena : in STD_LOGIC;
             wea : in STD_LOGIC_VECTOR ( 3 downto 0 );
             addra : in STD_LOGIC_VECTOR ( 31 downto 0 );
             dina : in STD_LOGIC_VECTOR ( 31 downto 0 );
             douta : out STD_LOGIC_VECTOR ( 31 downto 0 );
-            clkb : in STD_LOGIC;
+            clka : in STD_LOGIC;
+            
             enb : in STD_LOGIC;
             web : in STD_LOGIC_VECTOR ( 3 downto 0 );
             addrb : in STD_LOGIC_VECTOR ( 31 downto 0 );
             dinb : in STD_LOGIC_VECTOR ( 31 downto 0 );
-            doutb : out STD_LOGIC_VECTOR ( 31 downto 0 )
+            doutb : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            clkb : in STD_LOGIC
         );
     end component memory;
-    for all : memory use entity work.blk_mem_gen_0(stub);
+    for all : memory use entity work.blk_mem_gen_0_wrapper(xilinx);
     
     signal DOUT_A_s : DATA_TYPE;
     signal DOUT_B_s : DATA_TYPE;
@@ -341,20 +342,20 @@ begin
     memory_i : memory
     port map(
         -- port a: Intstructions
-        clk,
         '1',            -- enable : always on instruction ram
         "0000",         -- wen    : no write on instruction ram
         pc_asynch_s,    -- address: pc on instruction ram
         (others => '0'),-- DIN    : no write on instruction ram
         DOUT_A_s,       -- DOUT   : instruction
+        clk,
         
         -- port b: Data
-        clk,
         ENABLE_s,       -- enable : enable from MA
         BYTE_WRITE_EN_s,-- wen    : converted write enable from MA
         ADDRESS_s,      -- address: address from MA
         DATA_OUT_s,     -- DIN    : DATA_OUT from MA
-        DOUT_B_s        -- DOUT   : DATA_IN on MA
+        DOUT_B_s,       -- DOUT   : DATA_IN on MA
+        clk
     );
 
 end architecture beh;
