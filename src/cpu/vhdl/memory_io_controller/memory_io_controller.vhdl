@@ -56,7 +56,7 @@ architecture beh of memory_io_controller is
             clkb : in STD_LOGIC
         );
     end component memory;
-    for all : memory use open;     --entity work.blk_mem_gen_0_wrapper(xilinx)
+    for all : memory use entity work.blk_mem_gen_0_wrapper(dummy);     --entity work.blk_mem_gen_0_wrapper(xilinx)
     
     
 begin

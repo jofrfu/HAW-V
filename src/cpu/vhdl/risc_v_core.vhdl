@@ -10,7 +10,9 @@ use WORK.riscv_pack.all;
 
 entity risc_v_core is
     port(
-        clk, reset   : in std_logic
+        clk, reset   : in std_logic;
+        gpio_in      : in DATA_TYPE;
+        gpio_out     : out DATA_TYPE
     );
 end entity risc_v_core;
 
@@ -145,10 +147,7 @@ architecture beh of risc_v_core is
     signal WRITE_EN_s   : std_logic;
     signal DATA_OUT_s   : DATA_TYPE;
     signal ADDRESS_s    : ADDRESS_TYPE;
-    signal WORD_LENGTH_s: WORD_CNTRL_TYPE;
-    
-    -- WORD_CNTRL to BYTE_WRITE_EN
-    signal BYTE_WRITE_EN_s : std_logic_vector(3 downto 0);
+    signal WORD_LENGTH_s: WORD_CNTRL_TYPE;    
     
     component write_back is
         port(
@@ -167,25 +166,26 @@ architecture beh of risc_v_core is
     
     component memory is
         Port ( 
-            ena : in STD_LOGIC;
-            wea : in STD_LOGIC_VECTOR ( 3 downto 0 );
-            addra : in STD_LOGIC_VECTOR ( 31 downto 0 );
-            dina : in STD_LOGIC_VECTOR ( 31 downto 0 );
-            douta : out STD_LOGIC_VECTOR ( 31 downto 0 );
-            clka : in STD_LOGIC;
+            CLK            : IN STD_LOGIC;
+            reset          : IN STD_LOGIC;
+            pc_asynch      : IN ADDRESS_TYPE;
+            instruction    : OUT INSTRUCTION_BIT_TYPE;
             
-            enb : in STD_LOGIC;
-            web : in STD_LOGIC_VECTOR ( 3 downto 0 );
-            addrb : in STD_LOGIC_VECTOR ( 31 downto 0 );
-            dinb : in STD_LOGIC_VECTOR ( 31 downto 0 );
-            doutb : out STD_LOGIC_VECTOR ( 31 downto 0 );
-            clkb : in STD_LOGIC
+            EN             : IN STD_LOGIC;
+            WEN            : IN STD_LOGIC;
+            WORD_LENGTH    : in WORD_CNTRL_TYPE;
+            ADDR           : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            DIN            : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+            DOUT           : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+            
+            GPIO_IN        : IN DATA_TYPE;      --0x70000000 to 0x70000003
+            GPIO_OUT       : OUT DATA_TYPE      --0xB0000000 to 0xB0000003
         );
     end component memory;
-    for all : memory use entity work.blk_mem_gen_0_wrapper(xilinx);     --replace entity work.blk_mem_gen_0_wrapper(xilinx) with open when compiling with modelsim
+    for all : memory use entity work.memory_io_controller(beh);     --replace entity work.blk_mem_gen_0_wrapper(xilinx) with open when compiling with modelsim
     
-    signal DOUT_A_s : DATA_TYPE;
-    signal DOUT_B_s : DATA_TYPE;
+    signal DOUT_s : DATA_TYPE;
+    signal instruction_s : DATA_TYPE;
     
 begin
 
@@ -201,7 +201,7 @@ begin
         ABS_OUT_s,
         
         -- instruction memory
-        DOUT_A_s,
+        instruction_s,
         
         -- outputs
         IFR_s,
@@ -287,50 +287,22 @@ begin
         DO_EX_to_MA,
         PC_EX_to_MA,
         
-        -- memory ins
-        DOUT_B_s,
+        -- input from memory
+        DOUT_s,
         
         -- stage outs
         WB_CNTRL_MA_to_WB,
         DI_s,
         PC_MA_to_WB,
         
-        -- memory outs
+        --output to memory
         ENABLE_s,
         WRITE_EN_s,
         DATA_OUT_s,
         ADDRESS_s,
         WORD_LENGTH_s
     );
-    
-    write_en:
-    process(WORD_LENGTH_s, WRITE_EN_s) is
-        variable WORD_LENGTH_v   : WORD_CNTRL_TYPE;
-        variable WRITE_EN_v      : std_logic;
-        variable BYTE_WRITE_EN_v : std_logic_vector(3 downto 0);
-    begin
-        WORD_LENGTH_v := WORD_LENGTH_s;
-        WRITE_EN_v    := WRITE_EN_s;
         
-        if WRITE_EN_v = '1' then
-            case WORD_LENGTH_v is
-                when BYTE =>
-                    BYTE_WRITE_EN_v := "0001";
-                when HALF =>
-                    BYTE_WRITE_EN_v := "0011";
-                when WORD =>
-                    BYTE_WRITE_EN_v := "1111";
-                when others =>
-                    BYTE_WRITE_EN_v := "0000";
-                    report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
-            end case;
-        else
-            BYTE_WRITE_EN_v := "0000";
-        end if;
-        
-        BYTE_WRITE_EN_s <= BYTE_WRITE_EN_v;
-    end process write_en;
-    
     write_back_i : write_back
     port map(
         WB_CNTRL_MA_to_WB,
@@ -343,21 +315,20 @@ begin
     
     memory_i : memory
     port map(
-        -- port a: Intstructions
-        '1',            -- enable : always on instruction ram
-        "0000",         -- wen    : no write on instruction ram
-        pc_asynch_s,    -- address: pc on instruction ram
-        (others => '0'),-- DIN    : no write on instruction ram
-        DOUT_A_s,       -- DOUT   : instruction
         clk,
+        reset,
+        pc_asynch_s,
+        instruction_s,
         
-        -- port b: Data
-        ENABLE_s,       -- enable : enable from MA
-        BYTE_WRITE_EN_s,-- wen    : converted write enable from MA
-        ADDRESS_s,      -- address: address from MA
-        DATA_OUT_s,     -- DIN    : DATA_OUT from MA
-        DOUT_B_s,       -- DOUT   : DATA_IN on MA
-        clk
+        ENABLE_s,
+        WRITE_EN_s,
+        WORD_LENGTH_s,
+        ADDRESS_s,
+        DI_s,
+        DOUT_s,
+        
+        gpio_in,
+        gpio_out
     );
 
 end architecture beh;
