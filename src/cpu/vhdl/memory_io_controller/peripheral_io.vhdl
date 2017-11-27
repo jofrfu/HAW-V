@@ -43,7 +43,7 @@ begin
         
         variable PERIPH_cs_v    : IO_BYTE_TYPE;
         
-        variable DECODE_RESU_v  : IO_BYTE_TYPE := (others => (others => '0'));
+        variable DECODE_RESU_v  : IO_BYTE_TYPE;
         variable DOUT_v : DATA_TYPE;
     begin
         EN_v   := EN;
@@ -52,6 +52,8 @@ begin
         DIN_v  := DIN;
         
         PERIPH_cs_v := PERIPH_cs;
+        
+        DECODE_RESU_v := (others => (others => '0'));
         
         if EN_v = '1' then
             case WEA_v is
