@@ -2,7 +2,8 @@ onerror {resume}
 vsim -gui -novopt work.pc_log_tb
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /pc_log_tb/abso_s
-add wave -noupdate /pc_log_tb/pc_s
+add wave -noupdate /pc_log_tb/pc_asynch_s
+add wave -noupdate /pc_log_tb/pc_synch_s
 add wave -noupdate /pc_log_tb/rel_s
 add wave -noupdate /pc_log_tb/cntrl_s
 add wave -noupdate -divider {Basic Signals}

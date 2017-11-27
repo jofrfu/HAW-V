@@ -50,7 +50,7 @@ end entity memory_access;
 architecture beh of memory_access is
 
 	--! @brief registers
-	signal wb_cntrl_cs : WB_CNTRL_TYPE := (others => '0');
+	signal wb_cntrl_cs : WB_CNTRL_TYPE := WB_CNTRL_NOP;
 	signal wb_cntrl_ns : WB_CNTRL_TYPE;
 	signal di_cs       : DATA_TYPE     := (others => '0');
 	signal di_ns       : DATA_TYPE;
@@ -61,7 +61,7 @@ architecture beh of memory_access is
 begin
 
 	load_mux:
-	process(RESU, DATA_IN, MA_CNTRL(1)) is
+	process(RESU, DATA_IN_s, MA_CNTRL(1)) is
 	begin
 		if MA_CNTRL(1) = '1' then
 			di_ns <= DATA_IN_s;
@@ -71,7 +71,7 @@ begin
 	end process load_mux;
     
     sign_ext:
-    process(WORD_CNTRL, SIGN_EN) is
+    process(WORD_CNTRL, SIGN_EN, DATA_IN) is
         variable MIN_SIGN_v : natural;
         variable MSB_index_v: natural;
     begin
@@ -82,6 +82,7 @@ begin
                 when BYTE =>
                     MIN_SIGN_v := 8;
                     MSB_index_v:= 7;
+                    
                 when HALF =>
                     MIN_SIGN_v := 16;
                     MSB_index_v:= 15;
@@ -91,18 +92,22 @@ begin
                     MSB_index_v:= 31;
             end case;
             
-            for i in DATA_WIDTH-1 downto MIN_SIGN_v loop
-                DATA_IN_s(i) <= DATA_IN(MSB_index_v);
+            for i in DATA_WIDTH-1 downto 0 loop
+                if i >= MIN_SIGN_v then
+                    DATA_IN_s(i) <= DATA_IN(MSB_index_v);
+                else
+                    DATA_IN_s(i) <= DATA_IN(i);
+                end if;
             end loop;
         end if;
     end process sign_ext;
 	
 	sequ_log:
-	process(clk, reset) is
+	process(clk) is
 	begin
 		if clk'event and clk = '1' then
             if reset = '1' then
-        		wb_cntrl_cs <= (others => '0');
+        		wb_cntrl_cs <= WB_CNTRL_NOP;
         		di_cs		<= (others => '0');
         		pc_cs       <= (others => '0');
         	else

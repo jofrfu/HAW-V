@@ -11,6 +11,7 @@ architecture TB of instruction_fetch_TB is
         port(
              clk, reset : in std_logic;
              
+             branch    : in std_logic;      --! when branch the IFR has to be resetted
              cntrl     : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
              rel	   : in DATA_TYPE;		--! relative branch address
              abso	   : in DATA_TYPE;		--! absolute branch address, or base for relative jump
@@ -27,6 +28,7 @@ architecture TB of instruction_fetch_TB is
     signal reset_s       : std_logic := '0';
     signal simulation_running : boolean := false;
     
+    signal branch_s      : std_logic := '0';
     signal cntrl_s       : IF_CNTRL_TYPE := (others => '0');
     signal rel_s         : DATA_TYPE := (others => '0');
     signal abso_s        : DATA_TYPE := (others => '0');
@@ -44,6 +46,7 @@ begin
     port map(
         clk_s,
         reset_s,
+        branch_s,
         cntrl_s,
         rel_s,
         abso_s,
@@ -81,6 +84,7 @@ begin
         -- action: adds 4 to PC
         -- result: PC should be 4
         -- result: IFR should be 42
+        branch_s <= '0';
         cntrl_s <= "00";
         ins_s <= std_logic_vector(to_unsigned(42, ADDRESS_WIDTH));
         wait for 1 ns;
@@ -105,6 +109,7 @@ begin
         -- cntrl: 11
         -- action: adds immediate (8 in this case) to a register (512 in this case)
         -- result: PC should be 520
+        branch_s <= '0';
         cntrl_s <= "11";
         rel_s <= std_logic_vector(to_unsigned(8, ADDRESS_WIDTH));
         abso_s <= std_logic_vector(to_unsigned(512, ADDRESS_WIDTH));
@@ -120,6 +125,17 @@ begin
             wait; 
         end if;
     
+        -- test3
+        -- cntrl: 
+        -- action: branch! IFR must be discarded and replaced with nop
+        -- result: IFR is NOP_INRUCT
+        branch_s <= '1';
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if IFR_s /= NOP_INSTRUCT then
+            report "Test failed! Error on IFR reset when branching";
+            wait;
+        end if;
     
         report "Test successful!";
         

@@ -41,9 +41,9 @@ end entity execute_stage;
 
 architecture beh of execute_stage is
 
-    signal WB_CNTRL_cs   : WB_CNTRL_TYPE := (others => '0');
+    signal WB_CNTRL_cs   : WB_CNTRL_TYPE := WB_CNTRL_NOP;
     signal WB_CNTRL_ns   : WB_CNTRL_TYPE;
-    signal MA_CNTRL_cs   : MA_CNTRL_TYPE := (others => '0');
+    signal MA_CNTRL_cs   : MA_CNTRL_TYPE := MA_CNTRL_NOP;
     signal MA_CNTRL_ns   : MA_CNTRL_TYPE;
     signal WORD_CNTRL_cs : WORD_CNTRL_TYPE := (others => '0');
     signal WORD_CNTRL_ns : WORD_CNTRL_TYPE;
@@ -118,8 +118,8 @@ begin
     
         if clk'event and clk = '1' then
             if reset = '1' then
-                WB_CNTRL_cs <= (others => '0');
-                MA_CNTRL_cs <= (others => '0');
+                WB_CNTRL_cs <= WB_CNTRL_NOP;
+                MA_CNTRL_cs <= MA_CNTRL_NOP;
                 WORD_CNTRL_cs <= (others => '0');
                 SIGN_EN_cs <= '0';
                 RESU_DAR_cs <= (others => '0');

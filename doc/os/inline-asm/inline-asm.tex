@@ -1,0 +1,49 @@
+\documentclass[a4paper, oneside]{scrreprt}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\author{Andre Brand}
+
+\begin{document}
+\chapter{Inline Assembler}
+To write an inline assembler program which works on spike, you just need to write your instructions as strings in an asm()-block in a c-file.
+\\
+\section{Example}
+\begin{lstlisting}
+int main(int argc, char* argv) {
+	asm(
+		// Marker, to find the start of this assembler code
+		"li t1, 0xaffedead;"
+		"li t1, 0x3;"
+		"add t2, t1, t1;"
+		"addi t2, t2, 0x3;"
+		"end: j end;"
+	);
+}
+\end{lstlisting}
+
+\chapter{Running Inline Assembler in Spike}
+To run your inline assembler code in spike, you have to compile it with the gcc included in the risc-v toolchain.\\
+\begin{lstlisting}
+riscv64-unknown-elf-gcc -o yourprogramname yourcodefile.c
+\end{lstlisting}
+Then you have to run the compiled program in spike using the debug-mode and the proxykernel.\\
+\begin{lstlisting}
+spike -d pk yourprogramname
+\end{lstlisting}
+After the assembler program has started you can use the enter-key to do a single step. When you type run 10 spike will step over the next 10 instructions. When you just type run, your program will be runned until it's finished.
+\\
+To get to the start of your program you need to type:
+\begin{lstlisting}
+until reg 0 t1 0xaffedead
+\end{lstlisting}
+
+This command will run your code until the register t1 from core with index 0 contains the value "0xaffedead".
+\\
+To show the values of registers you need to type:
+\begin{lstlisting}
+reg 0 t1
+\end{lstlisting}
+
+This command will show you the value of register t1 from the core with index 0.
+\end{document}
