@@ -27,7 +27,7 @@ entity PC_log is
 end entity PC_log;
 
 architecture std_impl of PC_log is 
-    signal pc_cs : ADDRESS_TYPE := (others => '0');
+    signal pc_cs : ADDRESS_TYPE := std_logic_vector(to_signed(-4,DATA_WIDTH));
     signal pc_ns : ADDRESS_TYPE;
     
 begin
@@ -73,7 +73,7 @@ begin
     begin
         if clk'event and clk = '1' then
             if reset = '1' then
-                pc_cs <= (others => '0');
+                pc_cs <= std_logic_vector(to_signed(-4,DATA_WIDTH));
             else
                 pc_cs <= pc_ns;  --store data at rising edge
             end if;

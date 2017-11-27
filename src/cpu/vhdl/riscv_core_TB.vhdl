@@ -43,6 +43,8 @@ begin
     begin
         reset <= '1';
         wait until '1'=clk and clk'event;
+        wait until '1'=clk and clk'event;
+        wait until '1'=clk and clk'event;
         reset <= '0';
         wait;
     end process reset_proc;
