@@ -99,6 +99,7 @@ package riscv_pack is
 	constant OP_CODE_WIDTH : natural := 7;
 	constant FUNCT3_WIDTH : natural := 3;
 	constant FUNCT7_WIDTH : natural := 7;
+    constant WRITE_EN_WIDTH: natural := 4;
 	
 	subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
 	subtype ADDRESS_TYPE is DATA_TYPE;
@@ -108,6 +109,7 @@ package riscv_pack is
 	subtype OP_CODE_BIT_TYPE is std_logic_vector(OP_CODE_WIDTH-1 downto 0);
 	subtype FUNCT3_TYPE is std_logic_vector(FUNCT3_WIDTH-1 downto 0);
 	subtype FUNCT7_TYPE is std_logic_vector(FUNCT7_WIDTH-1 downto 0);
+    subtype WRITE_EN_TYPE is std_logic_vector(WRITE_EN_WIDTH-1 downto 0);
 	
 	type REG_OUT_TYPE is array(REGISTER_COUNT-1 downto 0) of DATA_TYPE;
 	
