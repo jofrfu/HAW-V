@@ -11,8 +11,11 @@ use WORK.riscv_pack.all;
 entity risc_v_core is
     port(
         clk, reset   : in std_logic;
-        gpio_in      : in DATA_TYPE;
-        gpio_out     : out DATA_TYPE
+        
+        -- IO
+        PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
+        PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
+        PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
     );
 end entity risc_v_core;
 
@@ -145,7 +148,7 @@ architecture beh of risc_v_core is
     
     signal ENABLE_s     : std_logic;
     signal WRITE_EN_s   : std_logic;
-    signal DATA_OUT_s   : DATA_TYPE;
+    signal DIN_s        : DATA_TYPE;
     signal ADDRESS_s    : ADDRESS_TYPE;
     signal WORD_LENGTH_s: WORD_CNTRL_TYPE;    
     
@@ -178,11 +181,13 @@ architecture beh of risc_v_core is
             DIN            : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
             DOUT           : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
             
-            GPIO_IN        : IN DATA_TYPE;      --0x70000000 to 0x70000003
-            GPIO_OUT       : OUT DATA_TYPE      --0xB0000000 to 0xB0000003
+            -- IO
+            PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
+            PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
+            PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
         );
     end component memory;
-    for all : memory use entity work.memory_io_controller(beh);     --replace entity work.blk_mem_gen_0_wrapper(xilinx) with open when compiling with modelsim
+    for all : memory use entity work.memory_io_controller(beh);
     
     signal DOUT_s : DATA_TYPE;
     signal instruction_s : DATA_TYPE;
@@ -298,7 +303,7 @@ begin
         --output to memory
         ENABLE_s,
         WRITE_EN_s,
-        DATA_OUT_s,
+        DIN_s,
         ADDRESS_s,
         WORD_LENGTH_s
     );
@@ -324,11 +329,13 @@ begin
         WRITE_EN_s,
         WORD_LENGTH_s,
         ADDRESS_s,
-        DI_s,
+        DIN_s,
         DOUT_s,
         
-        gpio_in,
-        gpio_out
+        -- IO
+        PERIPH_IN_EN,
+        PERIPH_IN,
+        PERIPH_OUT
     );
 
 end architecture beh;

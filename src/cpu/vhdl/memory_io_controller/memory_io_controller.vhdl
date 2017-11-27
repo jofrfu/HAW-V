@@ -20,8 +20,10 @@ entity memory_io_controller is
         DIN            : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         DOUT           : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         
-        GPIO_IN        : IN DATA_TYPE;      --0x70000000 to 0x70000003
-        GPIO_OUT       : OUT DATA_TYPE      --0xB0000000 to 0xB0000003
+        -- IO
+        PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
+        PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
+        PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
     );
 end entity memory_io_controller;
     
@@ -30,14 +32,6 @@ architecture beh of memory_io_controller is
     signal BYTE_WRITE_EN_s      : std_logic_vector(3 downto 0);
     signal DO_s                 : DATA_TYPE;
     signal DOB_s                : DATA_TYPE;
-    signal gpio_en_s            : std_logic;
-    
-    --GPIO Registers
-    signal gpio_out_reg_cs  : DATA_TYPE := (others => '0');
-    signal gpio_out_reg_ns  : DATA_TYPE;
-    signal gpio_in_reg_cs   : DATA_TYPE := (others => '0');
-    signal gpio_in_reg_ns   : DATA_TYPE;
-    
     
     component memory is
         Port ( 
@@ -56,10 +50,33 @@ architecture beh of memory_io_controller is
             clkb : in STD_LOGIC
         );
     end component memory;
-    for all : memory use entity work.blk_mem_gen_0_wrapper(dummy);     --entity work.blk_mem_gen_0_wrapper(xilinx)
+    for all : memory use entity work.blk_mem_gen_0_wrapper(xilinx);     --entity work.blk_mem_gen_0_wrapper(xilinx)
     
+    component peripherals is
+        port(
+            CLK            : IN  STD_LOGIC;
+            RESET          : IN  STD_LOGIC;
+            EN             : IN  STD_LOGIC;     -- enables access
+            WEA            : IN  STD_LOGIC_vector(3 DOWNTO 0); -- enables write access
+            ADDR           : IN  ADDRESS_TYPE;  -- selects peripheral
+            DIN            : IN  DATA_TYPE;     -- input for selected peripheral
+            DOUT           : OUT DATA_TYPE;     -- output of selected peripheral
+            
+            -- IO
+            PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
+            PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
+            PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
+        );
+    end component peripherals;
+    for all : peripherals use entity work.peripheral_io(beh);
     
+    signal io_en : std_logic;
+    signal mem_en: std_logic;
 begin
+
+    io_en <= EN and ADDR(ADDR'high);
+    mem_en <= EN and not ADDR(ADDR'high);
+
     mem : memory
     port map(
         '1',                --always enable
@@ -69,7 +86,7 @@ begin
         instruction,        --write to instruction ou
         CLK,
         ----------------
-        EN and not ADDR(ADDR'high),   --enable when enabled memory (when MSB is 1 is an IO access)
+        mem_en,   --enable when enabled memory (when MSB is 1 is an IO access)
         BYTE_WRITE_EN_s,
         ADDR,
         DIN,
@@ -77,50 +94,21 @@ begin
         CLK        
     );
     
-    gpio:
-    process(gpio_en_s, DIN, ADDR, BYTE_WRITE_EN_s, gpio_in_reg_cs, gpio_out_reg_cs) is
-        variable gpio_en_v          : std_logic;
-        variable DIN_v              : DATA_TYPE;
-        variable ADDR_v             : ADDRESS_TYPE;
-        variable BYTE_WRITE_EN_v    : WRITE_EN_TYPE;
-        variable DOUT_v             : DATA_TYPE;
-        variable gpio_out_v         : DATA_TYPE;
-    begin
-        gpio_en_v       := gpio_en_s;       
-        DIN_v           := DIN;          
-        ADDR_v          := ADDR;         
-        BYTE_WRITE_EN_v := BYTE_WRITE_EN_s;
-        DOUT_v          := (others => '0');
-        gpio_out_v      := (others => '0');
+    periph : peripherals
+    port map(
+        CLK,
+        reset,
+        io_en, -- peripheral enable
+        BYTE_WRITE_EN_s,
+        ADDR,
+        DIN,
+        DO_s,
         
-        if gpio_en_v = '1' then
-            if BYTE_WRITE_EN_v = "0000" then
-                case ADDR_v is 
-                    when x"70000000" => DOUT_v := gpio_in_reg_cs;
-                    when x"B0000000" => DOUT_v := gpio_out_reg_cs;
-                    when others => report "WRONG ADDRESS FOR GPIO" severity error;
-                end case;
-            else
-                case BYTE_WRITE_EN_v is
-                    when "0001" => 
-                        gpio_out_v (7 downto 0)  := DIN_v(7 downto 0); 
-                    when "0011" => 
-                        gpio_out_v (15 downto 0) := DIN_v(15 downto 0); 
-                    when "1111" => 
-                        gpio_out_v (31 downto 0)  := DIN_v(31 downto 0); 
-                    when others =>
-                        report "failure in gpio: byte_write_en" severity error;
-                end case;
-                DOUT_v := gpio_out_v;
-            end if;
-            gpio_out_reg_ns <= gpio_out_v;
-            DOUT <= DOUT_v;
-        end if;
-        
-    end process gpio;
-    
-    --gpio enable
-    gpio_en_s <= EN AND ADDR(ADDR'high);
+        -- IO
+        PERIPH_IN_EN,
+        PERIPH_IN,
+        PERIPH_OUT
+    );
     
     dout_mux:
     process(DOB_s, DO_s, ADDR(ADDR'high)) is
@@ -163,22 +151,5 @@ begin
         
         BYTE_WRITE_EN_s <= BYTE_WRITE_EN_v;
     end process write_en;
-    
-    sequ_log:       --only for GPIOs
-	process(clk) is
-	begin
-		if clk'event and clk = '1' then
-            if reset = '1' then
-                gpio_out_reg_cs <= (others => '0');
-                gpio_in_reg_cs  <= (others => '0');
-            else
-            	gpio_out_reg_cs <= gpio_out_reg_ns;
-                gpio_in_reg_cs  <= gpio_in_reg_ns ;
-            end if;
-        end if; 
-	end process sequ_log;    
-    
-    gpio_in_reg_ns <= GPIO_IN;
-    GPIO_OUT <= gpio_out_reg_cs;
     
 end architecture beh;
