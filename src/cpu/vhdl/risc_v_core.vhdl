@@ -18,7 +18,8 @@ architecture beh of risc_v_core is
     component instruction_fetch is
         port(
              clk, reset : in std_logic;
-             
+		 
+             branch    : in std_logic;      --! when branch the IFR has to be resetted
              cntrl     : in IF_CNTRL_TYPE;  --! Control the operation mode of the PC logic
              rel	   : in DATA_TYPE;		--! relative branch address
              abso	   : in DATA_TYPE;		--! absolute branch address, or base for relative jump
@@ -194,6 +195,7 @@ begin
         reset,
         
         -- cntrl and pc adds
+        BRANCH_s,
         IF_CNTRL_s,
         REL_OUT_s,
         ABS_OUT_s,
