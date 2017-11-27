@@ -24,6 +24,7 @@ entity memory_access is
         WB_CNTRL_IN : in WB_CNTRL_TYPE;
         MA_CNTRL    : in MA_CNTRL_TYPE;
         WORD_CNTRL  : in WORD_CNTRL_TYPE;
+        SIGN_EN     : in std_logic;
         RESU        : in DATA_TYPE;
         DO          : in DATA_TYPE;
         PC_IN       : in ADDRESS_TYPE;
@@ -56,20 +57,53 @@ architecture beh of memory_access is
 	signal pc_cs       : ADDRESS_TYPE  := (others => '0');
 	signal pc_ns       : ADDRESS_TYPE;
 
+    signal DATA_IN_s : DATA_TYPE;
 begin
 
 	load_mux:
-	process(RESU, DATA_IN, MA_CNTRL(1)) is
+	process(RESU, DATA_IN_s, MA_CNTRL(1)) is
 	begin
 		if MA_CNTRL(1) = '1' then
-			di_ns <= DATA_IN;
+			di_ns <= DATA_IN_s;
 		else
 			di_ns <= RESU;
 		end if;
 	end process load_mux;
+    
+    sign_ext:
+    process(WORD_CNTRL, SIGN_EN, DATA_IN) is
+        variable MIN_SIGN_v : natural;
+        variable MSB_index_v: natural;
+    begin
+        if SIGN_EN = '0' then
+            DATA_IN_s <= DATA_IN;
+        else
+            case WORD_CNTRL is
+                when BYTE =>
+                    MIN_SIGN_v := 8;
+                    MSB_index_v:= 7;
+                    
+                when HALF =>
+                    MIN_SIGN_v := 16;
+                    MSB_index_v:= 15;
+                when others =>
+                    report "Unsupported sign extension format!";
+                    MIN_SIGN_v := 32;
+                    MSB_index_v:= 31;
+            end case;
+            
+            for i in DATA_WIDTH-1 downto 0 loop
+                if i >= MIN_SIGN_v then
+                    DATA_IN_s(i) <= DATA_IN(MSB_index_v);
+                else
+                    DATA_IN_s(i) <= DATA_IN(i);
+                end if;
+            end loop;
+        end if;
+    end process sign_ext;
 	
 	sequ_log:
-	process(clk, reset) is
+	process(clk) is
 	begin
 		if clk'event and clk = '1' then
             if reset = '1' then

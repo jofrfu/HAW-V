@@ -81,7 +81,7 @@ begin
                     WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
                 when jalo =>
                     IF_CNTRL_v := "01";    --PC + rel
-                    ID_CNTRL_v := '0' & '0' & "00000" & "00000";    --load r0 in opa and r0 in opb (r0 in do)
+                    ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load r0 in opa and r0 in opb (r0 in do)
                     MA_CNTRL_v := "00";   --no load nor store
                     WB_CNTRL_v := '1' & rd_v;   --jump, write back (PC)
                 when jalro =>
