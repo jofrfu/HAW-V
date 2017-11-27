@@ -50,7 +50,7 @@ end entity memory_access;
 architecture beh of memory_access is
 
 	--! @brief registers
-	signal wb_cntrl_cs : WB_CNTRL_TYPE := (others => '0');
+	signal wb_cntrl_cs : WB_CNTRL_TYPE := WB_CNTRL_NOP;
 	signal wb_cntrl_ns : WB_CNTRL_TYPE;
 	signal di_cs       : DATA_TYPE     := (others => '0');
 	signal di_ns       : DATA_TYPE;
@@ -107,7 +107,7 @@ begin
 	begin
 		if clk'event and clk = '1' then
             if reset = '1' then
-        		wb_cntrl_cs <= (others => '0');
+        		wb_cntrl_cs <= WB_CNTRL_NOP;
         		di_cs		<= (others => '0');
         		pc_cs       <= (others => '0');
         	else

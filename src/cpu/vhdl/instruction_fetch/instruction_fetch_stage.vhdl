@@ -30,7 +30,7 @@ end entity instruction_fetch;
 
 architecture std_impl of instruction_fetch is 
 
-    signal IFR_cs : INSTRUCTION_BIT_TYPE := (others => '0');
+    signal IFR_cs : INSTRUCTION_BIT_TYPE := NOP_INSTRUCT;
     
     component PC_log is
     port(
