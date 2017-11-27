@@ -1,5 +1,5 @@
 --! @brief instruction decode stage
---! @author Jonas Fuhrmann + Felix Lorenz
+--! @author Jonas Fuhrmann + Felix Lorenz + Matthis Keppner
 --! project: ach ne! @ HAW-Hamburg
 
 use WORK.riscv_pack.all;
@@ -11,7 +11,7 @@ entity instruction_decode is
 	port(
 		clk, reset   :  in std_logic;
 		branch		 :  in std_logic;
-		IFR			 :  in INSTRUCTION_TYPE;
+		IFR			 :  in INSTRUCTION_BIT_TYPE;
 		PC           :  in DATA_TYPE;
 		DI	  		 :  in DATA_TYPE;
 		rd			 :  in REGISTER_ADDRESS_TYPE;
@@ -22,7 +22,8 @@ entity instruction_decode is
 		Imm			 : out DATA_TYPE;
 		OPB			 : out DATA_TYPE;
 		OPA			 : out DATA_TYPE;
-		DO			 : out DATA_TYPE
+		DO			 : out DATA_TYPE;
+        PC_o         : out ADDRESS_TYPE
 	);
 end entity instruction_decode;
 
@@ -32,8 +33,8 @@ architecture beh of instruction_decode is
 	-- immediate mux
 	signal imm_sel_s		: std_logic;
 	signal imm_s			: DATA_TYPE;
-	-- pc mux
-	signal pc_sel_s         : std_logic;
+	-- pc signal
+	signal pc_en_s          : std_logic;
 	-- register addresses
 	signal rs1_s			: REGISTER_ADDRESS_TYPE;
 	signal rs2_s			: REGISTER_ADDRESS_TYPE;
@@ -56,13 +57,14 @@ architecture beh of instruction_decode is
 	signal opa_reg_ns 		: DATA_TYPE;
 	signal do_reg_cs 		: DATA_TYPE 	:= (others => '0');
 	signal do_reg_ns 		: DATA_TYPE;
+    signal pc_reg_cs        : ADDRESS_TYPE  := (others => '0');
+    signal pc_reg_ns        : ADDRESS_TYPE;
 	
 	--! @brief decode unit
 	component decode is
 		port(
-			clk, reset   :  in std_logic;
 			branch		 :  in std_logic;
-			IFR			 :  in INSTRUCTION_TYPE;
+			IFR			 :  in INSTRUCTION_BIT_TYPE;
 			IF_CNTRL	 : out IF_CNTRL_TYPE;
 			ID_CNTRL	 : out ID_CNTRL_TYPE;
 			WB_CNTRL	 : out WB_CNTRL_TYPE;
@@ -71,6 +73,7 @@ architecture beh of instruction_decode is
 			Imm			 : out DATA_TYPE
 		);
 	end component decode;
+    for all : decode use entity work.decode(beh);
 	
 	--! @brief register file
 	component register_select is
@@ -78,20 +81,22 @@ architecture beh of instruction_decode is
 	    	clk, reset   :   in  std_logic;
 	        DI           :   in  DATA_TYPE;
 	        rs1, rs2, rd :   in  REGISTER_ADDRESS_TYPE;
-	        OPA, OPB, DO :   out DATA_TYPE
+	        OPA, OPB, DO :   out DATA_TYPE;
+            -------- PC ports
+            PC           :   in  ADDRESS_TYPE;
+            PC_en        :   in  std_logic
 	    );--]port
 	end component register_select;
+    for all : register_select use entity work.register_select(beh);
 	
 begin
 	
 	decode_i : decode
 	port map(
-		clk => clk,
-		reset => reset,
 		branch => branch,
 		IFR => IFR,
 		IF_CNTRL => IF_CNTRL,
-		ID_CNTRL(11) => pc_sel_s,
+		ID_CNTRL(11) => pc_en_s,
 		ID_CNTRL(10) => imm_sel_s,
 		ID_CNTRL(9 downto 5) => rs2_s,
 		ID_CNTRL(4 downto 0) => rs1_s,
@@ -100,19 +105,25 @@ begin
 		EX_CNTRL => ex_cntrl_reg_ns,
 		Imm	=> imm_s
 	);
+    
+    imm_reg_ns <= imm_s;    
 	
 	reg_sel_i : register_select
 	port map(
-		clk => clk, 
-		reset => reset,
-	    DI => DI,
-        rs1 => rs1_s, 
-        rs2 => rs2_s, 
-        rd => rd,
-        OPA => opa_s, 
-        OPB => opb_s, 
-        DO => do_reg_ns
+		clk, 
+		reset,
+	    DI,
+        rs1_s, 
+        rs2_s, 
+        rd,
+        opa_s, 
+        opb_s, 
+        do_reg_ns,
+        pc,
+        pc_en_s
 	);
+    
+    opa_reg_ns <= opa_s;
 	
 	--! @brief multiplexer for immediate and operand b selection
 	imm_mux:
@@ -124,20 +135,9 @@ begin
 			opb_reg_ns <= opb_s;
 		end if;
 	end process imm_mux;
-	
-	--! @brief multiplexer for pc and operand a selection
-    pc_mux:
-    process(opa_s, PC, pc_sel_s) is
-    begin
-        if imm_sel_s = '1' then
-            opa_reg_ns <= PC;
-        else
-            opa_reg_ns <= opa_s;
-        end if;
-    end process pc_mux;
 
 	sequ_log:
-	process(clk,reset) is
+	process(clk) is
 	begin
 		if clk'event and clk = '1' then
             if reset = '1' then
@@ -148,6 +148,7 @@ begin
                 opb_reg_cs 		<= (others => '0');
                 opa_reg_cs 		<= (others => '0');
                 do_reg_cs 		<= (others => '0');
+                pc_reg_cs       <= (others => '0');
             else
             	wb_cntrl_reg_cs <= wb_cntrl_reg_ns;
                 ma_cntrl_reg_cs <= ma_cntrl_reg_ns;
@@ -156,9 +157,20 @@ begin
                 opb_reg_cs 		<= opb_reg_ns;
                 opa_reg_cs 		<= opa_reg_ns;
                 do_reg_cs 		<= do_reg_ns;
+                pc_reg_cs       <= pc_reg_ns;
             end if;
         end if; 
 	end process sequ_log;
 	
+    pc_reg_ns <= pc;
+    PC_o      <= pc_reg_cs;
+    WB_CNTRL  <= wb_cntrl_reg_cs;
+    MA_CNTRL  <= ma_cntrl_reg_cs;
+    EX_CNTRL  <= ex_cntrl_reg_cs;
+    Imm       <= imm_reg_cs 	;
+    OPB       <= opb_reg_cs 	;
+    OPA       <= opa_reg_cs 	;
+    DO        <= do_reg_cs 	;
+    
 
 end architecture beh;

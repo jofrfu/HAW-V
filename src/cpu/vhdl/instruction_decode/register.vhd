@@ -14,7 +14,7 @@ architecture beh of reg is
 begin
 
     store:
-    process(clk, reset)
+    process(clk)
     begin
         if clk'event and clk = '1' then
             if reset = '1' then
