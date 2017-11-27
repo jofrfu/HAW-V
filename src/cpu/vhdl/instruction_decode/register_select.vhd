@@ -1,5 +1,6 @@
 -- register_select.vhd
 -- created by Felix Lorenz
+-- edited by Jonas Fuhrmann + Matthis Keppner
 -- project: ach ne! @ HAW-Hamburg
 
 use WORK.riscv_pack.all;
@@ -11,7 +12,10 @@ entity register_select is
     port(   clk, reset   :   in  std_logic;
             DI           :   in  DATA_TYPE;
             rs1, rs2, rd :   in  REGISTER_ADDRESS_TYPE;
-            OPA, OPB, DO :   out DATA_TYPE
+            OPA, OPB, DO :   out DATA_TYPE;
+            -------- PC ports
+            PC           :   in  ADDRESS_TYPE;
+            PC_en        :   in  std_logic
     );--]port
 end entity register_select;
 
@@ -41,6 +45,8 @@ begin
 			reg_out => reg_out_s(i)
 		);
 	end generate;
+    
+    reg_out_s(0) <= std_logic_vector(to_unsigned(0,DATA_WIDTH));
 	
 	rd_demux:
 	process(rd) is
@@ -50,23 +56,19 @@ begin
 	end process rd_demux;
 	
 	rs1_mux:
-	process(rs1) is
+	process(rs1, pc_en, PC, reg_out_s) is
 	begin
-		if rs1 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
-			OPA <= (others => '0');
-		else
-			OPA <= reg_out_s(to_integer(unsigned(rs1)));
-		end if;
+        if PC_en = '1' then
+            OPA <= PC;
+        else
+            OPA <= reg_out_s(to_integer(unsigned(rs1)));
+        end if;
 	end process rs1_mux;
 	
 	rs2_mux:
-	process(rs2) is
+	process(rs2, reg_out_s) is
 	begin
-		if rs2 = std_logic_vector(to_unsigned(0, REGISTER_ADDRESS_WIDTH)) then
-			opb_s <= (others => '0');
-		else
-			opb_s <= reg_out_s(to_integer(unsigned(rs2)));
-		end if;
+		opb_s <= reg_out_s(to_integer(unsigned(rs2)));
 	end process rs2_mux;
 
     OPB <= opb_s;

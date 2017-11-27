@@ -1,5 +1,5 @@
 --! @brief register_select.vhd
---! @author Jonas Fuhrmann + Felix Lorenz
+--! @author Jonas Fuhrmann + Felix Lorenz + Matthis Keppner
 --! project: ach ne! @ HAW-Hamburg
 
 use WORK.riscv_pack.all;
@@ -73,47 +73,54 @@ begin
                     IF_CNTRL_v := "00";    --PC + 4
                     ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load immediate for opb and r0 for opa (r0 in do)
                     MA_CNTRL_v := "00";   --no load nor store
-                    WB_CNTRL_v := rd_v;   --write result to rd
+                    WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
                 when auipco =>
                     IF_CNTRL_v := "00";    --PC + 4
                     ID_CNTRL_v := '1' & '1' & "00000" & "00000";    --load pc in opa and immediate in opb (r0 in do)
                     MA_CNTRL_v := "00";   --no load nor store
-                    WB_CNTRL_v := rd_v;   --write result to rd
+                    WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
                 when jalo =>
                     IF_CNTRL_v := "01";    --PC + rel
-                    ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load r0 in opa and immediate in opb (r0 in do)
+                    ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load r0 in opa and r0 in opb (r0 in do)
                     MA_CNTRL_v := "00";   --no load nor store
-                    WB_CNTRL_v := "00000";   --jump, no write back
+                    WB_CNTRL_v := '1' & rd_v;   --jump, write back (PC)
                 when jalro =>
                     IF_CNTRL_v := "11";    --abs + rel
                     ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
                     MA_CNTRL_v := "00";    --no load nor store
-                    WB_CNTRL_v := "00000";   --jump, no write back
+                    WB_CNTRL_v := '1' & rd_v;   --jump, write back (PC)
                 when brancho =>
                     IF_CNTRL_v := "00";    --next instruction will be loaded if no branching
                     ID_CNTRL_v := '0' & '0' & rs2_v & rs1_v;    --load rs1 in opa and rs2 in opb
                     MA_CNTRL_v := "00";    --no load nor store
-                    WB_CNTRL_v := "00000";   --branch, no write back
+                    WB_CNTRL_v := '0' & "00000";   --branch, no write back (no PC)
                 when loado =>
                     IF_CNTRL_v := "00";    --PC + 4
                     ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
                     MA_CNTRL_v := "01";    --load
-                    WB_CNTRL_v := rd_v;   --write loaded value to rd
+                    WB_CNTRL_v := '0' & rd_v;   --write loaded value to rd (no PC)
                 when storeo =>
                     IF_CNTRL_v := "00";    --PC + 4
                     ID_CNTRL_v := '0' & '1' & rs2_v & rs1_v;    --load rs1 in opa, immediate in opb and rs2 in do
                     MA_CNTRL_v := "10";    --store
-                    WB_CNTRL_v := "00000";   --value will be stored, no write back
+                    WB_CNTRL_v := '0' & "00000";   --value will be stored, no write back (no PC)
                 when opimmo =>
                     IF_CNTRL_v := "00";    --PC + 4
                     ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
                     MA_CNTRL_v := "00";    --no load nor store
-                    WB_CNTRL_v := rd_v;   --write result to rd
+                    WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
                 when opo =>
                     IF_CNTRL_v := "00";    --PC + 4
                     ID_CNTRL_v := '0' & '0' & rs2_v & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
                     MA_CNTRL_v := "00";    --no load nor store
-                    WB_CNTRL_v := rd_v;   --write result to rd
+                    WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
+                when others =>
+                    report "decode.vhd - decode: unknown OP_CODE" severity error;
+                    IF_CNTRL_v := "01";    --rel + PC
+                    ID_CNTRL_v := ID_CNTRL_NOP; --discard instruction in pipeline
+                    EX_CNTRL_v := EX_CNTRL_NOP;
+                    MA_CNTRL_v := MA_CNTRL_NOP;
+                    WB_CNTRL_v := WB_CNTRL_NOP;
             end case;
         end if; --branch_v
         
@@ -160,7 +167,10 @@ begin
                 immediate_v(10 downto 5) := imm_bits_v(30 downto 25);
                 immediate_v(4 downto 1) := imm_bits_v(11 downto 8);
                 immediate_v(0) := imm_bits_v(7);
-
+                
+            when others =>
+                report "decode.vhd - imm_constr: unknown OP_CODE" severity error;
+                immediate_v := (others => '0');
         end case;
         
         Imm <= immediate_v;

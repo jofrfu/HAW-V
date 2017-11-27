@@ -1,17 +1,14 @@
 onerror {resume}
-vsim -gui -novopt work.pc_log_tb
 quietly WaveActivateNextPane {} 0
-add wave -noupdate /pc_log_tb/abso_s
-add wave -noupdate /pc_log_tb/pc_asynch_s
-add wave -noupdate /pc_log_tb/pc_synch_s
-add wave -noupdate /pc_log_tb/rel_s
-add wave -noupdate /pc_log_tb/cntrl_s
-add wave -noupdate -divider {Basic Signals}
-add wave -noupdate /pc_log_tb/reset_s
-add wave -noupdate /pc_log_tb/simulation_running
-add wave -noupdate /pc_log_tb/clk_s
+add wave -noupdate -divider inputs
+add wave -noupdate /write_back_tb/WB_CNTRL_IN_s
+add wave -noupdate /write_back_tb/DATA_IN_s
+add wave -noupdate /write_back_tb/PC_IN_s
+add wave -noupdate -divider outputs
+add wave -noupdate /write_back_tb/REG_ADDR_s
+add wave -noupdate /write_back_tb/WRITE_BACK_s
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {165 ns} 0}
+WaveRestoreCursors {{Cursor 1} {588 ns} 0}
 quietly wave cursor active 1
 configure wave -namecolwidth 150
 configure wave -valuecolwidth 100
@@ -28,4 +25,3 @@ configure wave -timeline 0
 configure wave -timelineunits ns
 update
 WaveRestoreZoom {0 ns} {1 us}
-run -all

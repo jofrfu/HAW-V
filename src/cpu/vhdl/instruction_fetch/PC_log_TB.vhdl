@@ -12,22 +12,24 @@ architecture TB of PC_log_TB is
         port (
             clk, reset     : in std_logic;
              
-            cntrl          : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
-             rel            : in DATA_TYPE;        --! relative branch adress
-            abso        : in DATA_TYPE;        --! absolute branch adress, or base for relative jump
+            cntrl          : in IF_CNTRL_TYPE;    --! Control the operation mode of the PC logic
+             rel           : in DATA_TYPE;        --! relative branch adress
+            abso           : in DATA_TYPE;        --! absolute branch adress, or base for relative jump
              
-            pc             : out ADDRESS_TYPE    --! programm counter output
+            pc_asynch      : out ADDRESS_TYPE;    --! programm counter output
+            pc_synch       : out ADDRESS_TYPE     --! programm counter output
         );
     end component dut;
     for all : dut use entity work.PC_log(std_impl);
 
-    signal clk_s     : std_logic := '0';
-    signal reset_s     : std_logic := '0';
-    signal cntrl_s     : IF_CNTRL_TYPE := (others => '0');
-    signal rel_s    : DATA_TYPE := (others => '0');
-    signal abso_s    : DATA_TYPE := (others => '0');
+    signal clk_s         : std_logic := '0';
+    signal reset_s       : std_logic := '0';
+    signal cntrl_s       : IF_CNTRL_TYPE := (others => '0');
+    signal rel_s         : DATA_TYPE := (others => '0');
+    signal abso_s        : DATA_TYPE := (others => '0');
     
-    signal pc_s        : ADDRESS_TYPE;
+    signal pc_asynch_s   : ADDRESS_TYPE;
+    signal pc_synch_s    : ADDRESS_TYPE;
     
     signal simulation_running : boolean := false;
 
@@ -40,7 +42,8 @@ port map(
     cntrl_s,
     rel_s,
     abso_s,
-    pc_s
+    pc_asynch_s,
+    pc_synch_s
 );
     
 clk_gen:
@@ -70,9 +73,15 @@ process is
     -- action: adds 4 to PC
     -- result: PC should be 4
     cntrl_s <= "00";
+    wait for 1 ns;
+    if pc_asynch_s /= std_logic_vector(to_unsigned(4, ADDRESS_WIDTH)) then
+        report "Test failed! Error on PC standard addition!";
+        wait;
+    end if;
+    
     wait until '1'=clk_s and clk_s'event;
     wait for 1 ns;
-    if pc_s /= std_logic_vector(to_unsigned(4, ADDRESS_WIDTH)) then
+    if pc_synch_s /= std_logic_vector(to_unsigned(4, ADDRESS_WIDTH)) then
         report "Test failed! Error on PC standard addition!";
         wait;
     end if;
@@ -83,9 +92,14 @@ process is
     -- result: PC should be 20
     cntrl_s <= "01";
     rel_s <= std_logic_vector(to_unsigned(16, ADDRESS_WIDTH));
+    wait for 1 ns;
+    if pc_asynch_s /= std_logic_vector(to_unsigned(20, ADDRESS_WIDTH)) then
+        report "Test failed! Error on PC immediate addition!";
+        wait;
+    end if;
     wait until '1'=clk_s and clk_s'event;
     wait for 1 ns;
-    if pc_s /= std_logic_vector(to_unsigned(20, ADDRESS_WIDTH)) then
+    if pc_synch_s /= std_logic_vector(to_unsigned(20, ADDRESS_WIDTH)) then
         report "Test failed! Error on PC immediate addition!";
         wait;
     end if;
@@ -97,9 +111,14 @@ process is
     cntrl_s <= "11";
     rel_s <= std_logic_vector(to_unsigned(8, ADDRESS_WIDTH));
     abso_s <= std_logic_vector(to_unsigned(512, ADDRESS_WIDTH));
+    wait for 1 ns;
+    if pc_asynch_s /= std_logic_vector(to_unsigned(520, ADDRESS_WIDTH)) then
+        report "Test failed! Error on PC immediate and register addition!";
+        wait; 
+    end if;
     wait until '1'=clk_s and clk_s'event;
     wait for 1 ns;
-    if pc_s /= std_logic_vector(to_unsigned(520, ADDRESS_WIDTH)) then
+    if pc_synch_s /= std_logic_vector(to_unsigned(520, ADDRESS_WIDTH)) then
         report "Test failed! Error on PC immediate and register addition!";
         wait; 
     end if;
@@ -109,10 +128,16 @@ process is
     -- action: adds 4 to a register (512 in this case)
     -- result: PC should be 516, an error message should be shown
     cntrl_s <= "10";
+    wait for 1 ns;
+    abso_s <= std_logic_vector(to_unsigned(512, ADDRESS_WIDTH));
+    if pc_asynch_s /= std_logic_vector(to_unsigned(516, ADDRESS_WIDTH)) then
+        report "Test failed! Error on PC 4 and register addition!";
+        wait;
+    end if;
     wait until '1'=clk_s and clk_s'event;
     wait for 1 ns;
     abso_s <= std_logic_vector(to_unsigned(512, ADDRESS_WIDTH));
-    if pc_s /= std_logic_vector(to_unsigned(516, ADDRESS_WIDTH)) then
+    if pc_synch_s /= std_logic_vector(to_unsigned(516, ADDRESS_WIDTH)) then
         report "Test failed! Error on PC 4 and register addition!";
         wait;
     end if;
@@ -121,12 +146,13 @@ process is
     -- cntrl: 00
     -- action: reset the PC
     -- result: PC should be 0
+    -- Pc_asynch must not be tested 
     cntrl_s <= "00";
     reset_s <= '1';
     wait until '1'=clk_s and clk_s'event;
     reset_s <= '0';
     wait for 1 ns;
-    if pc_s /= std_logic_vector(to_unsigned(0, ADDRESS_WIDTH)) then
+    if pc_synch_s /= std_logic_vector(to_unsigned(0, ADDRESS_WIDTH)) then
         report "Test failed! Error on resetting PC!";
         wait;
     end if;
