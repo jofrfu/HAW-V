@@ -11,8 +11,11 @@ use WORK.riscv_pack.all;
 entity risc_v_core is
     port(
         clk, reset   : in std_logic;
-        gpio_in      : in DATA_TYPE;
-        gpio_out     : out DATA_TYPE
+        
+        -- IO
+        PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
+        PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
+        PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
     );
 end entity risc_v_core;
 
@@ -327,8 +330,10 @@ begin
         DI_s,
         DOUT_s,
         
-        gpio_in,
-        gpio_out
+        -- IO
+        PERIPH_IN_EN,
+        PERIPH_IN,
+        PERIPH_OUT
     );
 
 end architecture beh;
