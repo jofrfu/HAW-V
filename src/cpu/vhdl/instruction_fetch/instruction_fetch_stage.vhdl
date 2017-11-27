@@ -16,7 +16,8 @@ entity instruction_fetch is
 	port(
 		 clk, reset : in std_logic;
 		 
-		 cntrl     : in IF_CNTRL_TYPE;  --! Control the operation mode of the PC logic
+		 branch    : in std_logic;      --! when branch the IFR has to be resetted
+         cntrl     : in IF_CNTRL_TYPE;  --! Control the operation mode of the PC logic
 		 rel	   : in DATA_TYPE;		--! relative branch address
 		 abso	   : in DATA_TYPE;		--! absolute branch address, or base for relative jump
 		 ins 	   : in DATA_TYPE;		--! the new instruction is loaded from here
@@ -28,6 +29,7 @@ entity instruction_fetch is
 end entity instruction_fetch;
 
 architecture std_impl of instruction_fetch is 
+
     signal IFR_cs : INSTRUCTION_BIT_TYPE := (others => '0');
     
     component PC_log is
@@ -64,10 +66,10 @@ begin
     process(clk) is
     begin
         if clk'event and clk = '1' then
-            if reset = '1' then
-                IFR_cs <= (others => '0');
+            if branch = '1' or reset = '1' then
+                IFR_cs <= NOP_INSTRUCT; --discard next instruction
             else
-                IFR_cs <= ins;  --store data from instruction memory to IFR at rising edge
+                IFR_cs <= ins;  --store data from instruction memory to IFR at rising edge   
             end if;
         end if; 
     end process reg;
