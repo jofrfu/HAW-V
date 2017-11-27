@@ -182,7 +182,7 @@ architecture beh of risc_v_core is
             clkb : in STD_LOGIC
         );
     end component memory;
-    for all : memory use entity work.blk_mem_gen_0_wrapper(xilinx);
+    for all : memory use entity work.blk_mem_gen_0_wrapper(xilinx);     --replace entity work.blk_mem_gen_0_wrapper(xilinx) with open when compiling with modelsim
     
     signal DOUT_A_s : DATA_TYPE;
     signal DOUT_B_s : DATA_TYPE;
