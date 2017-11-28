@@ -102,6 +102,7 @@ package riscv_pack is
     constant WRITE_EN_WIDTH: natural := 4;
     constant BYTE_WIDTH    : natural := 8;
     constant IO_BYTE_COUNT : natural := 8; -- todo: change - depends on peripherals
+    constant PERIPH_IO_WIDTH : natural := 16; -- todo: change - depends on peripherals
 	
 	subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
 	subtype ADDRESS_TYPE is DATA_TYPE;
@@ -113,6 +114,7 @@ package riscv_pack is
 	subtype FUNCT7_TYPE is std_logic_vector(FUNCT7_WIDTH-1 downto 0);
     subtype WRITE_EN_TYPE is std_logic_vector(WRITE_EN_WIDTH-1 downto 0);
 	subtype BYTE_TYPE is std_logic_vector(BYTE_WIDTH-1 downto 0);
+    subtype PERIPH_IO_TYPE is std_logic_vector(PERIPH_IO_WIDTH-1 downto 0);
     
 	type REG_OUT_TYPE is array(REGISTER_COUNT-1 downto 0) of DATA_TYPE;
     type IO_BYTE_TYPE is array(IO_BYTE_COUNT-1 downto 0) of BYTE_TYPE;
