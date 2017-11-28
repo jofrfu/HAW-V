@@ -13,7 +13,7 @@ entity top_level is
         clk, reset     : in    std_logic;
         
         -- peripheral I/O
-        periph_bit_io  : inout PERIPH_IN_TYPE;
+        periph_bit_io  : inout PERIPH_IO_TYPE
     );
 end entity top_level;
 
@@ -82,7 +82,7 @@ architecture beh of top_level is
             MEM_to_PERIPH   : in    IO_BYTE_TYPE;
             
             -- top level connections
-            PERIPH_BIT_IO   : inout PERIPH_IN_TYPE;
+            PERIPH_BIT_IO   : inout PERIPH_IO_TYPE
         );
     end component peripherals;
     for all : peripherals use open; -- todo: change
@@ -134,4 +134,4 @@ begin
         periph_bit_io
     );
     
-end architecture top_level;
+end architecture beh;
