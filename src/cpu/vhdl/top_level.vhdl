@@ -10,7 +10,7 @@ use WORK.riscv_pack.all;
 
 entity top_level is
     port(
-        clk, reset     : in    std_logic;
+        clk, nres      : in    std_logic;
         
         -- peripheral I/O
         periph_bit_io  : inout PERIPH_IO_TYPE
@@ -18,6 +18,8 @@ entity top_level is
 end entity top_level;
 
 architecture beh of top_level is
+    signal reset : std_logic;
+
     component risc_v_core is
         port(
             clk, reset    : in std_logic;
@@ -85,8 +87,10 @@ architecture beh of top_level is
             PERIPH_BIT_IO   : inout PERIPH_IO_TYPE
         );
     end component peripherals;
-    for all : peripherals use open; -- todo: change
+    for all : peripherals use entity work.peripherals_wrapper(beh); -- todo: change
 begin
+    
+    reset <= not nres;
     
     core_i : risc_v_core
     port map(
