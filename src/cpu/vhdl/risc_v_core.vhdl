@@ -10,12 +10,18 @@ use WORK.riscv_pack.all;
 
 entity risc_v_core is
     port(
-        clk, reset   : in std_logic;
+        clk, reset    : in std_logic;
         
-        -- IO
-        PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
-        PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
-        PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
+        -- memory
+        pc_asynch     : out ADDRESS_TYPE;
+        instruction   : in  INSTRUCTION_BIT_TYPE;
+        
+        EN            : out std_logic;
+        WEN           : out std_logic;
+        WORD_LENGTH   : out WORD_CNTRL_TYPE;
+        ADDR          : out ADDRESS_TYPE;
+        D_CORE_to_MEM : out DATA_TYPE;
+        D_MEM_to_CORE : in  DATA_TYPE
     );
 end entity risc_v_core;
 
@@ -38,7 +44,6 @@ architecture beh of risc_v_core is
     for all : instruction_fetch use entity work.instruction_fetch(std_impl);
     
     signal IFR_s : DATA_TYPE;
-    signal pc_asynch_s : ADDRESS_TYPE;
     signal pc_synch_s  : ADDRESS_TYPE;
     
     component instruction_decode is
@@ -144,13 +149,7 @@ architecture beh of risc_v_core is
     
     signal WB_CNTRL_MA_to_WB    : WB_CNTRL_TYPE;
     signal DI_s                 : DATA_TYPE;
-    signal PC_MA_to_WB          : ADDRESS_TYPE;
-    
-    signal ENABLE_s     : std_logic;
-    signal WRITE_EN_s   : std_logic;
-    signal DIN_s        : DATA_TYPE;
-    signal ADDRESS_s    : ADDRESS_TYPE;
-    signal WORD_LENGTH_s: WORD_CNTRL_TYPE;    
+    signal PC_MA_to_WB          : ADDRESS_TYPE;    
     
     component write_back is
         port(
@@ -167,31 +166,6 @@ architecture beh of risc_v_core is
     signal REG_ADDR_s   : REGISTER_ADDRESS_TYPE;
     signal WRITE_BACK_s : DATA_TYPE;
     
-    component memory is
-        Port ( 
-            CLK            : IN STD_LOGIC;
-            reset          : IN STD_LOGIC;
-            pc_asynch      : IN ADDRESS_TYPE;
-            instruction    : OUT INSTRUCTION_BIT_TYPE;
-            
-            EN             : IN STD_LOGIC;
-            WEN            : IN STD_LOGIC;
-            WORD_LENGTH    : in WORD_CNTRL_TYPE;
-            ADDR           : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            DIN            : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            DOUT           : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-            
-            -- IO
-            PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
-            PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
-            PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
-        );
-    end component memory;
-    for all : memory use entity work.memory_io_controller(beh);
-    
-    signal DOUT_s : DATA_TYPE;
-    signal instruction_s : DATA_TYPE;
-    
 begin
 
     instruction_fetch_i : instruction_fetch
@@ -206,11 +180,11 @@ begin
         ABS_OUT_s,
         
         -- instruction memory
-        instruction_s,
+        instruction,
         
         -- outputs
         IFR_s,
-        pc_asynch_s,
+        pc_asynch,
         pc_synch_s
     );
     
@@ -293,19 +267,19 @@ begin
         PC_EX_to_MA,
         
         -- input from memory
-        DOUT_s,
+        D_MEM_to_CORE,
         
         -- stage outs
         WB_CNTRL_MA_to_WB,
         DI_s,
         PC_MA_to_WB,
         
-        --output to memory
-        ENABLE_s,
-        WRITE_EN_s,
-        DIN_s,
-        ADDRESS_s,
-        WORD_LENGTH_s
+        -- output to memory
+        EN,
+        WEN,
+        D_CORE_to_MEM,
+        ADDR,
+        WORD_LENGTH
     );
         
     write_back_i : write_back
@@ -316,26 +290,6 @@ begin
         
         REG_ADDR_s,
         WRITE_BACK_s
-    );
-    
-    memory_i : memory
-    port map(
-        clk,
-        reset,
-        pc_asynch_s,
-        instruction_s,
-        
-        ENABLE_s,
-        WRITE_EN_s,
-        WORD_LENGTH_s,
-        ADDRESS_s,
-        DIN_s,
-        DOUT_s,
-        
-        -- IO
-        PERIPH_IN_EN,
-        PERIPH_IN,
-        PERIPH_OUT
     );
 
 end architecture beh;
