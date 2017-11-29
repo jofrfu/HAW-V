@@ -82,20 +82,20 @@ begin
         -- cntrl: 00
         -- ins: 42
         -- action: adds 4 to PC
-        -- result: PC should be 4
+        -- result: PC should be 0
         -- result: IFR should be 42
         branch_s <= '0';
         cntrl_s <= "00";
         ins_s <= std_logic_vector(to_unsigned(42, ADDRESS_WIDTH));
         wait for 1 ns;
-        if pc_asynch_s /= std_logic_vector(to_unsigned(4, ADDRESS_WIDTH)) then
+        if pc_asynch_s /= std_logic_vector(to_unsigned(0, ADDRESS_WIDTH)) then
             report "Test failed! Error on PC_asynch connection!";
             wait;
         end if;
 
         wait until '1'=clk_s and clk_s'event;
         wait for 1 ns;
-        if pc_synch_s /= std_logic_vector(to_unsigned(4, ADDRESS_WIDTH)) then
+        if pc_synch_s /= std_logic_vector(to_unsigned(0, ADDRESS_WIDTH)) then
             report "Test failed! Error on PC_synch connection!";
             wait;
         end if;
