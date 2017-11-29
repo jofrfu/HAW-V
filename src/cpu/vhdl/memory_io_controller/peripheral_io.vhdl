@@ -92,23 +92,33 @@ begin
     
     --!@brief chooses between input or peripheral for writing to registers
     choose:
-    process(PERIPH_IN_EN, PERIPH_IN, DECODE_RESU) is
+    process(PERIPH_IN_EN, PERIPH_IN, DECODE_RESU, EN, PERIPH_cs) is
         variable PERIPH_IN_EN_v : IO_ENABLE_TYPE;
         variable PERIPH_IN_v    : IO_BYTE_TYPE;
         variable DECODE_RESU_v  : IO_BYTE_TYPE;
         
         variable PERIPH_ns_v    : IO_BYTE_TYPE;
+        variable PERIPH_cs_v    : IO_BYTE_TYPE;
+        
+        variable EN_v : std_logic;
     begin
         
         PERIPH_IN_EN_v := PERIPH_IN_EN;
         PERIPH_IN_v    := PERIPH_IN;
         DECODE_RESU_v  := DECODE_RESU;
+        
+        PERIPH_cs_v := PERIPH_cs;
+        EN_v := EN;
     
         for i in IO_BYTE_COUNT-1 downto 0 loop
             if PERIPH_IN_EN_v(i) = '1' then
                 PERIPH_ns_v(i) := PERIPH_IN_v(i);
             else
-                PERIPH_ns_v(i) := DECODE_RESU_v(i);
+                if EN_v = '1' then -- chip enable - only on write from core
+                    PERIPH_ns_v(i) := DECODE_RESU_v(i);
+                else
+                    PERIPH_ns_v := PERIPH_cs_v;
+                end if;
             end if;
         end loop;
         

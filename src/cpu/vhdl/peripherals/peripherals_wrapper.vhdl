@@ -41,7 +41,7 @@ begin
         -- map periph write enable
         PERIPH_WRITE_EN_v := MEM_to_PERIPH_v(0)(0);
 
-        if PERIPH_WRITE_EN_v = '1' then
+        if PERIPH_WRITE_EN_v = '0' then
             -- map memory to output
             PERIPH_BIT_IO_v := MEM_to_PERIPH_v(1);
             -- unmapped - not used in memory
