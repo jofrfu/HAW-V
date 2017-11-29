@@ -91,7 +91,7 @@ begin
                     MIN_SIGN_v := 32;
                     MSB_index_v:= 31;
             end case;
-            
+            -- sign extension
             for i in DATA_WIDTH-1 downto 0 loop
                 if i >= MIN_SIGN_v then
                     DATA_IN_s(i) <= DATA_IN(MSB_index_v);
