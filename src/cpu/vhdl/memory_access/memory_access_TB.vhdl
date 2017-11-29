@@ -216,6 +216,115 @@ begin
             wait;
         end if;
         
+        -- test8
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 00
+        -- MA_CNTRL = 10 : load
+        -- Data_in = 0x80
+        -- action: load signextended negative byte 
+        -- result : DI should be 0xFFFFFF80
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_s <= "00";
+        MA_CNTRL_s <= "10";
+        DATA_IN_s <= x"00000080";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"FFFFFF80" then 
+            report "Error! DI was not SIGN EXTENDED, but should be (BYTE)!!!";
+            wait;
+        end if;
+        
+        -- test9
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 00
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x70
+        -- action: load sign extended  positive byte
+        -- result : DI should be 0x00000070
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_s <= "00";
+        MA_CNTRL_s <= "10";
+        DATA_IN_s <= x"00000070";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"00000070" then 
+            report "Error! DI was SIGN EXTENDED, but should not be (BYTE)!!!";
+            wait;
+        end if;
+        
+        -- test10
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 01
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x8000
+        -- action: load signextended negative half-word 
+        -- result : DI should be 0xFFFF8000
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_s <= "01";
+        MA_CNTRL_s <= "10";
+        DATA_IN_s <= x"00008000";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"FFFF8000" then 
+            report "Error! DI was not SIGN EXTENDED, but should be (HALFWORD)!!!";
+            wait;
+        end if;
+        
+        -- test11
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 01
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x7000
+        -- action: load sign extended  positive half-word
+        -- result : DI should be 0x00007000
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_s <= "01";
+        MA_CNTRL_s <= "10";
+        DATA_IN_s <= x"00007000";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"00007000" then 
+            report "Error! DI was SIGN EXTENDED, but should not be (HALFWORD)!!!";
+            wait;
+        end if;     
+        
+        -- test12
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 10
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x80000000
+        -- action: load signextended negative word 
+        -- result : DI should be 0x80000000
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_s <= "10";
+        MA_CNTRL_s <= "10";
+        DATA_IN_s <= x"80000000";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"80000000" then 
+            report "Error! DI was not SIGN EXTENDED, but should be! (WORD)!!!";
+            wait;
+        end if;
+        
+        -- test13
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 01
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x70000000
+        -- action: load sign extended  positive half-word
+        -- result : DI should be 0x70000000
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_s <= "10";
+        MA_CNTRL_s <= "10";
+        DATA_IN_s <= x"70000000";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"70000000" then 
+            report "Error! DI was SIGN EXTENDED, but should not be! (WORD)!!!";
+            wait;
+        end if;     
+
+        
         report "Test was successful!";
         simulation_running <= false;
         wait;
