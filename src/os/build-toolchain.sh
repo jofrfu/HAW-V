@@ -5,21 +5,16 @@
 # Description: This Script ist building the Risc-V toolchain.
 
 #Variable
-REPO_PATH=riscv-tools/
-REPO_NAME=/riscv-tools/
 LOAD_REPO=yes
 LINUX=ubuntu
 TOOL_INSTALL=yes
+SETUP=yes
+TEST_NAME=toolchaintest
 
 # Argument parse
 for i in "$@"
 do
 case $i in
-	-R=*|--repository-path=*)
-	REPO_PATH="${i#*=}"
-	REPO_PATH+=$REPO_NAME
-	shift # past argument=value
-	;;
 	-r|--repository-load)
 	LOAD_REPO=no
 	shift # past argument=value
@@ -32,62 +27,39 @@ case $i in
 	LINUX="${i#*=}"
 	shift # past argument=value
 	;;
+	-s|--setup)
+	SETUP=no
+	shift # past argument=value
+	;;
 	-h|--help)
-	echo "Usage: build-toolchain [OPTION]..."
+	echo "Usage: build-toolchain.sh [OPTION]..."
 	echo "Download and build of the risc-v toolchain. Superuser rights required for tool installation"
 	echo
-	echo "-R=, --repository-path=       repository download path"
 	echo "-r,  --repository-load        disable repository download"
 	echo "-t,  --tool-install           disable tool installation"
 	echo "-l=, --linux=                 set Linux distribution for tool installation"
-	echo "-h , --help                   help"
+	echo "-s,  --setup                  skip repository download and tool installation"
+	echo "-h, --help                    help"
 	exit 0
 	;;
 	*)
           # unknown option
-    	;; 
+    	;;
 esac
 done
 
-echo "building risc-v toolchain"
-echo ""
-echo "REPO_PATH:    $REPO_PATH"
-echo "LOAD_REPO:    $LOAD_REPO"
-echo "LINUX:        $LINUX"
-echo "TOOL_INSTALL: $TOOL_INSTALL"
-echo ""
+echo
+echo "build risc-v toolchain"
+echo
+echo "SETUP:     $SETUP"
+echo
 
-# install tools
-if [ "$TOOL_INSTALL" = yes ]; then
-	echo "install tools .."
-	if [ "$LINUX" = ubuntu ]; then
-		sudo apt-get install autoconf automake autotools-dev curl device-tree-compiler libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc
-	elif [ "$LINUX" = fedora ]; then
-		sudo dnf install autoconf automake @development-tools curl dtc libmpc-devel mpfr-devel gmp-devel gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib-devel
-	else
-		echo "ERROR: failed to install required tools"
-		exit 1
-	fi
+
+
+if [ "$SETUP" = yes ]; then
+	./setup-riscv-repository.sh -r=$LOAD_REPO -t=$TOOL_INSTALL -l=$LINUX
 else
 	echo "install tools .. ignored"
-fi
-
-#Download Git Repo
-if [ "$LOAD_REPO" = yes ]; then
-	#Check for git directory
-	echo "init git repo .."
-	FILE=$REPO_PATH.git
-	if [ ! -f $FILE ]; then
-		cd $REPO_PATH
-		git pull origin master
-		git submodule update --recursive
-	else	#directory empty
-		git clone https://github.com/riscv/riscv-tools
-		cd $REPO_PATH
-		git submodule update --recursive
-	fi
-cd ..
-else
 	echo "init git repo .. ignored"
 fi
 
@@ -96,10 +68,25 @@ export TOP=$(pwd)
 export RISCV=$TOP/riscv
 export PATH=$PATH:$RISCV/bin
 
+echo
+echo "exports"
+echo "TOP:   $TOP"
+echo "RISCV: $RISCV"
+echo "PATH:  $PATH"
+
 cd $TOP/riscv-tools
 ./build.sh
 
 #Testing the toolchain
-cd $RISCV
-echo -e '#include <stdio.h>\n int main(void) { printf("Hello world!\\n"); return 0; }' > hello.c
-riscv64-unknown-elf-gcc -o hello hello.c
+DIR=$RISCV/$TEST_NAME
+if [ ! -d $DIR ]; then
+	mkdir $FILE
+fi
+cd $DIR
+
+echo -e '#include <stdio.h>\n int main(void) { printf("Your Toolchain ist working!\\n"); return 0; }' > $TEST_NAME.c
+$RISCV/bin/riscv64-unknown-elf-gcc -o $TEST_NAME $TEST_NAME.c
+
+echo
+$RISCV/bin/spike pk $TEST_NAME
+echo
