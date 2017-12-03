@@ -189,7 +189,16 @@ begin
         alu_test( -2147483648 , 19        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", -4096       , true );
         alu_test( -2147483648 , 31        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", -1          , true );
         alu_test( 71354785    , 0         , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", 71354785    , true );
-        alu_test( 1432616960  , 17        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", 10930       , true );  
+        alu_test( 1432616960  , 17        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", 10930       , true ); 
+        
+        --test lui and auipc
+        --test_id 42 and 43
+        alu_test( 0           , -4096     , NO_FUNCT7 , NO_FUNCT3 , luio,   "0000", -4096       , true );  -- it is "111...1000000000000" for immediate which must be added with zero
+        alu_test( 8064        , -4096     , NO_FUNCT7 , NO_FUNCT3 , auipc,  "0000", 3968        , true );  -- it is "111...1000000000000" for immediate and 8064 is actual pc
+        
+        --jal and jalr must not be tested because it will be nopped
+        
+        
         
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);        
