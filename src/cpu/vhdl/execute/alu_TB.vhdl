@@ -39,6 +39,8 @@ architecture TB of alu_TB is
     signal RES_s : DATA_TYPE;
     
     constant WAIT_TIME : time := 10 ns;
+    constant NO_RESULT : integer := 0;
+    constant B_TEST    : FLAGS_TYPE := "1111";       --impossible flag composition, only for branch opcode test
     
 begin
 
@@ -76,8 +78,36 @@ begin
             OPA_s <= std_logic_vector(to_signed(opa, DATA_WIDTH));
             ECI_s <= funct7 & funct3 & OP_CODE_TYPE_TO_BITS(opcode);
             wait for WAIT_TIME;
-            areFlagsCorrect := (FLG_s = flg_exp) or no_flag;
-            isResultCorrect := RES_s = std_logic_vector(to_signed(res_exp, DATA_WIDTH));
+            
+            if opcode /= brancho then --check for result
+                areFlagsCorrect := (FLG_s = flg_exp) or no_flag;
+                isResultCorrect := RES_s = std_logic_vector(to_signed(res_exp, DATA_WIDTH));
+            else --result is irrelevant
+                isResultCorrect := true;
+                case funct3 is
+                    when BEQ_FUNCT3 | BNE_FUNCT3 =>
+                        if opa = opb then
+                            areFlagsCorrect := FLG_s(2) = '1';     -- a = b when Z = 1
+                        else 
+                            areFlagsCorrect := FLG_s(2) = '0';     -- a /= b when Z = 0
+                        end if;                    
+                    when BLT_FUNCT3 | BGE_FUNCT3  =>
+                        if opa < opb then
+                            areFlagsCorrect := FLG_s(1) /= FLG_s(3);    -- a < b signed when N /= V
+                        else
+                            areFlagsCorrect := FLG_s(1) = FLG_s(3);     -- a >= b signed when N = V   
+                        end if;
+                    when BLTU_FUNCT3 | BGEU_FUNCT3 =>
+                        -- convert the bit vector to unsigned and use unsigned integer
+                        if opa < opb then
+                            areFlagsCorrect := FLG_s(0) = '0';                    -- a < b unsigned when C = 0
+                        else 
+                            areFlagsCorrect := (FLG_s(0) = '1' or FLG_s(2) = '1');    -- a >= b unsigned when C = 1 or Z = 1
+                        end if;
+                    when others =>
+                        report "no such FUNCT3 code for BRANCH opcode" severity warning;
+                end case;                    
+            end if;
             wasTestSuccesful:= areFlagsCorrect and isResultCorrect;
             
             write(wlb, string'( "### " ));
@@ -194,11 +224,36 @@ begin
         --test lui and auipc
         --test_id 42 and 43
         alu_test( 0           , -4096     , NO_FUNCT7 , NO_FUNCT3 , luio,   "0000", -4096       , true );  -- it is "111...1000000000000" for immediate which must be added with zero
-        alu_test( 8064        , -4096     , NO_FUNCT7 , NO_FUNCT3 , auipc,  "0000", 3968        , true );  -- it is "111...1000000000000" for immediate and 8064 is actual pc
+        alu_test( 8064        , -4096     , NO_FUNCT7 , NO_FUNCT3 , auipco, "0000", 3968        , true );  -- it is "111...1000000000000" for immediate and 8064 is actual pc
         
-        --jal and jalr must not be tested because it will be nopped
+        --jal and jalr need not be tested because it will be nopped
         
+        --test branch
+        --test_id 44 to 47
+        alu_test( 17          , 17        , NO_FUNCT7 , BEQ_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
+        alu_test( 13          , 11        , NO_FUNCT7 , BEQ_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
+        alu_test( -257        , -257      , NO_FUNCT7 , BNE_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
+        alu_test( 12345       , -12345    , NO_FUNCT7 , BNE_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
         
+        --test_id 48 to 50
+        alu_test( -89         , 868       , NO_FUNCT7 , BLT_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
+        alu_test( 1000        , 990       , NO_FUNCT7 , BLT_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
+        alu_test( 666         , 666       , NO_FUNCT7 , BLT_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
+        
+        --test_id 51 to 53
+        alu_test( -214748364  , 214748364 , NO_FUNCT7 , BGE_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
+        alu_test( 311         , 113       , NO_FUNCT7 , BGE_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
+        alu_test( 460         , 460       , NO_FUNCT7 , BGE_FUNCT3, brancho, B_TEST , NO_RESULT , false);   --
+        
+        --test_id 54 to 56
+        alu_test( 214748364   , 0         , NO_FUNCT7 , BLTU_FUNCT3,brancho, B_TEST , NO_RESULT , false);   --less than is false
+        alu_test( 2047        , 17        , NO_FUNCT7 , BLTU_FUNCT3,brancho, B_TEST , NO_RESULT , false);   --
+        alu_test( 647921      , 647921    , NO_FUNCT7 , BLTU_FUNCT3,brancho, B_TEST , NO_RESULT , false);   --
+        
+        --test_id 57 to 59
+        alu_test( 214748364   , 214748364 , NO_FUNCT7 , BGEU_FUNCT3,brancho, B_TEST , NO_RESULT , false);   --greater is false
+        alu_test( 554318      , 123       , NO_FUNCT7 , BGEU_FUNCT3,brancho, B_TEST , NO_RESULT , false);   --
+        alu_test( 0           , 0         , NO_FUNCT7 , BGEU_FUNCT3,brancho, B_TEST , NO_RESULT , false);   --
         
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);        
