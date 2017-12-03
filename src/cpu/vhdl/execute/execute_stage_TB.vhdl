@@ -105,15 +105,161 @@ begin
 
     stimulus: 
     process
+        variable EX_CNTRL_IN_v : EX_CNTRL_TYPE := ADD_FUNCT7 & ADD_FUNCT3 & OP_CODE_TYPE_TO_BITS(opo); --add instruction
+        variable Imm_v         : integer       := -4;
+        variable OPB_v         : integer       := 4;
+        variable OPA_v         : integer       := 8;
+        variable DO_IN_v       : integer       := 12;
+        variable PC_IN_v       : integer       := 16;
+        variable PC_OUT_v      : integer       := 20;
+        variable RESU_DAR_v    : integer       := 12; --4+8=12
+        variable WORD_CNTRL_OUT_v : WORD_CNTRL_TYPE;
+        variable SIGN_EN_v        :std_logic;
     begin
-
+        WB_CNTRL_IN <= WB_CNTRL_NOP;
+        MA_CNTRL_IN <= MA_CNTRL_NOP;
+        EX_CNTRL_IN <= EX_CNTRL_NOP;
+        Imm         <= std_logic_vector(to_signed(0, DATA_WIDTH))        ;
+        OPB         <= std_logic_vector(to_signed(0, DATA_WIDTH))        ;
+        OPA         <= std_logic_vector(to_signed(0, DATA_WIDTH))        ;
+        DO_IN       <= std_logic_vector(to_signed(0 , DATA_WIDTH))     ;
+        PC_IN       <= std_logic_vector(to_signed(0 , DATA_WIDTH))     ;        
+        
         -- Reset
         stop_the_clock <= false; --just for visibility
-        reset <= '1'; wait until clk'event and clk = '1';
-        wait until clk'event and clk = '1';
+        reset <= '1'; wait until clk'event and clk = '1'; 
+        reset <= '0'; wait until clk'event and clk = '1';
 
         -- Test starts here
-
+        
+        EX_CNTRL_IN_v := ADD_FUNCT7 & ADD_FUNCT3 & OP_CODE_TYPE_TO_BITS(opo);
+        Imm_v         := -4;
+        OPB_v         := 4;
+        OPA_v         := 8;
+        DO_IN_v       := 12;
+        PC_IN_v       := 16;
+        PC_OUT_v      := 20;
+        RESU_DAR_v    := 12;
+        
+        EX_CNTRL_IN <= EX_CNTRL_IN_v;
+        Imm         <= std_logic_vector(to_signed(Imm_v, DATA_WIDTH))        ;
+        OPB         <= std_logic_vector(to_signed(OPB_v, DATA_WIDTH))        ;
+        OPA         <= std_logic_vector(to_signed(OPA_v, DATA_WIDTH))        ;
+        DO_IN       <= std_logic_vector(to_signed(DO_IN_v , DATA_WIDTH))     ;
+        PC_IN       <= std_logic_vector(to_signed(PC_IN_v , DATA_WIDTH))     ;
+        
+        wait for clock_period/10;
+        
+        --check asynch outputs
+        if MA_CNTRL_OUT_ASYNCH /= MA_CNTRL_NOP then
+            report "MA_CNTRL_OUT_ASYNCH error";
+        end if;        
+        if RESU_DAR_ASYNCH /= std_logic_vector(to_signed(RESU_DAR_v, DATA_WIDTH)) then  
+            report "RESU_DAR_ASYNCH error";
+        end if;
+        
+        
+        wait until clk'event and clk = '1'; 
+        wait for clock_period/10;
+        
+        --check synch outputs
+        if WB_CNTRL_OUT /= WB_CNTRL_NOP then
+            report "WB_CNTRL_OUT error";
+        end if;
+        if MA_CNTRL_OUT_SYNCH /= MA_CNTRL_NOP then
+            report "MA_CNTRL_OUT_SYNCH error";
+        end if;
+        if RESU_DAR_SYNCH /= std_logic_vector(to_signed(RESU_DAR_v, DATA_WIDTH)) then  
+            report "RESU_DAR_SYNCH error";
+        end if;
+        if Branch = '1' then
+            report "Branch error";
+        end if;
+        if ABS_OUT /= std_logic_vector(to_signed(OPA_v,DATA_WIDTH)) then
+            report "ABS_OUT error";
+        end if;
+        if REL_OUT /= std_logic_vector(to_signed(Imm_v,DATA_WIDTH)) then
+            report "REL_OUT error";
+        end if;
+        if DO_OUT /= std_logic_vector(to_signed(DO_IN_v,DATA_WIDTH)) then
+            report "DO_OUT error";
+        end if;
+        if PC_OUT /= std_logic_vector(to_signed(PC_OUT_v,DATA_WIDTH)) then
+            report "PC_OUT error";
+        end if;
+        
+        wait for clock_period/10;
+        
+        --now test word_cntrl and sign_en outputs
+        EX_CNTRL_IN_v := NO_FUNCT7 & LH_FUNCT3 & OP_CODE_TYPE_TO_BITS(loado);
+        Imm_v         := 16;
+        OPB_v         := Imm_v;
+        OPA_v         := 20;
+        RESU_DAR_v    := 36;
+        DO_IN_v       := 123456;
+        PC_IN_v       := 128;
+        PC_OUT_v      := 132;
+        
+        EX_CNTRL_IN <= EX_CNTRL_IN_v;
+        Imm         <= std_logic_vector(to_signed(Imm_v, DATA_WIDTH))        ;
+        OPB         <= std_logic_vector(to_signed(OPB_v, DATA_WIDTH))        ;
+        OPA         <= std_logic_vector(to_signed(OPA_v, DATA_WIDTH))        ;
+        DO_IN       <= std_logic_vector(to_signed(DO_IN_v , DATA_WIDTH))     ;
+        PC_IN       <= std_logic_vector(to_signed(PC_IN_v , DATA_WIDTH))     ;
+        
+        wait for clock_period/10;
+        
+        if WORD_CNTRL_OUT_ASYNCH /= "01" then
+            report "WB_CNTRL_OUT_ASYNCH error";
+        end if;
+        if MA_CNTRL_OUT_ASYNCH /= MA_CNTRL_NOP then
+            report "MA_CNTRL_OUT_ASYNCH error";
+        end if;        
+        if RESU_DAR_ASYNCH /= std_logic_vector(to_signed(RESU_DAR_v, DATA_WIDTH)) then  
+            report "RESU_DAR_ASYNCH error";
+        end if;
+        
+        
+        wait until clk'event and clk = '1';
+        wait for clock_period/10;
+        
+        
+        if WORD_CNTRL_OUT_SYNCH /= "01" then
+            report "WB_CNTRL_OUT_SYNCH error";
+        end if;
+        if SIGN_EN /= '1'        then
+            report "SIGN_EN error";
+        end if;        
+        if WB_CNTRL_OUT /= WB_CNTRL_NOP then
+            report "WB_CNTRL_OUT error";
+        end if;
+        if MA_CNTRL_OUT_SYNCH /= MA_CNTRL_NOP then
+            report "MA_CNTRL_OUT_SYNCH error";
+        end if;
+        if RESU_DAR_SYNCH /= std_logic_vector(to_signed(RESU_DAR_v, DATA_WIDTH)) then  
+            report "RESU_DAR_SYNCH error";
+        end if;
+        if Branch = '1' then
+            report "Branch error";
+        end if;
+        if ABS_OUT /= std_logic_vector(to_signed(OPA_v,DATA_WIDTH)) then
+            report "ABS_OUT error";
+        end if;
+        if REL_OUT /= std_logic_vector(to_signed(Imm_v,DATA_WIDTH)) then
+            report "REL_OUT error";
+        end if;
+        if DO_OUT /= std_logic_vector(to_signed(DO_IN_v,DATA_WIDTH)) then
+            report "DO_OUT error";
+        end if;
+        if PC_OUT /= std_logic_vector(to_signed(PC_OUT_v,DATA_WIDTH)) then
+            report "PC_OUT error";
+        end if;
+        
+        wait for clock_period/10;
+        
+        wait until clk'event and clk = '1';
+        wait until clk'event and clk = '1';
+        
         -- Test ends here
         stop_the_clock <= true;
         wait;
