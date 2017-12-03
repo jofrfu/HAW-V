@@ -14,10 +14,13 @@ component dut is
         
         --! @brief stage inputs
         WB_CNTRL_IN : in WB_CNTRL_TYPE;
-        MA_CNTRL    : in MA_CNTRL_TYPE;
-        WORD_CNTRL  : in WORD_CNTRL_TYPE;
+        MA_CNTRL_SYNCH : in MA_CNTRL_TYPE;
+        MA_CNTRL_ASYNCH: in MA_CNTRL_TYPE;
+        WORD_CNTRL_SYNCH  : in WORD_CNTRL_TYPE;
+        WORD_CNTRL_ASYNCH : in WORD_CNTRL_TYPE;
         SIGN_EN     : in std_logic;
-        RESU        : in DATA_TYPE;
+        RESU_SYNCH  : in DATA_TYPE;
+        RESU_ASYNCH : in ADDRESS_TYPE; -- asynchronous address for reading from mem
         DO          : in DATA_TYPE;
         PC_IN       : in ADDRESS_TYPE;
         
@@ -34,7 +37,7 @@ component dut is
         WRITE_EN    : out std_logic;
         DATA_OUT    : out DATA_TYPE;
         ADDRESS     : out ADDRESS_TYPE;
-        WORD_LENGTH : out WORD_CNTRL_TYPE
+  		WORD_LENGTH : out WORD_CNTRL_TYPE
     );
 end component dut;
 for all : dut use entity work.memory_access(beh);
@@ -44,25 +47,28 @@ for all : dut use entity work.memory_access(beh);
     signal simulation_running : boolean := false;
     
     -- inputs
-    signal WB_CNTRL_IN_s : WB_CNTRL_TYPE       := (others => '0');
-    signal MA_CNTRL_s    : MA_CNTRL_TYPE       := (others => '0');
-    signal WORD_CNTRL_s  : WORD_CNTRL_TYPE     := (others => '0');
-    signal SIGN_EN_s     : std_logic           := '0';
-    signal RESU_s        : DATA_TYPE           := (others => '0');
-    signal DO_s          : DATA_TYPE           := (others => '0');
-    signal PC_IN_s       : ADDRESS_TYPE        := (others => '0');
+    signal WB_CNTRL_IN_s       : WB_CNTRL_TYPE      := (others => '0');
+    signal MA_CNTRL_SYNCH_s    : MA_CNTRL_TYPE      := (others => '0');
+    signal MA_CNTRL_ASYNCH_s   : MA_CNTRL_TYPE      := (others => '0');
+    signal WORD_CNTRL_SYNCH_s  : WORD_CNTRL_TYPE    := (others => '0');
+    signal WORD_CNTRL_ASYNCH_s : WORD_CNTRL_TYPE    := (others => '0');
+    signal SIGN_EN_s           : std_logic          := '0';
+    signal RESU_SYNCH_s        : DATA_TYPE          := (others => '0');
+    signal RESU_ASYNCH_s       : ADDRESS_TYPE       := (others => '0');
+    signal DO_s                : DATA_TYPE          := (others => '0');
+    signal PC_IN_s             : ADDRESS_TYPE       := (others => '0');
     -- memory input
-    signal DATA_IN_s     : DATA_TYPE           := (others => '0');
+    signal DATA_IN_s           : DATA_TYPE          := (others => '0');
     -- outputs
-    signal WB_CNTRL_OUT_s: WB_CNTRL_TYPE;
-    signal DI_s          : DATA_TYPE;
-    signal PC_OUT_s      : ADDRESS_TYPE;
+    signal WB_CNTRL_OUT_s      : WB_CNTRL_TYPE;
+    signal DI_s                : DATA_TYPE;
+    signal PC_OUT_s            : ADDRESS_TYPE;
     -- memory outputs
-    signal ENABLE_s      : std_logic;
-    signal WRITE_EN_s    : std_logic;
-    signal DATA_OUT_s    : DATA_TYPE;
-    signal ADDRESS_s     : ADDRESS_TYPE;
-    signal WORD_LENGTH_s : WORD_CNTRL_TYPE;
+    signal ENABLE_s            : std_logic;
+    signal WRITE_EN_s          : std_logic;
+    signal DATA_OUT_s          : DATA_TYPE;
+    signal ADDRESS_s           : ADDRESS_TYPE;
+    signal WORD_LENGTH_s       : WORD_CNTRL_TYPE;
 
 begin
 
@@ -71,10 +77,13 @@ begin
         clk_s,
         reset_s,
         WB_CNTRL_IN_s,
-        MA_CNTRL_s,
-        WORD_CNTRL_s,
+        MA_CNTRL_SYNCH_s,
+        MA_CNTRL_ASYNCH_s,
+        WORD_CNTRL_SYNCH_s,
+        WORD_CNTRL_ASYNCH_s,
         SIGN_EN_s,
-        RESU_s,
+        RESU_SYNCH_s,
+        RESU_ASYNCH_s,
         DO_s,
         PC_IN_s,
         DATA_IN_s,
@@ -136,13 +145,13 @@ begin
         end if;
         
         -- test3
-        -- MA_CNTRL = "00"
+        -- MA_CNTRL_SYNCH = "00"
         -- RESU = 74
-        -- Action: DI gets loaded with RESU
+        -- Action: DI gets loaded with RESU_SYNCH
         -- Result: DI should be 74 after clk,
         -- ENABLE and WRITE_EN should be 0
-        MA_CNTRL_s <= "00";
-        RESU_s <= std_logic_vector(to_unsigned(74, DATA_WIDTH));
+        MA_CNTRL_SYNCH_s <= "00";
+        RESU_SYNCH_s <= std_logic_vector(to_unsigned(74, DATA_WIDTH));
         wait until '1'=clk_s and clk_s'event;
         wait for 1 ns;
         if DI_s /= std_logic_vector(to_unsigned(74, DATA_WIDTH)) then
@@ -156,12 +165,21 @@ begin
         end if;
         
         -- test4
-        -- MA_CNTRL = "10"
+        -- MA_CNTRL_SYNCH = "10"
+        -- MA_CNTRL_ASYNCH = "10"
+        -- asynchronous and after clock for memory
         -- DATA_IN = 86
         -- Action: DI gets loaded with DATA_IN
         -- Result: DI should be 86 after clk,
         -- ENABLE should be 1, WRITE_EN should be 0
-        MA_CNTRL_s <= "10";
+        MA_CNTRL_SYNCH_s <= "10";
+        MA_CNTRL_ASYNCH_s <= "10";
+        wait for 1 ns;
+        if ENABLE_s /= '1' or WRITE_EN_s /= '0' then
+            report "Error! ENABLE should be 1 and WRITE_EN should be 0!";
+            wait;
+        end if;
+        
         DATA_IN_s <= std_logic_vector(to_unsigned(86, DATA_WIDTH));
         wait until '1'=clk_s and clk_s'event;
         wait for 1 ns;
@@ -170,18 +188,14 @@ begin
             wait;
         end if;
         
-        if ENABLE_s /= '1' or WRITE_EN_s /= '0' then
-            report "Error! ENABLE should be 1 and WRITE_EN should be 0!";
-            wait;
-        end if;
-        
         -- test5
-        -- MA_CNTRL = "01"
+        -- MA_CNTRL_SYNCH = "01"
         -- DO = 93
         -- Action: DATA_OUT gets value from DO
         -- Result: DATA_OUT should be 93 instantly,
         -- ENABLE and WRITE_EN should be 1
-        MA_CNTRL_s <= "01";
+        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_ASYNCH_s <= "00";
         DO_s <= std_logic_vector(to_unsigned(93, DATA_WIDTH));
         wait for 1 ns;
         if DATA_OUT_s /= std_logic_vector(to_unsigned(93, DATA_WIDTH)) then
@@ -194,27 +208,167 @@ begin
             wait;
         end if;
         
-        -- test6
-        -- WORD_CNTRL = "10"
+        -- test6 synchronous set
+        -- WORD_CNTRL_SYNCH = "10"
         -- Action: WORD_LENGTH gets set
         -- Result: WORD_LENGTH should be "10" instantly
-        WORD_CNTRL_s <= "10";
+        WORD_CNTRL_SYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_ASYNCH_s <= "00";
         wait for 1 ns;
         if WORD_LENGTH_s /= "10" then
-            report "Error! WORD_LENGTH should be 10";
+            report "Error! WORD_LENGTH should be 10!";
+            wait;
+        end if;
+        
+        -- test6.1 asynchronous set
+        -- WORD_CNTRL_ASYNCH = "01"
+        -- Action: WORD_LENGTH gets set
+        -- Result: WORD_LENGTH should be "01" instantly
+        WORD_CNTRL_ASYNCH_s <= "01";
+        MA_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "00";
+        wait for 1 ns;
+        if WORD_LENGTH_s /= "01" then
+            report "Error! WORD_LENGTH should be 01!";
             wait;
         end if;
         
         -- test7
-        -- RESU = 104
+        -- RESU_ASYNCH = 104
         -- Action: ADDRESS gets value
         -- Result: ADDRESS should be 104 instantly
-        RESU_s <= std_logic_vector(to_unsigned(104, DATA_WIDTH));
+        
+        RESU_ASYNCH_s <= std_logic_vector(to_unsigned(104, DATA_WIDTH));
         wait for 1 ns;
         if ADDRESS_s /= std_logic_vector(to_unsigned(104, ADDRESS_WIDTH)) then
             report "Error! ADDRESS should be 104!";
             wait;
         end if;
+        
+        -- test8
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 00
+        -- MA_CNTRL = 10 : load
+        -- Data_in = 0x80
+        -- action: load signextended negative byte 
+        -- result : DI should be 0xFFFFFF80
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_SYNCH_s <= "00";
+        WORD_CNTRL_ASYNCH_s <= "00";
+        MA_CNTRL_SYNCH_s <= "10";
+        MA_CNTRL_ASYNCH_s <= "10";
+        DATA_IN_s <= x"00000080";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"FFFFFF80" then 
+            report "Error! DI was not SIGN EXTENDED, but should be (BYTE)!!!";
+            wait;
+        end if;
+        
+        -- test9
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 00
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x70
+        -- action: load sign extended  positive byte
+        -- result : DI should be 0x00000070
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_SYNCH_s <= "00";
+        WORD_CNTRL_ASYNCH_s <= "00";
+        MA_CNTRL_SYNCH_s <= "10";
+        MA_CNTRL_ASYNCH_s <= "10";
+        DATA_IN_s <= x"00000070";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"00000070" then 
+            report "Error! DI was SIGN EXTENDED, but should not be (BYTE)!!!";
+            wait;
+        end if;
+        
+        -- test10
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 01
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x8000
+        -- action: load signextended negative half-word 
+        -- result : DI should be 0xFFFF8000
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_SYNCH_s <= "01";
+        WORD_CNTRL_ASYNCH_s <= "01";
+        MA_CNTRL_SYNCH_s <= "10";
+        MA_CNTRL_ASYNCH_s <= "10";
+        DATA_IN_s <= x"00008000";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"FFFF8000" then 
+            report "Error! DI was not SIGN EXTENDED, but should be (HALFWORD)!!!";
+            wait;
+        end if;
+        
+        -- test11
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 01
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x7000
+        -- action: load sign extended  positive half-word
+        -- result : DI should be 0x00007000
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_SYNCH_s <= "01";
+        WORD_CNTRL_ASYNCH_s <= "01";
+        MA_CNTRL_SYNCH_s <= "10";
+        MA_CNTRL_ASYNCH_s <= "10";
+        DATA_IN_s <= x"00007000";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"00007000" then 
+            report "Error! DI was SIGN EXTENDED, but should not be (HALFWORD)!!!";
+            wait;
+        end if;     
+        
+        -- test12
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 10
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x80000000
+        -- action: load signextended negative word 
+        -- result : DI should be 0x80000000
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_SYNCH_s <= "10";
+        WORD_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "10";
+        MA_CNTRL_ASYNCH_s <= "10";
+        DATA_IN_s <= x"80000000";
+        wait until '1'=clk_s and clk_s'event;
+        wait for 1 ns;
+        if DI_s /= x"80000000" then 
+            report "Error! DI was not SIGN EXTENDED, but should be! (WORD)!!!";
+            wait;
+        end if;
+        
+        -- test13
+        -- SIGN_EN = 1
+        -- WORD_CNTRL = 01
+        -- MA_CNTRL = 01 : load
+        -- Data_in = 0x70000000
+        -- action: load sign extended  positive half-word
+        -- result : DI should be 0x70000000
+        SIGN_EN_s <= '1';
+        WORD_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_ASYNCH_s <= "10";
+        DATA_IN_s <= x"70000000";
+        wait until '1'=clk_s and clk_s'event;
+        WORD_CNTRL_SYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "10";
+        -- test correct timing
+        WORD_CNTRL_ASYNCH_s <= "00";
+        MA_CNTRL_ASYNCH_s <= "00";
+        wait for 1 ns;
+        if DI_s /= x"70000000" then 
+            report "Error! DI was SIGN EXTENDED, but should not be! (WORD)!!!";
+            wait;
+        end if;     
+
         
         report "Test was successful!";
         simulation_running <= false;
