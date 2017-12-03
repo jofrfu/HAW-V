@@ -25,16 +25,19 @@ entity execute_stage is
         DO_IN         : in DATA_TYPE;        --!Data-output-register
         PC_IN         : in ADDRESS_TYPE;     --!PC Register
         
-        WB_CNTRL_OUT  : out WB_CNTRL_TYPE;   --!Controlbits for WB-Stage 
-        MA_CNTRL_OUT  : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
-        WORD_CNTRL_OUT: out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
-        SIGN_EN       : out std_logic;       --!Enables sign extension in memory access
-        RESU_DAR      : out DATA_TYPE;       --!Result of calulation
-        Branch        : out std_logic;       --!For conditioned branching
-        ABS_OUT       : out DATA_TYPE;
-        REL_OUT       : out DATA_TYPE;
-        DO_OUT        : out DATA_TYPE;       --!Data-output-register is passed to next stage
-        PC_OUT        : out ADDRESS_TYPE     --!PC Register
+        WB_CNTRL_OUT          : out WB_CNTRL_TYPE;   --!Controlbits for WB-Stage 
+        MA_CNTRL_OUT_SYNCH    : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
+        MA_CNTRL_OUT_ASYNCH   : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
+        WORD_CNTRL_OUT_SYNCH  : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
+        WORD_CNTRL_OUT_ASYNCH : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
+        SIGN_EN               : out std_logic;       --!Enables sign extension in memory access
+        RESU_DAR_SYNCH        : out DATA_TYPE;       --!Result of calulation
+        RESU_DAR_ASYNCH       : out DATA_TYPE;       --!Result of calulation
+        Branch                : out std_logic;       --!For conditioned branching
+        ABS_OUT               : out DATA_TYPE;
+        REL_OUT               : out DATA_TYPE;
+        DO_OUT                : out DATA_TYPE;       --!Data-output-register is passed to next stage
+        PC_OUT                : out ADDRESS_TYPE     --!PC Register
     );
 end entity execute_stage;   
 
@@ -143,12 +146,18 @@ begin
     DO_ns <= DO_IN;
     PC_ns <= std_logic_vector(unsigned(PC_IN) + to_unsigned(4, DATA_WIDTH));
     
+    -- synchronous outputs
     WB_CNTRL_OUT <= WB_CNTRL_cs;
-    MA_CNTRL_OUT <= MA_CNTRL_cs;
-    WORD_CNTRL_OUT <= WORD_CNTRL_cs;
+    MA_CNTRL_OUT_SYNCH <= MA_CNTRL_cs;
+    WORD_CNTRL_OUT_SYNCH <= WORD_CNTRL_cs;
     SIGN_EN <= SIGN_EN_cs;
-    RESU_DAR <= RESU_DAR_cs;
+    RESU_DAR_SYNCH <= RESU_DAR_cs;
     DO_OUT <= DO_cs;
     PC_OUT <= PC_cs;
+    
+    -- asynchronous outputs
+    MA_CNTRL_OUT_ASYNCH <= MA_CNTRL_ns;
+    WORD_CNTRL_OUT_ASYNCH <= WORD_CNTRL_ns;
+    RESU_DAR_ASYNCH <= RESU_DAR_ns;
 
 end architecture beh;  
