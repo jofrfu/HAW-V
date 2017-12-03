@@ -392,6 +392,10 @@ begin
                 nadd_sub_v := '1';
                 resu_v := add_result;
             
+            when luio | auipco | storeo | loado =>
+                nadd_sub_v := '0';
+                resu_v := add_result;
+            
             when others =>
                 report "Maybe unknown opcode!" severity note;
                 nadd_sub_v := '0';
