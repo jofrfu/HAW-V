@@ -41,6 +41,7 @@ architecture TB of alu_TB is
     constant WAIT_TIME : time := 10 ns;
     constant NO_RESULT : integer := 0;
     constant B_TEST    : FLAGS_TYPE := "1111";       --impossible flag composition, only for branch opcode test
+    constant NO_FLAG   : FLAGS_TYPE := "0000";
     
 begin
 
@@ -167,64 +168,64 @@ begin
         
         --test slt
         --test_id 10 to 13
-        alu_test( -2147483648 , 2147483647, SLT_FUNCT7, SLT_FUNCT3, opo,    "0000", 1           , true );   
-        alu_test( 0           , 0         , SLT_FUNCT7, SLT_FUNCT3, opo,    "0000", 0           , true );
-        alu_test( -5          , -1        , SLT_FUNCT7, SLT_FUNCT3, opo,    "0000", 1           , true );
-        alu_test( 32          , 31        , SLT_FUNCT7, SLT_FUNCT3, opo,    "0000", 0           , true );
+        alu_test( -2147483648 , 2147483647, SLT_FUNCT7, SLT_FUNCT3, opo,    NO_FLAG, 1           , true );   
+        alu_test( 0           , 0         , SLT_FUNCT7, SLT_FUNCT3, opo,    NO_FLAG, 0           , true );
+        alu_test( -5          , -1        , SLT_FUNCT7, SLT_FUNCT3, opo,    NO_FLAG, 1           , true );
+        alu_test( 32          , 31        , SLT_FUNCT7, SLT_FUNCT3, opo,    NO_FLAG, 0           , true );
         
         --test sltu
         --test_id 14 to 17
-        alu_test( -2147483648 , 2147483647, SLTU_FUNCT7,SLTU_FUNCT3,opo,    "0000", 0           , true );   
-        alu_test( 0           , 0         , SLTU_FUNCT7,SLTU_FUNCT3,opo,    "0000", 0           , true );
-        alu_test( -5          , -1        , SLTU_FUNCT7,SLTU_FUNCT3,opo,    "0000", 1           , true );
-        alu_test( 32          , 31        , SLTU_FUNCT7,SLTU_FUNCT3,opo,    "0000", 0           , true );
+        alu_test( -2147483648 , 2147483647, SLTU_FUNCT7,SLTU_FUNCT3,opo,    NO_FLAG, 0           , true );   
+        alu_test( 0           , 0         , SLTU_FUNCT7,SLTU_FUNCT3,opo,    NO_FLAG, 0           , true );
+        alu_test( -5          , -1        , SLTU_FUNCT7,SLTU_FUNCT3,opo,    NO_FLAG, 1           , true );
+        alu_test( 32          , 31        , SLTU_FUNCT7,SLTU_FUNCT3,opo,    NO_FLAG, 0           , true );
         
         --test and
         --test_id 18 to 21
-        alu_test( -1          , 0         , AND_FUNCT7, AND_FUNCT3, opo,    "0000", 0           , true );   
-        alu_test( 0           , -1        , AND_FUNCT7, AND_FUNCT3, opo,    "0000", 0           , true );  
-        alu_test( -1          , -1        , AND_FUNCT7, AND_FUNCT3, opo,    "0000", -1          , true );  
-        alu_test( 0           , 0         , AND_FUNCT7, AND_FUNCT3, opo,    "0000", 0           , true ); 
+        alu_test( -1          , 0         , AND_FUNCT7, AND_FUNCT3, opo,    NO_FLAG, 0           , true );   
+        alu_test( 0           , -1        , AND_FUNCT7, AND_FUNCT3, opo,    NO_FLAG, 0           , true );  
+        alu_test( -1          , -1        , AND_FUNCT7, AND_FUNCT3, opo,    NO_FLAG, -1          , true );  
+        alu_test( 0           , 0         , AND_FUNCT7, AND_FUNCT3, opo,    NO_FLAG, 0           , true ); 
         
         --test or
         --test_id 22 to 25
-        alu_test( -1          , 0         , OR_FUNCT7 , OR_FUNCT3 , opo,    "0000", -1          , true );   
-        alu_test( 0           , -1        , OR_FUNCT7 , OR_FUNCT3 , opo,    "0000", -1          , true );  
-        alu_test( -1          , -1        , OR_FUNCT7 , OR_FUNCT3 , opo,    "0000", -1          , true ); 
-        alu_test( 0           , 0         , OR_FUNCT7 , OR_FUNCT3 , opo,    "0000", 0           , true ); 
+        alu_test( -1          , 0         , OR_FUNCT7 , OR_FUNCT3 , opo,    NO_FLAG, -1          , true );   
+        alu_test( 0           , -1        , OR_FUNCT7 , OR_FUNCT3 , opo,    NO_FLAG, -1          , true );  
+        alu_test( -1          , -1        , OR_FUNCT7 , OR_FUNCT3 , opo,    NO_FLAG, -1          , true ); 
+        alu_test( 0           , 0         , OR_FUNCT7 , OR_FUNCT3 , opo,    NO_FLAG, 0           , true ); 
         
         --test xor
         --test_id 26 to 29
-        alu_test( -1          , 0         , XOR_FUNCT7, XOR_FUNCT3, opo,    "0000", -1          , true );   
-        alu_test( 0           , -1        , XOR_FUNCT7, XOR_FUNCT3, opo,    "0000", -1          , true );  
-        alu_test( -1          , -1        , XOR_FUNCT7, XOR_FUNCT3, opo,    "0000", 0           , true ); 
-        alu_test( 0           , 0         , XOR_FUNCT7, XOR_FUNCT3, opo,    "0000", 0           , true ); 
+        alu_test( -1          , 0         , XOR_FUNCT7, XOR_FUNCT3, opo,    NO_FLAG, -1          , true );   
+        alu_test( 0           , -1        , XOR_FUNCT7, XOR_FUNCT3, opo,    NO_FLAG, -1          , true );  
+        alu_test( -1          , -1        , XOR_FUNCT7, XOR_FUNCT3, opo,    NO_FLAG, 0           , true ); 
+        alu_test( 0           , 0         , XOR_FUNCT7, XOR_FUNCT3, opo,    NO_FLAG, 0           , true ); 
         
         --test sll
         --test_id 30 to 33
-        alu_test( 1           , 8         , SLL_FUNCT7, SLL_FUNCT3, opo,    "0000", 256         , true );
-        alu_test( 1           , 31        , SLL_FUNCT7, SLL_FUNCT3, opo,    "0000", -2147483648 , true );
-        alu_test( 123456      , 0         , SLL_FUNCT7, SLL_FUNCT3, opo,    "0000", 123456      , true );
-        alu_test( 10930       , 17        , SLL_FUNCT7, SLL_FUNCT3, opo,    "0000", 1432616960  , true );        
+        alu_test( 1           , 8         , SLL_FUNCT7, SLL_FUNCT3, opo,    NO_FLAG, 256         , true );
+        alu_test( 1           , 31        , SLL_FUNCT7, SLL_FUNCT3, opo,    NO_FLAG, -2147483648 , true );
+        alu_test( 123456      , 0         , SLL_FUNCT7, SLL_FUNCT3, opo,    NO_FLAG, 123456      , true );
+        alu_test( 10930       , 17        , SLL_FUNCT7, SLL_FUNCT3, opo,    NO_FLAG, 1432616960  , true );        
         
         --test srl
         --test_id 34 to 37
-        alu_test( -2147483648 , 19        , SRL_FUNCT7, SRL_FUNCT3, opo,    "0000", 4096        , true );
-        alu_test( -2147483648 , 31        , SRL_FUNCT7, SRL_FUNCT3, opo,    "0000", 1           , true );
-        alu_test( 71354785    , 0         , SRL_FUNCT7, SRL_FUNCT3, opo,    "0000", 71354785    , true );
-        alu_test( 1432616960  , 17        , SRL_FUNCT7, SRL_FUNCT3, opo,    "0000", 10930       , true );   
+        alu_test( -2147483648 , 19        , SRL_FUNCT7, SRL_FUNCT3, opo,    NO_FLAG, 4096        , true );
+        alu_test( -2147483648 , 31        , SRL_FUNCT7, SRL_FUNCT3, opo,    NO_FLAG, 1           , true );
+        alu_test( 71354785    , 0         , SRL_FUNCT7, SRL_FUNCT3, opo,    NO_FLAG, 71354785    , true );
+        alu_test( 1432616960  , 17        , SRL_FUNCT7, SRL_FUNCT3, opo,    NO_FLAG, 10930       , true );   
         
         --test sra
         --test_id 38 to 41
-        alu_test( -2147483648 , 19        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", -4096       , true );
-        alu_test( -2147483648 , 31        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", -1          , true );
-        alu_test( 71354785    , 0         , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", 71354785    , true );
-        alu_test( 1432616960  , 17        , SRA_FUNCT7, SRA_FUNCT3, opo,    "0000", 10930       , true ); 
+        alu_test( -2147483648 , 19        , SRA_FUNCT7, SRA_FUNCT3, opo,    NO_FLAG, -4096       , true );
+        alu_test( -2147483648 , 31        , SRA_FUNCT7, SRA_FUNCT3, opo,    NO_FLAG, -1          , true );
+        alu_test( 71354785    , 0         , SRA_FUNCT7, SRA_FUNCT3, opo,    NO_FLAG, 71354785    , true );
+        alu_test( 1432616960  , 17        , SRA_FUNCT7, SRA_FUNCT3, opo,    NO_FLAG, 10930       , true ); 
         
         --test lui and auipc
         --test_id 42 and 43
-        alu_test( 0           , -4096     , NO_FUNCT7 , NO_FUNCT3 , luio,   "0000", -4096       , true );  -- it is "111...1000000000000" for immediate which must be added with zero
-        alu_test( 8064        , -4096     , NO_FUNCT7 , NO_FUNCT3 , auipco, "0000", 3968        , true );  -- it is "111...1000000000000" for immediate and 8064 is actual pc
+        alu_test( 0           , -4096     , NO_FUNCT7 , NO_FUNCT3 , luio,   NO_FLAG, -4096       , true );  -- it is "111...1000000000000" for immediate which must be added with zero
+        alu_test( 8064        , -4096     , NO_FUNCT7 , NO_FUNCT3 , auipco, NO_FLAG, 3968        , true );  -- it is "111...1000000000000" for immediate and 8064 is actual pc
         
         --jal and jalr need not be tested because it will be nopped
         
@@ -254,6 +255,33 @@ begin
         alu_test( 214748364   , 214748364 , NO_FUNCT7 , BGEU_FUNCT3,brancho, B_TEST , NO_RESULT , false);   --greater is false
         alu_test( 554318      , 123       , NO_FUNCT7 , BGEU_FUNCT3,brancho, B_TEST , NO_RESULT , false);   --
         alu_test( 0           , 0         , NO_FUNCT7 , BGEU_FUNCT3,brancho, B_TEST , NO_RESULT , false);   --
+        
+        --test_id 60 to 63
+        alu_test( 1           , 1         , NO_FUNCT7 , SB_FUNCT3,  storeo,  "0000" , 2         , true );
+        alu_test( 1           , -1        , NO_FUNCT7 , SB_FUNCT3,  storeo,  "0000" , 0         , true );
+        alu_test( 1           , 1         , NO_FUNCT7 , SH_FUNCT3,  storeo,  "0000" , 2         , true );
+        alu_test( 1           , 1         , NO_FUNCT7 , SW_FUNCT3,  storeo,  "0000" , 2         , true );
+        
+        --test_id 64 to 69
+        alu_test( 1           , 1         , NO_FUNCT7 , LB_FUNCT3,  loado,   "0000" , 2         , true );
+        alu_test( 1           , -1        , NO_FUNCT7 , LB_FUNCT3,  loado,   "0000" , 0         , true );
+        alu_test( 1           , 1         , NO_FUNCT7 , LH_FUNCT3,  loado,   "0000" , 2         , true );
+        alu_test( 1           , 1         , NO_FUNCT7 , LW_FUNCT3,  loado,   "0000" , 2         , true );
+        alu_test( 1           , -1        , NO_FUNCT7 , LBU_FUNCT3, loado,   "0000" , 0         , true );
+        alu_test( 1           , 1         , NO_FUNCT7 , LHU_FUNCT3, loado,   "0000" , 2         , true );
+        
+        --test_id 70 to 78
+        alu_test( 127         , -507      , NO_FUNCT7,   ADDI_FUNCT3,  opimmo, "0010",  -380        , false);   -- negative
+        alu_test( -2147483648 , 2147483647, NO_FUNCT7,   SLTI_FUNCT3,  opimmo, NO_FLAG, 1           , true ); 
+        alu_test( 32          , 31        , NO_FUNCT7,   SLTIU_FUNCT3, opimmo, NO_FLAG, 0           , true );
+        alu_test( 0           , -1        , NO_FUNCT7,   ANDI_FUNCT3,  opimmo, NO_FLAG, 0           , true );  
+        alu_test( 0           , 0         , NO_FUNCT7,   ORI_FUNCT3,   opimmo, NO_FLAG, 0           , true ); 
+        alu_test( -1          , 0         , NO_FUNCT7,   XORI_FUNCT3,  opimmo, NO_FLAG, -1          , true );
+        alu_test( 1           , 8         , SLLI_FUNCT7, SLLI_FUNCT3,  opimmo, NO_FLAG, 256         , true );
+        alu_test( 1432616960  , 17        , SRLI_FUNCT7, SRLI_SRAI_FUNCT3,  opimmo, NO_FLAG, 10930       , true );  
+        alu_test( -2147483648 , 19        , SRAI_FUNCT7, SRLI_SRAI_FUNCT3,  opimmo, NO_FLAG, -4096       , true );        
+        
+        
         
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);
         write(wlb,     string'( "###############################" ));  writeline(output, wlb);        
