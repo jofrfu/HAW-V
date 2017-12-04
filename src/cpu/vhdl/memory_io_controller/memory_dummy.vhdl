@@ -37,7 +37,28 @@ architecture dummy of blk_mem_gen_0_wrapper is
         
     type memory is array (natural range 0 to 645120) of std_logic_vector(7 downto 0);
     constant instr_memory : memory := (
-        
+         x"93", x"05", x"F0", x"0F", 
+         x"93", x"05", x"30", x"00",  
+         x"13", x"07", x"F0", x"FF", 
+         x"13", x"00", x"00", x"00", 
+         x"93", x"07", x"40", x"00",         
+         x"13", x"00", x"00", x"00",  
+         x"13", x"00", x"00", x"00",  
+         x"33", x"86", x"B5", x"00",  
+         x"13", x"00", x"00", x"00",  
+         x"13", x"00", x"00", x"00",  
+         x"13", x"00", x"00", x"00",
+         x"13", x"00", x"00", x"00",         
+         x"23", x"A0", x"C7", x"00", 
+         x"13", x"06", x"16", x"00", 
+         x"13", x"00", x"00", x"00",  
+         x"13", x"00", x"00", x"00",  
+         x"13", x"00", x"00", x"00",  
+         x"13", x"00", x"00", x"00",
+         x"B3", x"06", x"E6", x"40", 
+         x"17", x"07", x"00", x"00", 
+         x"03", x"27", x"07", x"00",    
+         x"6F", x"00", x"00", x"00",
         others => "00000000"
     );
     

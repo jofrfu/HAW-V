@@ -80,8 +80,8 @@ USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_ARITH.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
---LIBRARY UNISIM;
---USE UNISIM.VCOMPONENTS.ALL;
+LIBRARY UNISIM;
+USE UNISIM.VCOMPONENTS.ALL;
 
 --------------------------------------------------------------------------------
 -- Entity Declaration
