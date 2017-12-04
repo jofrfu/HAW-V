@@ -10,12 +10,18 @@ use WORK.riscv_pack.all;
 
 entity risc_v_core is
     port(
-        clk, reset   : in std_logic;
+        clk, reset    : in std_logic;
         
-        -- IO
-        PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
-        PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
-        PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
+        -- memory
+        pc_asynch     : out ADDRESS_TYPE;
+        instruction   : in  INSTRUCTION_BIT_TYPE;
+        
+        EN            : out std_logic;
+        WEN           : out std_logic;
+        WORD_LENGTH   : out WORD_CNTRL_TYPE;
+        ADDR          : out ADDRESS_TYPE;
+        D_CORE_to_MEM : out DATA_TYPE;
+        D_MEM_to_CORE : in  DATA_TYPE
     );
 end entity risc_v_core;
 
@@ -38,7 +44,6 @@ architecture beh of risc_v_core is
     for all : instruction_fetch use entity work.instruction_fetch(std_impl);
     
     signal IFR_s : DATA_TYPE;
-    signal pc_asynch_s : ADDRESS_TYPE;
     signal pc_synch_s  : ADDRESS_TYPE;
     
     component instruction_decode is
@@ -86,30 +91,36 @@ architecture beh of risc_v_core is
             DO_IN         : in DATA_TYPE;        --!Data-output-register
             PC_IN         : in ADDRESS_TYPE;     --!PC Register
             
-            WB_CNTRL_OUT  : out WB_CNTRL_TYPE;   --!Controlbits for WB-Stage 
-            MA_CNTRL_OUT  : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
-            WORD_CNTRL_OUT: out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
-            SIGN_EN       : out std_logic;       --!Enables sign extension in memory access
-            RESU_DAR      : out DATA_TYPE;       --!Result of calulation
-            Branch        : out std_logic;       --!For conditioned branching
-            ABS_OUT       : out DATA_TYPE;
-            REL_OUT       : out DATA_TYPE;
-            DO_OUT        : out DATA_TYPE;       --!Data-output-register is passed to next stage
-            PC_OUT        : out ADDRESS_TYPE     --!PC Register
+            WB_CNTRL_OUT          : out WB_CNTRL_TYPE;   --!Controlbits for WB-Stage 
+            MA_CNTRL_OUT_SYNCH    : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
+            MA_CNTRL_OUT_ASYNCH   : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
+            WORD_CNTRL_OUT_SYNCH  : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
+            WORD_CNTRL_OUT_ASYNCH : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
+            SIGN_EN               : out std_logic;       --!Enables sign extension in memory access
+            RESU_DAR_SYNCH        : out DATA_TYPE;       --!Result of calulation
+            RESU_DAR_ASYNCH       : out DATA_TYPE;       --!Result of calulation
+            Branch                : out std_logic;       --!For conditioned branching
+            ABS_OUT               : out DATA_TYPE;
+            REL_OUT               : out DATA_TYPE;
+            DO_OUT                : out DATA_TYPE;       --!Data-output-register is passed to next stage
+            PC_OUT                : out ADDRESS_TYPE     --!PC Register
         );
     end component execute_stage;
     for all : execute_stage use entity work.execute_stage(beh);
     
-    signal WB_CNTRL_EX_to_MA : WB_CNTRL_TYPE;
-    signal MA_CNTRL_EX_to_MA : MA_CNTRL_TYPE;
-    signal WORD_CNTRL_s      : WORD_CNTRL_TYPE;
-    signal SIGN_EN_s         : std_logic;
-    signal RESU_DAR_s        : DATA_TYPE;
-    signal BRANCH_s          : std_logic;
-    signal ABS_OUT_s         : DATA_TYPE;
-    signal REL_OUT_s         : DATA_TYPE;
-    signal DO_EX_to_MA       : DATA_TYPE;
-    signal PC_EX_to_MA       : ADDRESS_TYPE;
+    signal WB_CNTRL_EX_to_MA        : WB_CNTRL_TYPE;
+    signal MA_CNTRL_SYNCH_EX_to_MA  : MA_CNTRL_TYPE;
+    signal MA_CNTRL_ASYNCH_EX_to_MA : MA_CNTRL_TYPE;
+    signal WORD_CNTRL_SYNCH_s       : WORD_CNTRL_TYPE;
+    signal WORD_CNTRL_ASYNCH_s      : WORD_CNTRL_TYPE;
+    signal SIGN_EN_s                : std_logic;
+    signal RESU_DAR_SYNCH_s         : DATA_TYPE;
+    signal RESU_DAR_ASYNCH_s        : DATA_TYPE;
+    signal BRANCH_s                 : std_logic;
+    signal ABS_OUT_s                : DATA_TYPE;
+    signal REL_OUT_s                : DATA_TYPE;
+    signal DO_EX_to_MA              : DATA_TYPE;
+    signal PC_EX_to_MA              : ADDRESS_TYPE;
     
     component memory_access is
         port(
@@ -117,10 +128,13 @@ architecture beh of risc_v_core is
             
             --! @brief stage inputs
             WB_CNTRL_IN : in WB_CNTRL_TYPE;
-            MA_CNTRL    : in MA_CNTRL_TYPE;
-            WORD_CNTRL  : in WORD_CNTRL_TYPE;
+            MA_CNTRL_SYNCH : in MA_CNTRL_TYPE;
+            MA_CNTRL_ASYNCH: in MA_CNTRL_TYPE;
+            WORD_CNTRL_SYNCH  : in WORD_CNTRL_TYPE;
+            WORD_CNTRL_ASYNCH : in WORD_CNTRL_TYPE;
             SIGN_EN     : in std_logic;
-            RESU        : in DATA_TYPE;
+            RESU_SYNCH  : in DATA_TYPE;
+            RESU_ASYNCH : in ADDRESS_TYPE; -- asynchronous address for reading from mem
             DO          : in DATA_TYPE;
             PC_IN       : in ADDRESS_TYPE;
             
@@ -144,13 +158,7 @@ architecture beh of risc_v_core is
     
     signal WB_CNTRL_MA_to_WB    : WB_CNTRL_TYPE;
     signal DI_s                 : DATA_TYPE;
-    signal PC_MA_to_WB          : ADDRESS_TYPE;
-    
-    signal ENABLE_s     : std_logic;
-    signal WRITE_EN_s   : std_logic;
-    signal DIN_s        : DATA_TYPE;
-    signal ADDRESS_s    : ADDRESS_TYPE;
-    signal WORD_LENGTH_s: WORD_CNTRL_TYPE;    
+    signal PC_MA_to_WB          : ADDRESS_TYPE;    
     
     component write_back is
         port(
@@ -167,31 +175,6 @@ architecture beh of risc_v_core is
     signal REG_ADDR_s   : REGISTER_ADDRESS_TYPE;
     signal WRITE_BACK_s : DATA_TYPE;
     
-    component memory is
-        Port ( 
-            CLK            : IN STD_LOGIC;
-            reset          : IN STD_LOGIC;
-            pc_asynch      : IN ADDRESS_TYPE;
-            instruction    : OUT INSTRUCTION_BIT_TYPE;
-            
-            EN             : IN STD_LOGIC;
-            WEN            : IN STD_LOGIC;
-            WORD_LENGTH    : in WORD_CNTRL_TYPE;
-            ADDR           : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            DIN            : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-            DOUT           : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-            
-            -- IO
-            PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
-            PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
-            PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
-        );
-    end component memory;
-    for all : memory use entity work.memory_io_controller(beh);
-    
-    signal DOUT_s : DATA_TYPE;
-    signal instruction_s : DATA_TYPE;
-    
 begin
 
     instruction_fetch_i : instruction_fetch
@@ -206,11 +189,11 @@ begin
         ABS_OUT_s,
         
         -- instruction memory
-        instruction_s,
+        instruction,
         
         -- outputs
         IFR_s,
-        pc_asynch_s,
+        pc_asynch,
         pc_synch_s
     );
     
@@ -261,12 +244,15 @@ begin
         
         -- cntrl outs
         WB_CNTRL_EX_to_MA,
-        MA_CNTRL_EX_to_MA,
-        WORD_CNTRL_s,
+        MA_CNTRL_SYNCH_EX_to_MA,
+        MA_CNTRL_ASYNCH_EX_to_MA,
+        WORD_CNTRL_SYNCH_s,
+        WORD_CNTRL_ASYNCH_s,
         SIGN_EN_s,
         
         -- outs
-        RESU_DAR_s,
+        RESU_DAR_SYNCH_s,
+        RESU_DAR_ASYNCH_s,
         BRANCH_s,
         ABS_OUT_s,
         REL_OUT_s,
@@ -282,30 +268,33 @@ begin
         
         -- cntrl ins
         WB_CNTRL_EX_to_MA,
-        MA_CNTRL_EX_to_MA,
-        WORD_CNTRL_s,
+        MA_CNTRL_SYNCH_EX_to_MA,
+        MA_CNTRL_ASYNCH_EX_to_MA,
+        WORD_CNTRL_SYNCH_s,
+        WORD_CNTRL_ASYNCH_s,
         SIGN_EN_s,
         
         -- ins
-        RESU_DAR_s,
+        RESU_DAR_SYNCH_s,
+        RESU_DAR_ASYNCH_s,
         
         DO_EX_to_MA,
         PC_EX_to_MA,
         
         -- input from memory
-        DOUT_s,
+        D_MEM_to_CORE,
         
         -- stage outs
         WB_CNTRL_MA_to_WB,
         DI_s,
         PC_MA_to_WB,
         
-        --output to memory
-        ENABLE_s,
-        WRITE_EN_s,
-        DIN_s,
-        ADDRESS_s,
-        WORD_LENGTH_s
+        -- output to memory
+        EN,
+        WEN,
+        D_CORE_to_MEM,
+        ADDR,
+        WORD_LENGTH
     );
         
     write_back_i : write_back
@@ -316,26 +305,6 @@ begin
         
         REG_ADDR_s,
         WRITE_BACK_s
-    );
-    
-    memory_i : memory
-    port map(
-        clk,
-        reset,
-        pc_asynch_s,
-        instruction_s,
-        
-        ENABLE_s,
-        WRITE_EN_s,
-        WORD_LENGTH_s,
-        ADDRESS_s,
-        DIN_s,
-        DOUT_s,
-        
-        -- IO
-        PERIPH_IN_EN,
-        PERIPH_IN,
-        PERIPH_OUT
     );
 
 end architecture beh;
