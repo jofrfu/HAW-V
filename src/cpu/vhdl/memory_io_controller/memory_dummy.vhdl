@@ -34,6 +34,12 @@ ENTITY blk_mem_gen_0_wrapper IS
 END blk_mem_gen_0_wrapper;
 
 architecture dummy of blk_mem_gen_0_wrapper is
+        
+    type memory is array (natural range 0 to 645120) of std_logic_vector(7 downto 0);
+    constant instr_memory : memory := (
+        
+        others => "00000000"
+    );
     
 begin
     test:
@@ -42,42 +48,16 @@ begin
         variable instruction      : instruction_bit_type;
     begin
         address := to_integer(unsigned(ADDRA));
-        case address is
-            when 0 =>
-                instruction := IFR_I_TYPE(-2, 0, ADDI_FUNCT3, 2, opimmo); -- addi x2, x0, -2
-            when 4 =>
-                instruction := IFR_I_TYPE(-1, 0, ADDI_FUNCT3, 1, opimmo); -- addi x1, x0, -1
-            when 8 =>
-                instruction := NOP_INSTRUCT;
-            when 12 =>
-                instruction := NOP_INSTRUCT;
-            when 16 =>
-                instruction := NOP_INSTRUCT;
-            when 20 =>
-                instruction := NOP_INSTRUCT;
-            when 24 =>
-                instruction := NOP_INSTRUCT;
-            when 28 =>
-                instruction := IFR_R_TYPE(ADD_FUNCT7, 2, 1, ADD_FUNCT3, 3, opo); --add x3, x1, x2
-            when 32 =>
-                instruction := NOP_INSTRUCT;
-            when 36 =>
-                instruction := NOP_INSTRUCT;
-            when 40 =>
-                instruction := NOP_INSTRUCT;
-            when 44 =>
-                instruction := NOP_INSTRUCT;
-            when 48 =>
-                instruction := NOP_INSTRUCT;
-            when others =>
-                report "end of instruction memory";
-                instruction := NOP_INSTRUCT;
-        end case;
+        
+        instruction(7 downto 0)     := instr_memory(address + 0);
+        instruction(15 downto 8)    := instr_memory(address + 1);
+        instruction(23 downto 16)   := instr_memory(address + 2);
+        instruction(31 downto 24)   := instr_memory(address + 3);
         
         DOUTA <= instruction;
             
     end process test;
         
     
-    DOUTB <= (others => '0');
+    DOUTB <= std_logic_vector(to_unsigned(6, DATA_WIDTH));
 end architecture dummy;
