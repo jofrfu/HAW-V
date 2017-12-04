@@ -42,7 +42,7 @@ for all : dut use entity work.memory_io_controller(beh);
     signal DOUT: STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal PERIPH_IN_EN: IO_ENABLE_TYPE;
     signal PERIPH_IN: IO_BYTE_TYPE;
-    signal PERIPH_OUT: IO_BYTE_TYPE ;
+    signal PERIPH_OUT: IO_BYTE_TYPE;
 
 begin
 
@@ -61,4 +61,4 @@ begin
     PERIPH_IN    => PERIPH_IN,
     PERIPH_OUT   => PERIPH_OUT 
     );
-    
+end architecture TB;
