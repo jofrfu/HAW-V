@@ -56,7 +56,7 @@ architecture beh of memory_io_controller is
             clkb : in STD_LOGIC
         );
     end component memory;
-    for all : memory use entity work.blk_mem_gen_0_wrapper(xilinx);     --entity work.blk_mem_gen_0_wrapper(xilinx)
+    for all : memory use entity work.blk_mem_gen_0_wrapper(dummy);     --entity work.blk_mem_gen_0_wrapper(xilinx)
     
     component peripherals is
         port(
@@ -96,7 +96,7 @@ begin
         BYTE_WRITE_EN_s,
         ADDR,
         DIN_LITTLE_s,
-        DOB_s,
+        DOB_LITTLE_s,
         CLK        
     );
     
@@ -108,7 +108,7 @@ begin
         BYTE_WRITE_EN_s,
         ADDR,
         DIN_LITTLE_s,
-        DO_s,
+        DO_LITTLE_s,
         
         -- IO
         PERIPH_IN_EN,
