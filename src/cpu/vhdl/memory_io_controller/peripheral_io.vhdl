@@ -27,12 +27,14 @@ end entity peripheral_io;
 architecture beh of peripheral_io is
     signal PERIPH_cs : IO_BYTE_TYPE := (others => (others => '0'));
     signal PERIPH_ns : IO_BYTE_TYPE;
+    signal DOUT_cs   : DATA_TYPE := (others => '0');
+    signal DOUT_ns   : DATA_TYPE;
     
     signal DECODE_RESU : IO_BYTE_TYPE;
 begin
 
     PERIPH_OUT <= PERIPH_cs;
-    
+    DOUT <= DOUT_cs;
     --!@brief writes eventually to registers, reads from registers
     decode:
     process(EN, WEA, ADDR, DIN, PERIPH_cs) is
@@ -107,7 +109,7 @@ begin
         end if;
         
         DECODE_RESU <= DECODE_RESU_v;
-        DOUT <= DOUT_v;
+        DOUT_ns <= DOUT_v;
     end process decode;
     
     --!@brief chooses between input or peripheral for writing to registers
@@ -161,8 +163,10 @@ begin
         if clk'event and clk = '1' then
             if reset = '1' then
                 PERIPH_cs <= (others => (others => '0'));
+                DOUT_cs <= (others => '0'); 
             else
                 PERIPH_cs <= PERIPH_ns;
+                DOUT_cs <= DOUT_ns;
             end if;
         end if;
     end process sequ_log;

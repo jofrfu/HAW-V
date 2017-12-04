@@ -186,7 +186,7 @@ begin
         periph_in(0) <= x"AF";
         periph_in(1) <= x"FE";
         wait until '1' = CLK and CLK'event;
-        
+        wait until '1' = CLK and CLK'event;
         wait for 1 ns;
         if DOUT /= x"AFFE0000" then
             report ">>>>TEST FOUR<<<< You stupid monkey!!! ERROR with dataout";
