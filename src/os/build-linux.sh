@@ -14,6 +14,11 @@ LINUX_VERSION=linux-4.14
 LINUX_SETUP=yes
 LINUX_BUILD=yes
 CORE_NUMBER=4
+BUSY_BUILD=yes
+CROSS_COMPILER=riscv64-unknown-linux-gnu-
+DISK_BUILD=yes
+HOST=riscv64-unknown-linux-gnu
+RE_BUILD=yes
 
 # Argument parse
 for i in "$@"
@@ -98,7 +103,7 @@ if [ $MAKEFILE = yes ]; then
 	echo "Generate makefile .."
 
 	cd $TOP/riscv-tools/riscv-gnu-toolchain
-	./configure --prefix=$RISCV CROSS_COMPILE=riscv64-unknown-linux-gnu-
+	./configure --prefix=$RISCV CROSS_COMPILE=$CROSS_COMPILER
 	make linux
 	echo
 else
@@ -129,9 +134,77 @@ else
 	echo
 fi
 
-#Build Kernel
+# Build Kernel
 if [ $LINUX_BUILD = yes ]; then
 	cd $LINUX_VERSION
 	make ARCH=riscv defconfig
 	make -j$CORE_NUMBER ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu-
 fi
+
+# BusyBox
+if [ $BUSY_BUILD = yes ]; then
+	cd $TOP
+	# Get BusyBox
+	rm -r busybox-1.26.2
+	curl -L http://busybox.net/downloads/busybox-1.26.2.tar.bz2 > busybox-1.26.2.tar.bz2
+	tar xvjf busybox-1.26.2.tar.bz2
+	rm busybox-1.26.2.tar.bz2
+
+	cd busybox-1.26.2
+	make allnoconfig
+
+	echo "Set Config"
+	sed -i 's/# CONFIG_STATIC is not set/CONFIG_STATIC=y/' .config
+	sed -i s/'CONFIG_CROSS_COMPILER_PREFIX=""'/CONFIG_CROSS_COMPILER_PREFIX='"'$CROSS_COMPILER'"'/ .config
+	sed -i 's/# CONFIG_FEATURE_INSTALLER is not set/CONFIG_FEATURE_INSTALLER=y/' .config
+	sed -i 's/# CONFIG_INIT is not set/CONFIG_INIT=y/' .config
+	sed -i 's/# CONFIG_ASH is not set/CONFIG_ASH=y/' .config
+	sed -i 's/# CONFIG_ASH_JOB_CONTROL is not set/CONFIG_ASH_JOB_CONTROL=n/' .config
+	sed -i 's/# CONFIG_MOUNT is not set/CONFIG_MOUNT=y/' .config
+	sed -i 's/# CONFIG_FEATURE_USE_INITTAB is not set/CONFIG_FEATURE_USE_INITTAB=y/' .config
+
+	make -j$CORE_NUMBER
+else
+	echo "Busybox build .. ignored"
+	echo
+fi
+
+# Root Disk
+if [ $DISK_BUILD = yes ]; then
+	cd $TOP/$LINUX_VERSION
+
+	mkdir root
+	cd root
+	mkdir -p bin etc dev lib proc sbin sys tmp usr usr/bin usr/lib usr/sbin
+
+	cp $TOP/busybox-1.26.2/busybox bin
+
+	# Download inittab
+	curl -L http://riscv.org/install-guides/linux-inittab > etc/inittab
+
+	#  create a symbolic link to /bin/busybox for init to work.
+	ln -s ../bin/busybox sbin/init
+	ln -s sbin/init init
+
+	# character device for the console
+	sudo mknod dev/console c 5 1
+
+	#  create our initramfs
+	find . | cpio --quiet -o -H newc > $TOP/$LINUX_VERSION/rootfs.cpio
+fi
+
+if [ $RE_BUILD = yes ]; then
+	cp $TOP/.config .config
+
+	# rebuild linux and pk
+	cd $TOP/$LINUX_VERSION
+	make -j$CORE_NUMBER ARCH=riscv CROSS_COMPILE=$CROSS_COMPILER vmlinux
+
+	cd $TOP/riscv-tools/riscv-pk/build
+	rm -rf *
+
+	../configure --prefix=$RISCV CROSS_COMPILE=$CROSS_COMPILER --host=riscv64-unknown-linux-gnu --with-payload=$TOP/$LINUX_VERSION/vmlinux
+	make
+	make install
+fi
+
