@@ -181,7 +181,7 @@ if [ $DISK_BUILD = yes ]; then
 
 	# Create inittab
 	#curl -L http://riscv.org/install-guides/linux-inittab > etc/inittab
-	rm inittab
+	cat > inittab
 	echo "::sysinit:/bin/busybox mount -t proc proc /proc" >> inittab
 	echo "::sysinit:/bin/busybox mount -t tmpfs tmpfs /tmp" >> inittab
 	echo "::sysinit:/bin/busybox mount -o remount,rw /dev/htifblk0 /" >> inittab
