@@ -9,7 +9,6 @@ src/cpu/vhdl/**/*.*
 
 #java sources
 src/cpu/java/**/*.*
-src/cpu/java/**/*
 !src/cpu/java/**/*.java
 
 # for memory generation - add whole project
