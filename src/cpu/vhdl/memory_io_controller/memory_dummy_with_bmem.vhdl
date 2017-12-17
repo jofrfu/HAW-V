@@ -48,7 +48,7 @@ begin
                 instruction := (others => '0');
                 --instruction := IFR_I_TYPE(-2, 0, ADDI_FUNCT3, 2, opimmo); -- addi x2, x0, -2
             when 4 =>
-                instruction := IFR_I_TYPE(-1, 0, ADDI_FUNCT3, 1, opimmo); -- addi x1, x0, -1
+                instruction := (others => '1'); -- addi x1, x0, -1
             when 8 =>
                 instruction := NOP_INSTRUCT;
             when 12 =>

@@ -174,7 +174,7 @@ begin
         --      WEN  = 0
         --      word_length = HALF 01
         --      periph_in_en = 11
-        --      periph_in = 0xFFFF
+        --      periph_in = 0xFEAF
         --action: load byte from periph_in into periph and get it as output
         --resu: data_out should be 0x"01"
         EN <= '1';
@@ -227,23 +227,50 @@ begin
         --test pc_async - mem -instruction connection
         --set:
         -- pc_async = 0;
-        -- instruction should be addi x2, x0, -2
+        -- resu: instruction should be 0x00000000 (look into mem_dummy)
         pc_asynch <= (others => '0');
         wait until '1' = CLK and CLK'event;
         wait for 1 ns;
-        if instruction /= IFR_I_TYPE(-2, 0, ADDI_FUNCT3, 2, opimmo) then 
+        if instruction /= x"00000000" then 
             report " >>>>TEST SIX<<<< failed to load instruction 0!!!!!!";
-            --wait;
+            wait;
         end if;
+        -- pc_async = 4;
+        -- resu: instruction should be 0xFFFFFFFF (look into mem_dummy)
         wait until '1' = CLK and CLK'event;        
         pc_asynch <= std_logic_vector(to_unsigned(4,pc_asynch'length));
         wait until '1' = CLK and CLK'event;
         wait for 1 ns;
-        if instruction /= IFR_I_TYPE(-1, 0, ADDI_FUNCT3, 1, opimmo) then 
+        if instruction /= x"FFFFFFFF" then 
             report " >>>>TEST SIX<<<< failed to load instruction 4!!!!!!";
-            --wait;
+            wait;
         end if;
         
+        -- test7
+        -- test dout mem to dout mux
+        -- write and read from mem stub
+        -- set:
+            -- en   = 1
+            -- DIN   = 0x"F1F100F1"
+            -- ADDR = 0x"00000000"
+            -- WEN  = 1
+            -- word_length =  word 10
+        -- resu: DOUT: should be   0x"F1F100F1"
+        en <= '1';
+        ADDR <= x"00000000";
+        DIN <= x"F1F100F1";
+        WEN <= '1';
+        word_length <= "10";
+        wait until '1' = CLK and CLK'event;
+        wait for 1 ns;
+        WEN <= '0';
+        wait until '1' = CLK and CLK'event;
+        wait for 1 ns;
+        
+        if DOUT /= x"00F1F1F1" then
+            report ">>>>TEST SEVEN<<<< You stupid monkey!!! ERROR with dataout from MEM";
+            wait;
+        end if;
         
         report "##################################################";
         report ">>>>>>>>>>>>>>>TEST SUCCESSFUL<<<<<<<<<<<<!!!!!!!";
