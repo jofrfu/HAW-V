@@ -121,7 +121,7 @@ if [ $LINUX_SETUP = yes ]; then
 
 		curl -L https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.14.33.tar.xz | tar -xJkf -
 	elif [ $LINUX_VERSION = linux-4.14 ]; then
-		git clone https://github.com/riscv/riscv-linux.git linux-4.14
+		git clone -b riscv-linux-4.14 https://github.com/riscv/riscv-linux.git linux-4.14
 
 		curl -L https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.14.tar.xz | tar -xJkf -
 	else
@@ -181,12 +181,13 @@ if [ $DISK_BUILD = yes ]; then
 
 	# Create inittab
 	#curl -L http://riscv.org/install-guides/linux-inittab > etc/inittab
-	rm inittab
+	cd etc
 	echo "::sysinit:/bin/busybox mount -t proc proc /proc" >> inittab
 	echo "::sysinit:/bin/busybox mount -t tmpfs tmpfs /tmp" >> inittab
 	echo "::sysinit:/bin/busybox mount -o remount,rw /dev/htifblk0 /" >> inittab
 	echo "::sysinit:/bin/busybox --install -s" >> inittab
 	echo "/dev/console::sysinit:-/bin/ash" >> inittab
+	cd ..
 
 	#  create a symbolic link to /bin/busybox for init to work.
 	ln -s ../bin/busybox sbin/init
@@ -200,16 +201,17 @@ if [ $DISK_BUILD = yes ]; then
 fi
 
 if [ $RE_BUILD = yes ]; then
-	cp $TOP/.config .config
-
 	# rebuild linux and pk
 	cd $TOP/$LINUX_VERSION
+
+	echo "Rbuild Linux"
+	sed -i 's/# CONFIG_INITRAMFS_SOURCE is not set/CONFIG_INITRAMFS_SOURCE="rootfs.cpio"/' .config
 	make -j$CORE_NUMBER ARCH=riscv CROSS_COMPILE=$CROSS_COMPILER vmlinux
 
+	echo "Rebuild PK"
 	cd $TOP/riscv-tools/riscv-pk/build
 	rm -rf *
-
-	../configure --prefix=$RISCV CROSS_COMPILE=$CROSS_COMPILER --host=riscv64-unknown-linux-gnu --with-payload=$TOP/$LINUX_VERSION/vmlinux
+	../configure --prefix=$RISCV --host=riscv64-unknown-linux-gnu --with-payload=$TOP/$LINUX_VERSION/vmlinux
 	make
 	make install
 fi

@@ -57,7 +57,7 @@ if [ "$SETUP" = yes ]; then
 	echo "LINUX:        $LINUX"
 	echo "TOOL_INSTALL: $TOOL_INSTALL"
 	echo
-	
+
 	# install tools
 	if [ "$TOOL_INSTALL" = yes ]; then
 		echo "install tools .."
@@ -72,7 +72,7 @@ if [ "$SETUP" = yes ]; then
 	else
 		echo "install tools .. ignored"
 	fi
-	
+
 	#Download Git Repo
 	if [ "$LOAD_REPO" = yes ]; then
 		echo "init git repo .."
