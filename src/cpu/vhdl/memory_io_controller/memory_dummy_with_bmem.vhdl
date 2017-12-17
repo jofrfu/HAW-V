@@ -34,8 +34,14 @@ ENTITY blk_mem_gen_0_wrapper IS
 END blk_mem_gen_0_wrapper;
 
 architecture dummy_bmem of blk_mem_gen_0_wrapper is
-    signal dout_cs : DATA_TYPE;
-    type BMEM is array(10 downto 0) of DATA_TYPE; 
+    signal douta_ns : instruction_bit_type;
+    signal douta_cs : instruction_bit_type := (others => '0');
+    signal b_REG   : DATA_TYPE := (others => '0');
+    signal dout_cs : DATA_TYPE := (others => '0');
+    --type BMEM is array(10 downto 0) of DATA_TYPE;
+    
+    
+    
 begin
     test_portA:
     process (ADDRA) is
@@ -75,8 +81,8 @@ begin
                 report "end of instruction memory";
                 instruction := NOP_INSTRUCT;
         end case;
+        douta_ns <= instruction;
         
-        DOUTA <= instruction;
             
     end process test_portA;
     
@@ -84,37 +90,45 @@ begin
     process (ADDRB, ENB, WEB, DINB) is
         variable address : integer;
         variable instruction      : instruction_bit_type;
-        variable dout_array       : BMEM; --just for testing
+        --variable dout_array       : BMEM; --just for testing
         variable dout             : DATA_TYPE;
         variable din              : DATA_TYPE;
     begin
         address := to_integer(unsigned(ADDRB));
         din     := DINB;
-        if address < 10 then
-            if ENB = '1' then
-                case WEB is      --write into mem 
-                    when "0001" =>     
-                        dout_array(address) := DINB;
-                    when "0011" =>
-                        dout_array(address) := DINB;
-                    when "1111" =>
-                        dout_array(address) := DINB;
-                    when "0000" =>     --read from mem
-                        dout := dout_array(address);
-                    when others =>  
-                        dout := dout_cs;
-                        report "ERROR with WEB" severity ERROR;            
-                end case;
-            else 
-                dout := dout_cs;
-            end if;
-        else
-            report "address to big for mem stub, try smaller then 10!!!" severity ERROR;
+        if ENB = '1' then
+            case WEB is      --write into mem 
+                when "0001" =>     
+                   dout := DINB;
+                when "0011" =>
+                    dout := DINB;
+                when "1111" =>
+                    dout := DINB;
+                when "0000" =>     --read from mem
+                    dout := b_REG;
+                when others =>  
+                    dout := b_REG;
+                    report "ERROR with WEB" severity ERROR;            
+            end case;
+        else 
+            dout := b_REG;
         end if;
-        dout_cs <= dout;
-        DOUTB <= dout_cs;
+        b_REG <= dout;
             
+        
+         
     end process test_portB;
+    
+    reg :
+    process(CLKB) is
+    begin
+        if CLKB'event and CLKB = '1' then
+        douta_cs <= douta_ns;
+        dout_cs <= b_REG;
+        end if;
+        DOUTB <= dout_cs;
+        DOUTA <= douta_cs;
+    end process reg;        
     
     
 end architecture dummy_bmem;
