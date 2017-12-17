@@ -193,35 +193,60 @@ begin
             wait;
         end if;
         
+        -- test5
+        -- test Data out from periph_io
+        -- set:
+             -- en   = 1
+             -- DIN   = 0x"FFFF0000"
+             -- ADDR = 0x"80000000"
+             -- WEN  = 0
+             -- word_length = HALF 01
+             -- periph_in_en = 11
+             -- periph_in = 0xFFFF
+        -- action: load byte from periph_in into periph and get it as output
+        -- resu: data_out should be 0x"01"
         
-            -- test5
-            -- test Data out from periph_io
-            -- set:
-                 -- en   = 1
-                 -- DIN   = 0x"FFFF0000"
-                 -- ADDR = 0x"80000000"
-                 -- WEN  = 0
-                 -- word_length = HALF 01
-                 -- periph_in_en = 11
-                 -- periph_in = 0xFFFF
-            -- action: load byte from periph_in into periph and get it as output
-            -- resu: data_out should be 0x"01"
-            
-            -- EN <= '1';
-            -- DIN <= x"FFFF0000";
-            -- ADDR <= x"80000000";
-            -- WEN <= '0';
-            -- word_length <= "01";
-            -- periph_in_en <= "11";
-            -- periph_in(0) <= x"FE";
-            -- periph_in(1) <= x"AF";
-            -- wait until '1' CLK and CLK'event;
-            -- wait for 1 ns;
-            -- if DOUT /= x"0000AFFE" then
-                -- report ">>>>TEST FIVE<<<< You stupid monkey!!! ERROR with dataout";
-                -- wait;
+        EN <= '1';
+        DIN <= x"FFFF0000";
+        ADDR <= x"80000000";
+        WEN <= '0';
+        word_length <= "01";
+        periph_in_en <= "11";
+        periph_in(0) <= x"FE";
+        periph_in(1) <= x"AF";
+        wait until '1' = CLK and CLK'event;
+        wait for 1 ns;
+        if DOUT /= x"AFFE0000" then
+            report ">>>>TEST FIVE<<<< You stupid monkey!!! ERROR with dataout";
+            wait;
+        end if;
         
-        report ">>>>>>>TEST SUCCESSFUL<<<<<<<<<<<<!!!!!!!";
+        report ">>>>>>>>>>>>>>>>>>>>Periph TESTS DONE<<<<<<<<<<<<<<<<<<<<<<";
+        
+        --test6
+        --test pc_async - mem -instruction connection
+        --set:
+        -- pc_async = 0;
+        -- instruction should be addi x2, x0, -2
+        pc_asynch <= (others => '0');
+        wait until '1' = CLK and CLK'event;
+        wait for 1 ns;
+        if instruction /= IFR_I_TYPE(-2, 0, ADDI_FUNCT3, 2, opimmo) then 
+            report " >>>>TEST SIX<<<< failed to load instruction 0!!!!!!";
+            --wait;
+        end if;
+        wait until '1' = CLK and CLK'event;        
+        pc_asynch <= std_logic_vector(to_unsigned(4,pc_asynch'length));
+        wait until '1' = CLK and CLK'event;
+        wait for 1 ns;
+        if instruction /= IFR_I_TYPE(-1, 0, ADDI_FUNCT3, 1, opimmo) then 
+            report " >>>>TEST SIX<<<< failed to load instruction 4!!!!!!";
+            --wait;
+        end if;
+        
+        
+        report "##################################################";
+        report ">>>>>>>>>>>>>>>TEST SUCCESSFUL<<<<<<<<<<<<!!!!!!!";
         simulation_running <= false;
         wait;
         
