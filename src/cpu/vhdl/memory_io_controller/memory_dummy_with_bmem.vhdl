@@ -36,8 +36,9 @@ END blk_mem_gen_0_wrapper;
 architecture dummy_bmem of blk_mem_gen_0_wrapper is
     signal douta_ns : instruction_bit_type;
     signal douta_cs : instruction_bit_type := (others => '0');
-    signal b_REG   : DATA_TYPE := (others => '0');
-    signal dout_cs : DATA_TYPE := (others => '0');
+    signal b_REG    : DATA_TYPE := (others => '0');
+    signal dout_ns  : DATA_TYPE;
+    signal dout_cs  : DATA_TYPE := (others => '0');
     --type BMEM is array(10 downto 0) of DATA_TYPE;
     
     
@@ -51,10 +52,10 @@ begin
         address := to_integer(unsigned(ADDRA));
         case address is
             when 0 =>
-                instruction := (others => '0');
+                instruction := (others => '1');
                 --instruction := IFR_I_TYPE(-2, 0, ADDI_FUNCT3, 2, opimmo); -- addi x2, x0, -2
             when 4 =>
-                instruction := (others => '1'); -- addi x1, x0, -1
+                instruction := x"01020304"; -- addi x1, x0, -1
             when 8 =>
                 instruction := NOP_INSTRUCT;
             when 12 =>
@@ -96,6 +97,7 @@ begin
     begin
         address := to_integer(unsigned(ADDRB));
         din     := DINB;
+        dout    := b_REG; 
         if ENB = '1' then
             case WEB is      --write into mem 
                 when "0001" =>     
@@ -110,13 +112,13 @@ begin
                     dout := b_REG;
                     report "ERROR with WEB" severity ERROR;            
             end case;
+            b_REG <= dout;
+            dout_ns <= b_REG;
         else 
-            dout := b_REG;
+            b_REG <= b_REG;
+            dout_ns <= dout_cs;
         end if;
-        b_REG <= dout;
-            
-        
-         
+          
     end process test_portB;
     
     reg :
@@ -124,11 +126,13 @@ begin
     begin
         if CLKB'event and CLKB = '1' then
         douta_cs <= douta_ns;
-        dout_cs <= b_REG;
-        end if;
-        DOUTB <= dout_cs;
-        DOUTA <= douta_cs;
+        dout_cs <= dout_ns;
+        else
+        douta_cs <= douta_cs;
+        dout_cs <= dout_cs;
+        end if;      
     end process reg;        
-    
+    DOUTB <= dout_cs;
+    DOUTA <= douta_cs;
     
 end architecture dummy_bmem;

@@ -35,7 +35,7 @@ for all : dut use entity work.memory_io_controller(beh);
 
     signal CLK: STD_LOGIC;
     signal reset: STD_LOGIC;
-    signal pc_asynch: ADDRESS_TYPE;
+    signal pc_asynch: ADDRESS_TYPE := (others => '0'); 
     signal instruction: INSTRUCTION_BIT_TYPE;
     signal EN: STD_LOGIC;
     signal WEN: STD_LOGIC;
@@ -227,21 +227,21 @@ begin
         --test pc_async - mem -instruction connection
         --set:
         -- pc_async = 0;
-        -- resu: instruction should be 0x00000000 (look into mem_dummy)
+        -- resu: instruction should be 0xFFFFFFFF (look into mem_dummy)
         pc_asynch <= (others => '0');
         wait until '1' = CLK and CLK'event;
         wait for 1 ns;
-        if instruction /= x"00000000" then 
+        if instruction /= x"FFFFFFFF" then 
             report " >>>>TEST SIX<<<< failed to load instruction 0!!!!!!";
             wait;
         end if;
         -- pc_async = 4;
-        -- resu: instruction should be 0xFFFFFFFF (look into mem_dummy)
+        -- resu: instruction should be 0x04030201 (look into mem_dummy)
         wait until '1' = CLK and CLK'event;        
         pc_asynch <= std_logic_vector(to_unsigned(4,pc_asynch'length));
         wait until '1' = CLK and CLK'event;
         wait for 1 ns;
-        if instruction /= x"FFFFFFFF" then 
+        if instruction /= x"04030201" then 
             report " >>>>TEST SIX<<<< failed to load instruction 4!!!!!!";
             wait;
         end if;
@@ -251,14 +251,14 @@ begin
         -- write and read from mem stub
         -- set:
             -- en   = 1
-            -- DIN   = 0x"F1F100F1"
+            -- DIN   = 0x"01020304"
             -- ADDR = 0x"00000000"
             -- WEN  = 1
             -- word_length =  word 10
-        -- resu: DOUT: should be   0x"F1F100F1"
+        -- resu: DOUT: should be   0x"01020304"
         en <= '1';
         ADDR <= x"00000000";
-        DIN <= x"F1F100F1";
+        DIN <= x"01020304";
         WEN <= '1';
         word_length <= "10";
         wait until '1' = CLK and CLK'event;
@@ -267,10 +267,48 @@ begin
         wait until '1' = CLK and CLK'event;
         wait for 1 ns;
         
-        if DOUT /= x"00F1F1F1" then
+        if DOUT /= x"01020304" then
             report ">>>>TEST SEVEN<<<< You stupid monkey!!! ERROR with dataout from MEM";
             wait;
         end if;
+        
+        -- test8
+        -- test dout mem to dout mux
+        -- write and read from mem stub but disable dout when write
+        -- set:
+            -- en   = 0 
+            -- DIN   = 0x"0F0E0D0C"
+            -- ADDR = 0x"00000004"
+            -- WEN  = 1
+            -- word_length =  word 10
+        -- resu: DOUT: should be 0x"01020304"
+        en <= '0';
+        ADDR <= x"00000004";
+        DIN <= x"0F0E0D0C";
+        WEN <= '1';
+        word_length <= "10";
+        wait until '1' = CLK and CLK'event;
+        wait for 1 ns;
+        -- set:
+            -- en   = 1
+            -- DOUT: should be 0x"04030201"
+        en <= '1';
+        WEN <= '1';
+        word_length <= "10";
+        DIN <= x"04030201";
+        ADDR <= x"00000008";
+        wait until '1' = CLK and CLK'event;
+        wait for 2 ns;
+        WEN <= '0';
+        wait until '1' = CLK and CLK'event;
+        wait for 2 ns;
+        
+        if DOUT /= x"04030201" then
+            report ">>>>TEST EIGHT<<<< You stupid monkey!!! ERROR with dataout from MEM";
+            --wait;
+        end if;
+        wait until '1' = CLK and CLK'event;
+        wait until '1' = CLK and CLK'event;
         
         report "##################################################";
         report ">>>>>>>>>>>>>>>TEST SUCCESSFUL<<<<<<<<<<<<!!!!!!!";
