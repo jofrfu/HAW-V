@@ -1,15 +1,15 @@
 #!/bin/bash
 # Author: Mike Wüstenberg
 # Date: 26.11.2017
-# Version: 0.1
+# Version: 0.6
 # Description: This Script ist building the Risc-V toolchain.
 
 #Variable
-LOAD_REPO=yes
-LINUX=ubuntu
-TOOL_INSTALL=yes
-SETUP=yes
-TEST_NAME=toolchaintest
+LOAD_REPO=yes # Download toolchain repository. options[yes, no]
+LINUX=ubuntu # Set Host Linux Type. options[ubuntu, fedora]
+TOOL_INSTALL=yes # Install third party tools(needs sudo). options[yes, no]
+SETUP=yes	#skip toolchain download and installation. options[yes, no]
+TEST_NAME=toolchaintest # Name of the test file
 
 # Argument parse
 for i in "$@"
@@ -103,11 +103,7 @@ export TOP=$(pwd)
 export RISCV=$TOP/riscv
 export PATH=$PATH:$RISCV/bin
 
-
 echo
-echo "build risc-v toolchain"
-echo
-echo "SETUP:     $SETUP"
 echo "exports"
 echo "TOP:   $TOP"
 echo "RISCV: $RISCV"
