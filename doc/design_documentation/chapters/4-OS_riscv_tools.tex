@@ -16,7 +16,7 @@ To compile and test a linux operating system based on riscv32i, we need to insta
      $ sudo apt-get install autoconf automake autotools-dev curl 
       device-tree-compiler libmpc-dev libmpfr-dev libgmp-dev 
       libusb-1.0-0-dev gawk build-essential bison flex texinfo 
-      gperf libtool patchutils bc zlib1g-dev pkg-config git
+      gperf libtool patchutils bc zlib1g-dev pkg-config git ncurses-dev openssl
 
 \end{verbatim}
 
@@ -73,10 +73,12 @@ Add bin folder to \$PATH variable
    $ export PATH=$PATH:$RISCV/bin
 \end{verbatim}
 
-Now, we can run the build script.
-
+Now, we can run the build script. You may edit it for your needs. Change --host=riscv64-unknown-elf to --host=riscv32-unknown-elf for building 32 bit compiler.
+There is also a special instruction set script, you may edit this and use it instead.
+If you wanna use 32 bit with only integer instructions set, you may edit the file ``build-rv-32ima.sh'' and the change the commands: --with-isa and --with-arch like this: --with-isa=rv32i --with-arch=rv32i
+Finally run the ``build-rv-32ima.sh'' script
 \begin{verbatim}
-   $ ./build.sh
+   $ ./build-rv-32ima.sh
 \end{verbatim}
 
 \subsection{Testing your toolchain}
@@ -104,3 +106,49 @@ The ``Hello wolrd'' programm involves a system call, which couldn't be handled b
 \begin{verbatim}
    $ spike pk hello
 \end{verbatim}
+
+\section{Installing Linux/RISC-V}
+
+\subsection{Building riscv64-unknown-linux-gnu-gcc}
+
+The cross-compiler is used to build binaries linked to GNU C Library (glibc) insteadof the Newlibi libary.
+To build linux you can use the already installed riscv32-unknown-elf-gcc, but for cross-compiling applications, we now build the riscv-32-unknown-linux-gnu-gcc.
+
+First we need to enter the riscv-gnu-toolchain directory und run the configure script to generate the ``Makefile''.
+
+Here if you wanna use the 32 bit version with only integer instructions set, you have to add options like so. 
+\begin{verbatim}
+   $ ./configure --with-arch=rv32i --prefix=$RISCV
+\end{verbatim}
+
+\section{Building linux kernel}
+
+Get the linux kernel source code. (This way tested on version 4.15-rc3)
+
+\begin{verbatim}
+   $ cd $TOP
+   $ git clone https://github.com/riscv/riscv-linux.git
+\end{verbatim}
+
+Configuring the linux kernel
+
+Applying default configuration and edit it with a text-based GUI (ncurses)
+
+Don't forget the CROSS COMPILE option!!
+
+\begin{verbatim}
+   $ make -j4 ARCH=riscv defconfig
+          CROSS_COMPILE=$RISCV/bin/riscv32-unknown-linux-gnu-
+   $ make -j4 ARCH=riscv menuconfig
+          CROSS_COMPILE=$RISCV/bin/riscv32-unknown-linux-gnu-
+\end{verbatim}
+
+When done configuration, you can now start building the kernel.
+-j [number] is optional and it uses multiple cores to speed up the process. 
+
+\begin{verbatim}
+   $ make -j4 ARCH=riscv 
+          CROSS_COMPILE=$RISCV/bin/riscv32-unknown-linux-gnu- vmlinux
+\end{verbatim}
+
+The created vmlinux is the cross-compiled linux kernel image.
