@@ -31,7 +31,13 @@ architecture beh of memory_io_controller is
 
     signal BYTE_WRITE_EN_s      : std_logic_vector(3 downto 0);
     signal DO_s                 : DATA_TYPE;
-    signal DOB_s                : DATA_TYPE;
+    signal DOB_s                : DATA_TYPE;    
+    
+    -- Little Endian signals
+    signal DO_LITTLE_s             : DATA_TYPE;
+    signal DOB_LITTLE_s            : DATA_TYPE;
+    signal instruction_little_s    : INSTRUCTION_BIT_TYPE;
+    signal DIN_LITTLE_s            : DATA_TYPE;
     
     component memory is
         Port ( 
@@ -50,7 +56,7 @@ architecture beh of memory_io_controller is
             clkb : in STD_LOGIC
         );
     end component memory;
-    for all : memory use entity work.blk_mem_gen_0_wrapper(xilinx);     --entity work.blk_mem_gen_0_wrapper(xilinx)
+    for all : memory use entity work.blk_mem_gen_0_wrapper(dummy_bmem);     --entity work.blk_mem_gen_0_wrapper(xilinx)
     
     component peripherals is
         port(
@@ -83,14 +89,14 @@ begin
         "0000",             --never write => read only
         pc_asynch,          --address is PC
         (others => '0'),    --READ ONLY, NO WRITE
-        instruction,        --write to instruction ou
+        instruction_little_s,        --write to instruction ou
         CLK,
         ----------------
         mem_en,   --enable when enabled memory (when MSB is 1 is an IO access)
         BYTE_WRITE_EN_s,
         ADDR,
-        DIN,
-        DOB_s,
+        DIN_LITTLE_s,
+        DOB_LITTLE_s,
         CLK        
     );
     
@@ -101,14 +107,28 @@ begin
         io_en, -- peripheral enable
         BYTE_WRITE_EN_s,
         ADDR,
-        DIN,
-        DO_s,
+        DIN_LITTLE_s,
+        DO_LITTLE_s,
         
         -- IO
         PERIPH_IN_EN,
         PERIPH_IN,
         PERIPH_OUT
     );
+        
+    -- little to big endian
+    DOB_s <= DOB_LITTLE_s( 7 downto  0) & DOB_LITTLE_s(15 downto  8) &
+             DOB_LITTLE_s(23 downto 16) & DOB_LITTLE_s(31 downto 24);
+    
+    DO_s  <= DO_LITTLE_s( 7 downto  0) & DO_LITTLE_s(15 downto  8) &
+             DO_LITTLE_s(23 downto 16) & DO_LITTLE_s(31 downto 24);
+    
+    instruction <= instruction_little_s( 7 downto  0) & instruction_little_s(15 downto  8) &
+                   instruction_little_s(23 downto 16) & instruction_little_s(31 downto 24);
+    
+    -- big to little endian
+    DIN_LITTLE_s <= DIN( 7 downto  0) & DIN(15 downto  8) &
+                    DIN(23 downto 16) & DIN(31 downto 24);
     
     dout_mux:
     process(DOB_s, DO_s, ADDR(ADDR'high)) is
