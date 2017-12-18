@@ -77,23 +77,29 @@ public class CRR {
 
             for (Map.Entry<Integer, Long> entry : regVal.entrySet()) {
                 sbRegCheck.append("    "+entry.getKey() + ",\r\n");
-
-                sbValues.append("    \"" + Long.toBinaryString(entry.getValue()) + "\",\r\n");
+                String val =   Long.toBinaryString(entry.getValue());
+                int valLength = val.length();
+                for(int i = 0; i < 32 - valLength; i++){
+                    val = "0" + val;
+                }
+                sbValues.append("    \"" + val + "\",\r\n");
             }
 
-            out.write("use WORK.riscv_pack.all; \r\n" +
+            out.write("library IEEE;\r\n" +
+                      "use IEEE.std_logic_1164.all;\r\n" +
+                      "use WORK.riscv_pack.all; \r\n" +
                       "package regResults  is \r\n" +
-                      "type reg_ar is array (0 to "+ regVal.size() +")) of integer range 0 to 31;\r\n" +
+                      "type reg_ar is array (0 to "+ regVal.size() +") of integer range 0 to 31;\r\n" +
                       "constant REG_TO_CHECK : reg_ar := ( \n");
-            sbRegCheck.deleteCharAt(sbRegCheck.length()-1); //delete last ","
+            sbRegCheck.deleteCharAt(sbRegCheck.length()-3); //delete last ","
             out.write(sbRegCheck.toString() + ");");
 
-            out.write("\r\n\r\ntype reg_resu_ar is array (0 to "+ regVal.size() +")) of DATA_TYPE;\r\n" +
-                      "constant REG_TO_CHECK : reg_resu_ar := ( \r\n");
-            sbRegCheck.deleteCharAt(sbRegCheck.length()-1); //delete last ","
+            out.write("\r\n\r\ntype reg_resu_ar is array (0 to "+ regVal.size() +") of DATA_TYPE;\r\n" +
+                      "constant REG_VALUES : reg_resu_ar := ( \r\n");
+            sbValues.deleteCharAt(sbValues.length()-3); //delete last ","
             out.write(sbValues.toString() + ");");
 
-            out.write("\r\nend package body;");
+            out.write("\r\nend package regResults;");
             out.close();
 
 

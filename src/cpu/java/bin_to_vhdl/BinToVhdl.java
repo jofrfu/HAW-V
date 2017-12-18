@@ -59,7 +59,9 @@ public class BinToVhdl {
             in = new FileInputStream(in_f);
             out = new FileWriter(out_f);
             
-            out.write("package " +  args[3] + " is \r\n" +
+            out.write("library IEEE; \r\n" + 
+                      "use IEEE.std_logic_1164.all;" +
+                      "package " +  args[3] + " is \r\n" +
                       "type memory is array (natural range 0 to 645120) of std_logic_vector(7 downto 0);\r\n" + 
                       "constant "+ args[2] +" : memory := (");
             
@@ -83,7 +85,7 @@ public class BinToVhdl {
                 
             }while(bytesRead != -1);
             out.write("\r\n    others => \"00000000\"\r\n);\r\n" + 
-                      "end package body;");
+                      "end package " + args[3] + ";");
             out.close();
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
