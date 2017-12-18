@@ -1,0 +1,6 @@
+make -j4 ARCH=riscv defconfig CROSS_COMPILE=/opt/riscv/bin/riscv32-unknown-linux-gnu-
+
+make -j4 ARCH=riscv CROSS_COMPILE=/opt/riscv/bin/riscv32-unknown-linux-gnu- vmlinux
+
+
+../configure --prefix=/opt/riscv/riscv32-unknown-linux-gnu/  --host=riscv32-unknown-linux-gnu --with-payload=/home/sp/riscv-linux/vmlinux
