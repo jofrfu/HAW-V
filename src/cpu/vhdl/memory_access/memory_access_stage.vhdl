@@ -62,9 +62,9 @@ architecture beh of memory_access is
 begin
 
 	load_mux:
-	process(RESU_SYNCH, DATA_IN_s, MA_CNTRL_SYNCH(1)) is
+	process(RESU_SYNCH, DATA_IN_s, MA_CNTRL_SYNCH(0)) is
 	begin
-		if MA_CNTRL_SYNCH(1) = '1' then
+		if MA_CNTRL_SYNCH(0) = '1' then
 			di_ns <= DATA_IN_s;
 		else
 			di_ns <= RESU_SYNCH;
@@ -104,15 +104,15 @@ begin
     end process sign_ext;
 	
     MEM_MUX:
-    process(MA_CNTRL_ASYNCH(1), MA_CNTRL_SYNCH(0), RESU_SYNCH, RESU_ASYNCH, WORD_CNTRL_SYNCH, WORD_CNTRL_ASYNCH) is
+    process(MA_CNTRL_ASYNCH(0), MA_CNTRL_SYNCH(1), RESU_SYNCH, RESU_ASYNCH, WORD_CNTRL_SYNCH, WORD_CNTRL_ASYNCH) is
     
     begin
-        if MA_CNTRL_ASYNCH(1) = '1' and MA_CNTRL_SYNCH(0) = '0' then -- load - priority
+        if MA_CNTRL_ASYNCH(0) = '1' and MA_CNTRL_SYNCH(1) = '0' then -- load - priority
             ADDRESS  <= RESU_ASYNCH;
             ENABLE   <= '1';
             WRITE_EN <= '0';
             WORD_LENGTH <= WORD_CNTRL_ASYNCH;
-        elsif MA_CNTRL_SYNCH(0) = '1' and MA_CNTRL_ASYNCH(1) = '0' then -- store
+        elsif MA_CNTRL_SYNCH(1) = '1' and MA_CNTRL_ASYNCH(0) = '0' then -- store
             ADDRESS  <= RESU_SYNCH;
             ENABLE   <= '1';
             WRITE_EN <= '1';
