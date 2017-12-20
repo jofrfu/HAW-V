@@ -50,7 +50,8 @@ begin
     begin
         EN_v   := EN;
         WEA_v  := WEA;
-        ADDR_v := '0' & ADDR(ADDRESS_WIDTH-2 downto 0);
+        -- manipulate for getting memory behavior
+        ADDR_v := '0' & ADDR(ADDRESS_WIDTH-2 downto 2) & "00";
         DIN_v  := DIN;
         
         PERIPH_cs_v := PERIPH_cs;
@@ -128,7 +129,8 @@ begin
         variable WEA_v : STD_LOGIC_vector(3 DOWNTO 0);
     begin
         
-        ADDR_v := '0' & ADDR(ADDRESS_WIDTH-2 downto 0);
+        -- manipulate for getting memory behavior
+        ADDR_v := '0' & ADDR(ADDRESS_WIDTH-2 downto 2) & "00";
         
         PERIPH_IN_EN_v := PERIPH_IN_EN;
         PERIPH_IN_v    := PERIPH_IN;

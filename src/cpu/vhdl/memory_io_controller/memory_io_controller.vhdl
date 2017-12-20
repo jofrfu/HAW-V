@@ -29,9 +29,7 @@ end entity memory_io_controller;
     
 architecture beh of memory_io_controller is
 
-    signal BYTE_WRITE_EN_s      : std_logic_vector(3 downto 0);
-    signal DO_s                 : DATA_TYPE;
-    signal DOB_s                : DATA_TYPE;    
+    signal BYTE_WRITE_EN_s      : std_logic_vector(3 downto 0); 
     
     -- Little Endian signals
     signal DO_LITTLE_s             : DATA_TYPE;
@@ -121,68 +119,80 @@ begin
                    instruction_little_s(23 downto 16) & instruction_little_s(31 downto 24);
 				   
     dout_conv:		--for LOAD
-	process(ADDR(1 downto 0), DOB_LITTLE_s, WORD_LENGTH) is
+	process(ADDR, DOB_LITTLE_s, DO_LITTLE_s, WORD_LENGTH) is
 		variable offset_v : std_logic_vector(1 downto 0);
 		variable dob_little_v : DATA_TYPE;
+        variable do_little_v  : DATA_TYPE;
+        variable conv_little_v: DATA_TYPE;
 		variable word_length_v : WORD_CNTRL_TYPE;
 		variable dout_v : DATA_TYPE;
+        variable io_not_mem_v : std_logic;
 	begin
 		offset_v := ADDR(1 downto 0);
 		dob_little_v := DOB_LITTLE_s;
+        do_little_v  := DO_LITTLE_s;
 		word_length_v := WORD_LENGTH;
+        io_not_mem_v := ADDR(ADDR'high);
 		dout_v := (others => '0');
+        
+        -- mem/periph mux
+        if io_not_mem_v = '1' then
+            conv_little_v := do_little_v;
+        else
+            conv_little_v := dob_little_v;
+        end if;
 		
 		case offset_v is
 			when "00" =>
 				case word_length_v is
 					when BYTE =>
-						dout_v(7 downto 0) := dob_little_v (7 downto 0);
+						dout_v(7 downto 0) := conv_little_v (7 downto 0);
 					when HALF =>
-						dout_v(7 downto 0) := dob_little_v(15 downto 8);
-						dout_v(15 downto 8) := dob_little_v(7 downto 0);
+						dout_v(7 downto 0) := conv_little_v(15 downto 8);
+						dout_v(15 downto 8) := conv_little_v(7 downto 0);
 					when WORD =>
-						dout_v(7 downto 0) := dob_little_v(31 downto 24);
-						dout_v(15 downto 8) := dob_little_v(23 downto 16);
-						dout_v(23 downto 16) := dob_little_v(15 downto 8);
-						dout_v(31 downto 24) := dob_little_v(7 downto 0);
+						dout_v(7 downto 0) := conv_little_v(31 downto 24);
+						dout_v(15 downto 8) := conv_little_v(23 downto 16);
+						dout_v(23 downto 16) := conv_little_v(15 downto 8);
+						dout_v(31 downto 24) := conv_little_v(7 downto 0);
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(00) word_length" severity error;
 				end case;
 			when "01" =>
 				case word_length_v is
 					when BYTE =>
-						dout_v(7 downto 0) := dob_little_v (15 downto 8);
+						dout_v(7 downto 0) := conv_little_v (15 downto 8);
 					when HALF =>
-						dout_v(7 downto 0) := dob_little_v(23 downto 16);
-						dout_v(15 downto 8) := dob_little_v(15 downto 8);
+						dout_v(7 downto 0) := conv_little_v(23 downto 16);
+						dout_v(15 downto 8) := conv_little_v(15 downto 8);
 					when WORD =>
-						dout_v(15 downto 8) := dob_little_v(31 downto 24);
-						dout_v(23 downto 16) := dob_little_v(23 downto 16);
-						dout_v(31 downto 24) := dob_little_v(15 downto 8);
+						dout_v(15 downto 8) := conv_little_v(31 downto 24);
+						dout_v(23 downto 16) := conv_little_v(23 downto 16);
+						dout_v(31 downto 24) := conv_little_v(15 downto 8);
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(01) word_length" severity error;
 				end case;
 			when "10" =>
 				case word_length_v is
 					when BYTE =>
-						dout_v(7 downto 0) := dob_little_v (23 downto 16);
+						dout_v(7 downto 0) := conv_little_v (23 downto 16);
 					when HALF =>
-						dout_v(7 downto 0) := dob_little_v(31 downto 24);
-						dout_v(15 downto 8) := dob_little_v(23 downto 16);
+						dout_v(7 downto 0) := conv_little_v(31 downto 24);
+						dout_v(15 downto 8) := conv_little_v(23 downto 16);
 					when WORD =>
-						dout_v(23 downto 16) := dob_little_v(31 downto 24);
-						dout_v(31 downto 24) := dob_little_v(23 downto 16);
+						dout_v(23 downto 16) := conv_little_v(31 downto 24);
+						dout_v(31 downto 24) := conv_little_v(23 downto 16);
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(10) word_length" severity error;
 				end case;
 			when "11" =>
 				case word_length_v is
 					when BYTE =>
-						dout_v(7 downto 0) := dob_little_v (31 downto 24);
+						dout_v(7 downto 0) := conv_little_v (31 downto 24);
 					when HALF =>
-						dout_v(15 downto 8) := dob_little_v(31 downto 24);
+						dout_v(15 downto 8) := conv_little_v(31 downto 24);
 					when WORD =>
-						dout_v(31 downto 24) := dob_little_v(31 downto 24);						
+						dout_v(31 downto 24) := conv_little_v(31 downto 24);						
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(11) word_length" severity error;
 				end case;
@@ -190,7 +200,7 @@ begin
 				report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v" severity error;
 		end case;
 		
-		DOB_s <= dout_v;
+		DOUT <= dout_v;
 		
 	end process dout_conv;
     
@@ -268,20 +278,6 @@ begin
 		DIN_LITTLE_s <= din_little_v;
 		
 	end process din_conv;
-    
-    dout_mux:
-    process(DOB_s, DO_s, ADDR(ADDR'high)) is
-        variable io_not_mem : std_logic;
-        variable dout_v     : DATA_TYPE;
-    begin
-        io_not_mem  := ADDR(ADDR'high);
-        if io_not_mem = '1' then
-            dout_v := DO_s;
-        else
-            dout_v := DOB_s;
-        end if;
-        DOUT <= dout_v;
-    end process dout_mux;
     
     write_en:
     process(WORD_LENGTH, WEN, ADDR(1 downto 0)) is
