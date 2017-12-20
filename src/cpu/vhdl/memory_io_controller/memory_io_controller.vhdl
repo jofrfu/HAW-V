@@ -284,25 +284,69 @@ begin
     end process dout_mux;
     
     write_en:
-    process(WORD_LENGTH, WEN) is
+    process(WORD_LENGTH, WEN, ADDR(1 downto 0)) is
         variable WORD_LENGTH_v   : WORD_CNTRL_TYPE;
         variable WRITE_EN_v      : std_logic;
+        variable ADDR_v          : std_logic_vector(1 downto 0);
         variable BYTE_WRITE_EN_v : WRITE_EN_TYPE;
     begin
         WORD_LENGTH_v := WORD_LENGTH;
         WRITE_EN_v    := WEN;
+        ADDR_v := ADDR(1 downto 0);
         
         if WRITE_EN_v = '1' then
-            case WORD_LENGTH_v is
-                when BYTE =>
-                    BYTE_WRITE_EN_v := "0001";
-                when HALF =>
-                    BYTE_WRITE_EN_v := "0011";
-                when WORD =>
-                    BYTE_WRITE_EN_v := "1111";
+            case ADDR_v is
+                when "00" =>
+                    case WORD_LENGTH_v is
+                        when BYTE =>
+                            BYTE_WRITE_EN_v := "0001";
+                        when HALF =>
+                            BYTE_WRITE_EN_v := "0011";
+                        when WORD =>
+                            BYTE_WRITE_EN_v := "1111";
+                        when others =>
+                            BYTE_WRITE_EN_v := "0000";
+                            report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
+                    end case;
+                when "01" =>
+                    case WORD_LENGTH_v is
+                        when BYTE =>
+                            BYTE_WRITE_EN_v := "0010";
+                        when HALF =>
+                            BYTE_WRITE_EN_v := "0110";
+                        when WORD =>
+                            BYTE_WRITE_EN_v := "1110";
+                        when others =>
+                            BYTE_WRITE_EN_v := "0000";
+                            report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
+                    end case;
+                when "10" =>
+                    case WORD_LENGTH_v is
+                        when BYTE =>
+                            BYTE_WRITE_EN_v := "0100";
+                        when HALF =>
+                            BYTE_WRITE_EN_v := "1100";
+                        when WORD =>
+                            BYTE_WRITE_EN_v := "1100";
+                        when others =>
+                            BYTE_WRITE_EN_v := "0000";
+                            report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
+                    end case;
+                when "11" =>
+                    case WORD_LENGTH_v is
+                        when BYTE =>
+                            BYTE_WRITE_EN_v := "1000";
+                        when HALF =>
+                            BYTE_WRITE_EN_v := "1000";
+                        when WORD =>
+                            BYTE_WRITE_EN_v := "1000";
+                        when others =>
+                            BYTE_WRITE_EN_v := "0000";
+                            report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
+                    end case;
                 when others =>
+                    report "Unsupported address values!!!" severity error;
                     BYTE_WRITE_EN_v := "0000";
-                    report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
             end case;
         else
             BYTE_WRITE_EN_v := "0000";
