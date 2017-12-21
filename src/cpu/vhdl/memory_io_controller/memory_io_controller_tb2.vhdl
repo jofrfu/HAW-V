@@ -84,12 +84,33 @@ begin
     
     test:
     process is
+        procedure writeMemory(
+            data        : in DATA_TYPE,
+            wordLength  : in std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0),
+            address     : in ADDRESS_TYPE
+        ) is 
+        begin
+        
+        end writeMemory;
+        
+        procedure readMemory(
+            data        : out DATA_TYPE,
+            wordLength  : in std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0),
+            address     : in ADDRESS_TYPE
+        ) is
+        begin
+        
+        end readMemory;
+        
         begin
         simulation_running <= true;
         reset <= '1';
         wait until '1'=CLK and CLK'event;
         wait until '1'=CLK and CLK'event;
         reset <= '0';
+        
+        --READ Tests
+        --note: the .coe-file contains data where every byte has the value of its address
         
         
         
