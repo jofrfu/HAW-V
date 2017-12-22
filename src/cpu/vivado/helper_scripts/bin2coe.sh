@@ -31,8 +31,12 @@ version()
 convert()
 {   
     coetext="memory_initialization_radix=16;\nmemory_initialization_vector=\n"
-    coetext=$coetext$(hexdump -v -e '4/1 "%02x" ",\n"' $infile)
+    # INFO: for some reason newline does not work with hexdump and string variables
+    coetext=$coetext$(hexdump -v -e '4/1 "%02x" ", "' $infile)
+    # remove all from last comma, concat a semicolon
     coetext=${coetext%,*}";"
+    # replace all spaces with newline, work around for hexdump 'bug'
+    coetext=${coetext// /"\n"}
     echo -e $coetext > $outfile
 }
 # #############################################################
