@@ -21,7 +21,7 @@ component dut is
         
         EN             : IN STD_LOGIC;
         WEN            : IN STD_LOGIC;
-        WORD_LENGTH    : in WORD_CNTRL_TYPE;
+        WORD_LENGTH    : IN WORD_CNTRL_TYPE;
         ADDR           : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         DIN            : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
         DOUT           : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -86,20 +86,28 @@ begin
     process is
         procedure writeMemory(
             data        : in DATA_TYPE,
-            wordLength  : in std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0),
+            wLength     : in std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0),
             address     : in ADDRESS_TYPE
         ) is 
         begin
-        
+            EN          <= '1';
+            WEN         <= '1';
+            WORD_LENGTH <= wLength;
+            ADDR        <= address;
+            DIN         <= data;
+            wait until '1'=CLK and CLK'event;
         end writeMemory;
         
         procedure readMemory(
-            data        : out DATA_TYPE,
             wordLength  : in std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0),
             address     : in ADDRESS_TYPE
         ) is
         begin
-        
+            EN          <= '1';
+            WEN         <= '0';
+            WORD_LENGTH <= wLength;
+            ADDR        <= address;
+            wait until '1'=CLK and CLK'event;
         end readMemory;
         
         begin
@@ -110,13 +118,14 @@ begin
         reset <= '0';
         
         --READ Tests
-        --note: the .coe-file contains data where every byte has the value of its address
+        --note: the .coe-file contains data where every byte has the value of its address, defined from 0x0 to 0xFF
+        --      when address is 0xAB, the value of the byte is 0xAB
         
         
         
         wait until '1' = CLK and CLK'event;
         wait until '1' = CLK and CLK'event;
-        wait until '1'=CLK and CLK'event;
+        wait until '1' = CLK and CLK'event;
         report "##################################################";
         report ">>>>>>>>>>>>>>>TEST SUCCESSFUL<<<<<<<<<<<<!!!!!!!";
         simulation_running <= false;
