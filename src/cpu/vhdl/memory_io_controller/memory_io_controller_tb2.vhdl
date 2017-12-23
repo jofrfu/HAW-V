@@ -85,8 +85,8 @@ begin
     test:
     process is
         procedure writeMemory(
-            data        : in DATA_TYPE,
-            wLength     : in WORD_CNTRL_TYPE,
+            data        : in DATA_TYPE;
+            wLength     : in WORD_CNTRL_TYPE;
             address     : in ADDRESS_TYPE
         ) is 
         begin
@@ -99,7 +99,7 @@ begin
         end writeMemory;
         
         procedure readMemory(
-            wordLength  : in std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0),
+            wLength  : in std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0);
             address     : in ADDRESS_TYPE
         ) is
         begin
@@ -110,7 +110,21 @@ begin
             wait until '1'=CLK and CLK'event;
         end readMemory;
         
-        variable adrVal : integer range x"0" to x"100";
+        procedure testMemory(
+            address : in ADDRESS_TYPE;
+            wordExpected : in DATA_TYPE;
+            errorMsg : in STRING
+        ) is 
+        begin
+            readMemory(WORD, address);
+            if DOUT /= wordExpected then
+                report errorMsg severity error;
+                simulation_running <= false;
+                wait;
+            end if;
+        end testMemory;
+        
+        variable adrVal : integer range 0 to 256;
         
     begin
         simulation_running <= true;
@@ -124,9 +138,9 @@ begin
         --      when address is 0xAB, the value of the byte is 0xAB
         
         adrVal := 0;
-        while adrVal <= x'FF loop --read all bytes
+        while adrVal < 256 loop --read all bytes
             readMemory(BYTE, std_logic_vector(to_unsigned(adrVal, ADDRESS_WIDTH)));
-            if DOUT /= to_integer(unsigned(adrVal) then
+            if DOUT /= std_logic_vector(to_unsigned(adrVal, ADDRESS_WIDTH)) then
                 report "error while reading bytewise" severity error;
                 simulation_running <= false;
                 wait;
@@ -134,10 +148,32 @@ begin
             adrVal := adrVal + 1;
         end loop;
         
-        while adrVal < x'100 loop --loop through all words
+        while adrVal < 256 loop --loop through all words
             for offset in 0 to 2 loop --offset to distinguish between positions in words
                 readMemory(HALF, std_logic_vector(to_unsigned(adrVal+offset, ADDRESS_WIDTH)));
+                if DOUT /= x"0000" & std_logic_vector(to_unsigned(adrVal+offset+1, BYTE_WIDTH)) & std_logic_vector(to_unsigned(adrVal+offset, BYTE_WIDTH)) then
+                    case offset is
+                        when 0 => report "error while reading halfbytes; offset = 0" severity error;
+                        when 1 => report "error while reading halfbytes; offset = 1" severity error;
+                        when 2 => report "error while reading halfbytes; offset = 2" severity error;
+                    end case;                    
+                    simulation_running <= false;
+                    wait;
+                end if;
             end loop;
+            adrVal := adrVal + 4;
+        end loop;
+        
+        while adrVal < 256 loop --loop through all words
+            readMemory(WORD, std_logic_vector(to_unsigned(adrVal, ADDRESS_WIDTH)));
+            if DOUT /= std_logic_vector(to_unsigned(adrVal+3, BYTE_WIDTH)) 
+                     & std_logic_vector(to_unsigned(adrVal+2, BYTE_WIDTH)) 
+                     & std_logic_vector(to_unsigned(adrVal+1, BYTE_WIDTH)) 
+                     & std_logic_vector(to_unsigned(adrVal, BYTE_WIDTH)) then
+                report "error while reading words" severity error;
+                simulation_running <= false;
+                wait;
+            end if;
             adrVal := adrVal + 4;
         end loop;
         
@@ -146,6 +182,22 @@ begin
         
         
         --WRITE Tests
+        writeMemory(x"AFFEDEAD", WORD, x"00000A00");         --memory @ 0x00000A00 :    AFFEDEAD
+        testMemory (x"00000A00", x"AFFEDEAD", "error writing word");        
+        writeMemory(x"0000ABBA", HALF, x"00000A00");             --                     BAABDEAD
+        testMemory (x"00000A00", x"BAABDEAD", "error writing halfword; offset = 0");
+        writeMemory(x"00000045", BYTE, x"00000A00");              --                    45ABDEAD
+        testMemory (x"00000A00", x"45ABDEAD", "error writing byte; offset = 0");
+        writeMemory(x"00001234", HALF, x"00000A01");             --                     453412AD
+        testMemory (x"00000A00", x"453412AD", "error writing halfword; offset = 1");
+        writeMemory(x"0000D00D", HALF, x"00000A02");             --                     45340DD0
+        testMemory (x"00000A00", x"45340DD0", "error writing halfword; offset = 2");
+        writeMemory(x"00000029", BYTE, x"00000A01");              --                    4529DEAD
+        testMemory (x"00000A00", x"4529DEAD", "error writing byte; offset = 1");
+        writeMemory(x"000000CE", BYTE, x"00000A02");              --                    45ABCEAD
+        testMemory (x"00000A00", x"45ABCEAD", "error writing byte; offset = 2");
+        writeMemory(x"000000FA", BYTE, x"00000A03");              --                    45ABDEFA
+        testMemory (x"00000A00", x"45ABDEFA", "error writing byte; offset = 3");
         
         
         report "#################################################";

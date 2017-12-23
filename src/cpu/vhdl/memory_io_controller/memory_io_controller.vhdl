@@ -49,12 +49,12 @@ architecture beh of memory_io_controller is
             enb : in STD_LOGIC;
             web : in WRITE_EN_TYPE;
             addrb : in ADDRESS_TYPE;
-            dinb : in DATA_TYPE);
+            dinb : in DATA_TYPE;
             doutb : out DATA_TYPE;
             clkb : in STD_LOGIC
         );
     end component memory;
-    for all : memory use entity work.blk_mem_gen_0_wrapper(xilinx);     --entity work.blk_mem_gen_0_wrapper(xilinx)
+    for all : memory use entity work.blk_mem_gen_0_wrapper(dummy_bmem);     --entity work.blk_mem_gen_0_wrapper(xilinx)
     
     component peripherals is
         port(
