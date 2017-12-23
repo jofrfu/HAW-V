@@ -22,9 +22,9 @@ component dut is
         EN             : IN STD_LOGIC;
         WEN            : IN STD_LOGIC;
         WORD_LENGTH    : IN WORD_CNTRL_TYPE;
-        ADDR           : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        DIN            : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        DOUT           : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        ADDR           : IN ADDRESS_TYPE;
+        DIN            : IN DATA_TYPE;
+        DOUT           : OUT DATA_TYPE;
         
         -- IO
         PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
@@ -42,9 +42,9 @@ for all : dut use entity work.memory_io_controller(beh);
     signal EN: STD_LOGIC;
     signal WEN: STD_LOGIC;
     signal WORD_LENGTH: WORD_CNTRL_TYPE;
-    signal ADDR: STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal DIN: STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal DOUT: STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal ADDR: ADDRESS_TYPE;
+    signal DIN: DATA_TYPE;
+    signal DOUT: DATA_TYPE;
     signal PERIPH_IN_EN: IO_ENABLE_TYPE;
     signal PERIPH_IN: IO_BYTE_TYPE;
     signal PERIPH_OUT: IO_BYTE_TYPE;
@@ -86,7 +86,7 @@ begin
     process is
         procedure writeMemory(
             data        : in DATA_TYPE,
-            wLength     : in std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0),
+            wLength     : in WORD_CNTRL_TYPE,
             address     : in ADDRESS_TYPE
         ) is 
         begin
@@ -110,7 +110,9 @@ begin
             wait until '1'=CLK and CLK'event;
         end readMemory;
         
-        begin
+        variable adrVal : integer range x"0" to x"100";
+        
+    begin
         simulation_running <= true;
         reset <= '1';
         wait until '1'=CLK and CLK'event;
@@ -121,13 +123,39 @@ begin
         --note: the .coe-file contains data where every byte has the value of its address, defined from 0x0 to 0xFF
         --      when address is 0xAB, the value of the byte is 0xAB
         
+        adrVal := 0;
+        while adrVal <= x'FF loop --read all bytes
+            readMemory(BYTE, std_logic_vector(to_unsigned(adrVal, ADDRESS_WIDTH)));
+            if DOUT /= to_integer(unsigned(adrVal) then
+                report "error while reading bytewise" severity error;
+                simulation_running <= false;
+                wait;
+            end if;
+            adrVal := adrVal + 1;
+        end loop;
+        
+        while adrVal < x'100 loop --loop through all words
+            for offset in 0 to 2 loop --offset to distinguish between positions in words
+                readMemory(HALF, std_logic_vector(to_unsigned(adrVal+offset, ADDRESS_WIDTH)));
+            end loop;
+            adrVal := adrVal + 4;
+        end loop;
+        
+        report "#################################################";
+        report "####################READ TESTS###################";
         
         
+        --WRITE Tests
+        
+        
+        report "#################################################";
+        report "####################WRITE TESTS##################";
+
         wait until '1' = CLK and CLK'event;
         wait until '1' = CLK and CLK'event;
         wait until '1' = CLK and CLK'event;
-        report "##################################################";
-        report ">>>>>>>>>>>>>>>TEST SUCCESSFUL<<<<<<<<<<<<!!!!!!!";
+        report "#################################################";
+        report ">>>>>>>>>>>>>>>>>>TEST SUCCESSFUL<<<<<<<<<<<<<<<<";
         simulation_running <= false;
         wait;
         

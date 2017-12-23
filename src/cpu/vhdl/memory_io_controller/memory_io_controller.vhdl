@@ -16,9 +16,9 @@ entity memory_io_controller is
         EN             : IN STD_LOGIC;
         WEN            : IN STD_LOGIC;
         WORD_LENGTH    : in WORD_CNTRL_TYPE;
-        ADDR           : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        DIN            : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-        DOUT           : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        ADDR           : IN ADDRESS_TYPE;
+        DIN            : IN DATA_TYPE;
+        DOUT           : OUT DATA_TYPE;
         
         -- IO
         PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
@@ -29,7 +29,7 @@ end entity memory_io_controller;
     
 architecture beh of memory_io_controller is
 
-    signal BYTE_WRITE_EN_s      : std_logic_vector(3 downto 0); 
+    signal BYTE_WRITE_EN_s      : WRITE_EN_TYPE; 
     
     -- Little Endian signals
     signal DO_LITTLE_s             : DATA_TYPE;
@@ -41,16 +41,16 @@ architecture beh of memory_io_controller is
         Port ( 
             ena : in STD_LOGIC;
             wea : in WRITE_EN_TYPE;
-            addra : in STD_LOGIC_VECTOR ( 31 downto 0 );
-            dina : in STD_LOGIC_VECTOR ( 31 downto 0 );
-            douta : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            addra : in ADDRESS_TYPE;
+            dina : in DATA_TYPE;
+            douta : out DATA_TYPE;
             clka : in STD_LOGIC;
             
             enb : in STD_LOGIC;
             web : in WRITE_EN_TYPE;
-            addrb : in STD_LOGIC_VECTOR ( 31 downto 0 );
-            dinb : in STD_LOGIC_VECTOR ( 31 downto 0 );
-            doutb : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            addrb : in ADDRESS_TYPE;
+            dinb : in DATA_TYPE);
+            doutb : out DATA_TYPE;
             clkb : in STD_LOGIC
         );
     end component memory;
@@ -61,7 +61,7 @@ architecture beh of memory_io_controller is
             CLK            : IN  STD_LOGIC;
             RESET          : IN  STD_LOGIC;
             EN             : IN  STD_LOGIC;     -- enables access
-            WEA            : IN  STD_LOGIC_vector(3 DOWNTO 0); -- enables write access
+            WEA            : IN  WRITE_EN_TYPE; -- enables write access
             ADDR           : IN  ADDRESS_TYPE;  -- selects peripheral
             DIN            : IN  DATA_TYPE;     -- input for selected peripheral
             DOUT           : OUT DATA_TYPE;     -- output of selected peripheral

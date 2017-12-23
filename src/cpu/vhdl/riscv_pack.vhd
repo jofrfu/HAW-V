@@ -145,13 +145,14 @@ package riscv_pack is
 	--! @brief execute
 	constant FLAGS_WIDTH : natural := 4;
 	constant WORD_CNTRL_WIDTH  : natural := 2;
-    constant BYTE : std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0) := "00";
-    constant HALF : std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0) := "01";
-    constant WORD : std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0) := "10";
-    constant DOUBLE : std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0) := "11";
-    
-	subtype FLAGS_TYPE is std_logic_vector(FLAGS_WIDTH-1 downto 0);
+    subtype FLAGS_TYPE is std_logic_vector(FLAGS_WIDTH-1 downto 0);
 	subtype WORD_CNTRL_TYPE  is std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0);
+    constant BYTE : WORD_CNTRL_TYPE := "00";
+    constant HALF : WORD_CNTRL_TYPE := "01";
+    constant WORD : WORD_CNTRL_TYPE := "10";
+    constant DOUBLE : WORD_CNTRL_TYPE := "11";
+    
+	
 	
 	--functions 
 	--! @brief LUT as function to convert op_code as std_logic_vector to OP_CODE_TYPE
