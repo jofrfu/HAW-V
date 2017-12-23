@@ -1,7 +1,7 @@
 #!/bin/bash
 # 
 # Jonas Fuhrmann
-version="0.1 Do Dec 21 22:58 GMT 2017"
+version="0.2 Fri Dec 22 10:52 GMT 2017"
 #
 # -------------------------------------------------------------
 usage()
