@@ -110,19 +110,21 @@ begin
             wait until '1'=CLK and CLK'event;
         end readMemory;
         
-        procedure testMemory(
-            address : in ADDRESS_TYPE;
-            wordExpected : in DATA_TYPE;
+        procedure testWriteMemory(
+            testWord : in DATA_TYPE;            
+            wLength : in WORD_CNTRL_TYPE;
+            address : in ADDRESS_TYPE;            
             errorMsg : in STRING
         ) is 
         begin
-            readMemory(WORD, address);
-            if DOUT /= wordExpected then
+            writeMemory(testWord, wLength, address);
+            readMemory(wLength, address);
+            if DOUT /= testWord then
                 report errorMsg severity error;
                 simulation_running <= false;
                 wait;
             end if;
-        end testMemory;
+        end testWriteMemory;
         
         variable adrVal : integer range 0 to 256;
         
@@ -136,6 +138,9 @@ begin
         --READ Tests
         --note: the .coe-file contains data where every byte has the value of its address, defined from 0x0 to 0xFF
         --      when address is 0xAB, the value of the byte is 0xAB
+        
+        report "#################################################";
+        report "####################READ TESTS###################";
         
         adrVal := 0;
         while adrVal < 256 loop --read all bytes
@@ -178,31 +183,19 @@ begin
         end loop;
         
         report "#################################################";
-        report "####################READ TESTS###################";
-        
+        report "####################WRITE TESTS##################";
         
         --WRITE Tests
-        writeMemory(x"AFFEDEAD", WORD, x"00000A00");         --memory @ 0x00000A00 :    AFFEDEAD
-        testMemory (x"00000A00", x"AFFEDEAD", "error writing word");        
-        writeMemory(x"0000ABBA", HALF, x"00000A00");             --                     BAABDEAD
-        testMemory (x"00000A00", x"BAABDEAD", "error writing halfword; offset = 0");
-        writeMemory(x"00000045", BYTE, x"00000A00");              --                    45ABDEAD
-        testMemory (x"00000A00", x"45ABDEAD", "error writing byte; offset = 0");
-        writeMemory(x"00001234", HALF, x"00000A01");             --                     453412AD
-        testMemory (x"00000A00", x"453412AD", "error writing halfword; offset = 1");
-        writeMemory(x"0000D00D", HALF, x"00000A02");             --                     45340DD0
-        testMemory (x"00000A00", x"45340DD0", "error writing halfword; offset = 2");
-        writeMemory(x"00000029", BYTE, x"00000A01");              --                    4529DEAD
-        testMemory (x"00000A00", x"4529DEAD", "error writing byte; offset = 1");
-        writeMemory(x"000000CE", BYTE, x"00000A02");              --                    45ABCEAD
-        testMemory (x"00000A00", x"45ABCEAD", "error writing byte; offset = 2");
-        writeMemory(x"000000FA", BYTE, x"00000A03");              --                    45ABDEFA
-        testMemory (x"00000A00", x"45ABDEFA", "error writing byte; offset = 3");
+        testWriteMemory(x"AFFEDEAD", WORD, x"00000A00", "error writing word");         
+        testWriteMemory(x"0000ABBA", HALF, x"00000A00", "error writing halfword; offset = 0");  
+        testWriteMemory(x"00000045", BYTE, x"00000A00", "error writing byte; offset = 0");   
+        testWriteMemory(x"00001234", HALF, x"00000A01", "error writing halfword; offset = 1");
+        testWriteMemory(x"0000D00D", HALF, x"00000A02", "error writing halfword; offset = 2");   
+        testWriteMemory(x"00000029", BYTE, x"00000A01", "error writing byte; offset = 1");
+        testWriteMemory(x"000000CE", BYTE, x"00000A02", "error writing byte; offset = 2"); 
+        testWriteMemory(x"000000FA", BYTE, x"00000A03", "error writing byte; offset = 3");         
         
         
-        report "#################################################";
-        report "####################WRITE TESTS##################";
-
         wait until '1' = CLK and CLK'event;
         wait until '1' = CLK and CLK'event;
         wait until '1' = CLK and CLK'event;
