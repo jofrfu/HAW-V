@@ -12,6 +12,9 @@ entity decode is
 		--clk, reset  :  in std_logic;  --neccessary?? TO DO: delete?
 		branch      :  in std_logic;
 		IFR	        :  in INSTRUCTION_BIT_TYPE;
+        DEST_REG_EX :  in REGISTER_ADDRESS_TYPE;
+        DEST_REG_MA :  in REGISTER_ADDRESS_TYPE;
+        DEST_REG_WB :  in REGISTER_ADDRESS_TYPE;
 		----------------------------------------
 		IF_CNTRL    : out IF_CNTRL_TYPE;
 		ID_CNTRL    : out ID_CNTRL_TYPE;

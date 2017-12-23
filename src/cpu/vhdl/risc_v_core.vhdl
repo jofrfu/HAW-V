@@ -55,6 +55,10 @@ architecture beh of risc_v_core is
             DI	  		 :  in DATA_TYPE;
             rd			 :  in REGISTER_ADDRESS_TYPE;
             
+            DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+            
             IF_CNTRL	 : out IF_CNTRL_TYPE;
             WB_CNTRL	 : out WB_CNTRL_TYPE;
             MA_CNTRL	 : out MA_CNTRL_TYPE;
@@ -207,6 +211,11 @@ begin
         IFR_s,
         pc_synch_s,
         WRITE_BACK_s,
+        REG_ADDR_s,
+        
+        -- write back registers from stages
+        WB_CNTRL_EX_to_MA(4 downto 0),
+        WB_CNTRL_MA_to_WB(4 downto 0),
         REG_ADDR_s,
         
         -- cntrl outs
