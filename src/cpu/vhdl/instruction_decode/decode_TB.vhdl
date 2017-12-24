@@ -31,10 +31,10 @@ architecture TB of decode_TB is
     
     signal branch_s      : std_logic := '0';
     signal IFR_s	     : INSTRUCTION_BIT_TYPE := IFR_I_TYPE(0, 0, "000", 0, opimmo);
-    signal DEST_REG_EX_s : REGISTER_ADDRESS_TYPE;
-    signal DEST_REG_MA_s : REGISTER_ADDRESS_TYPE;
-    signal DEST_REG_WB_s : REGISTER_ADDRESS_TYPE;
-    signal STORE_s       : std_logic;
+    signal DEST_REG_EX_s : REGISTER_ADDRESS_TYPE := (others => '0');
+    signal DEST_REG_MA_s : REGISTER_ADDRESS_TYPE := (others => '0');
+    signal DEST_REG_WB_s : REGISTER_ADDRESS_TYPE := (others => '0');
+    signal STORE_s       : std_logic := '0';
     ----------------------------------------
     signal IF_CNTRL_s    : IF_CNTRL_TYPE;
     signal ID_CNTRL_s    : ID_CNTRL_TYPE;
@@ -48,7 +48,7 @@ architecture TB of decode_TB is
     --!         the argument should be set to zero
     --!         Instructions that do not feature a funct7 are expected
     --!         to be handeled with an all Zero funct7
-    impure function decode_response_check( --TODO 13.11.17 17:57 Sebastian Brueckner Unfinished, add other opcodes 
+    impure function decode_response_check( 
         Imm_wanted      : in integer;
         opcode          : in OP_CODE_TYPE;
         rs2, rs1, rd    : in integer range 0 to REGISTER_COUNT-1;
@@ -295,6 +295,46 @@ architecture TB of decode_TB is
         return true;
     end function decode_response_check;
 
+    impure function bubble_check(
+        shouldBubble    : in boolean;
+        Imm_wanted      : in integer;
+        opcode          : in OP_CODE_TYPE;
+        rs2, rs1, rd    : in integer range 0 to REGISTER_COUNT-1;
+        funct3_wanted   : in FUNCT3_TYPE;
+        funct7_wanted   : in FUNCT7_TYPE    
+    )
+    return boolean is
+    begin
+        if shouldBubble then
+            if IF_CNTRL_s /= IF_CNTRL_BUB then
+                report "decode_TB.vhdl:bubble_check - IF_CNTRL check failed" severity error;
+                return false;
+            end if;
+            if ID_CNTRL_s /= ID_CNTRL_BUB then
+                report "decode_TB.vhdl:bubble_check - ID_CNTRL check failed" severity error;
+                return false;
+            end if;
+            if EX_CNTRL_s /= EX_CNTRL_BUB then
+                report "decode_TB.vhdl:bubble_check - EX_CNTRL check failed" severity error;
+                return false;
+            end if;
+            if MA_CNTRL_s /= MA_CNTRL_BUB then
+                report "decode_TB.vhdl:bubble_check - MA_CNTRL check failed" severity error;
+                return false;
+            end if;
+            if WB_CNTRL_s /= WB_CNTRL_BUB then
+                report "decode_TB.vhdl:bubble_check - WB_CNTRL check failed" severity error;
+                return false;
+            end if;
+            if Imm_s /= std_logic_vector(to_signed(0, DATA_WIDTH)) then
+                report "decode_TB.vhdl:bubble_check - immediate check failed" severity error;
+                return false;
+            end if;
+        else
+            return decode_response_check(Imm_wanted, opcode, rs2, rs1, rd, funct3_wanted, funct7_wanted);
+        end if;
+    end function bubble_check;
+    
     begin
 
     dut_i : dut
@@ -322,6 +362,7 @@ architecture TB of decode_TB is
         variable funct3         : FUNCT3_TYPE;
         variable funct7         : FUNCT7_TYPE;
         variable shamt          : integer range 0 to REGISTER_COUNT-1;
+        variable shouldBubble   : boolean;
     begin
         --first loop everything without branching, secound loop with branching
         for i in std_logic range '0' to '1' loop
@@ -756,7 +797,44 @@ architecture TB of decode_TB is
             
         end loop;
         
-        report "decode test successful" severity note;
+        report "normal decode test successful" severity note;
+        
+        --bubble testing starts here
+        --load stages with r1, r2 and r3
+        DEST_REG_EX_s <= std_logic_vector(to_signed(1, REGISTER_ADDRESS_WIDTH));
+        DEST_REG_MA_s <= std_logic_vector(to_signed(2, REGISTER_ADDRESS_WIDTH));
+        DEST_REG_WB_s <= std_logic_vector(to_signed(3, REGISTER_ADDRESS_WIDTH));
+        STORE_s       <= '1';
+        
+        --first test everything with r0 as source register which should not bubble 
+        
+        -- addi x2, x0, -1              
+        shouldBubble := false;
+        immediate    := -1;
+        opcode       := opimmo;
+        rs1          := 0;
+        rd           := 2;
+        funct3       := ADDI_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "bubble_check failed opimmo with rs1=r0" severity error;
+            wait;
+        end if;
+        
+        --jalr x2, x0, -1
+        opcode      := jalro;        
+        funct3      := "000";
+                
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "bubble_check failed jalro with rs1=r0" severity error;
+            wait;
+        end if;    
+        
+        report "bubble decode test successful" severity note;
         wait;
         
     end process test;  

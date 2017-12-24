@@ -47,7 +47,7 @@ begin
     end process rs1_check_1;
     
     rs2_check_2:
-    process(IFR, DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
+    process(IFR(24 downto 20), DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
         variable rs2_v      : REGISTER_ADDRESS_TYPE;
     begin
         rs2_v := IFR(24 downto 20);
