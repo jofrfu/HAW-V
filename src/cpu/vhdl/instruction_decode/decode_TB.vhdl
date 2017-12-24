@@ -330,6 +330,7 @@ architecture TB of decode_TB is
                 report "decode_TB.vhdl:bubble_check - immediate check failed" severity error;
                 return false;
             end if;
+            return true;
         else
             return decode_response_check(Imm_wanted, opcode, rs2, rs1, rd, funct3_wanted, funct7_wanted);
         end if;
@@ -804,38 +805,61 @@ architecture TB of decode_TB is
         DEST_REG_EX_s <= std_logic_vector(to_signed(1, REGISTER_ADDRESS_WIDTH));
         DEST_REG_MA_s <= std_logic_vector(to_signed(2, REGISTER_ADDRESS_WIDTH));
         DEST_REG_WB_s <= std_logic_vector(to_signed(3, REGISTER_ADDRESS_WIDTH));
-        STORE_s       <= '1';
+        STORE_s       <= '0';
+        branch_s      <= '0';
         
-        --first test everything with r0 as source register which should not bubble 
-        
-        -- addi x2, x0, -1              
-        shouldBubble := false;
+        -- addi x2, x1, -1              
+        shouldBubble := true;
         immediate    := -1;
         opcode       := opimmo;
-        rs1          := 0;
+        rs1          := 1;
         rd           := 2;
         funct3       := ADDI_FUNCT3;
         
         IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
         wait for WAIT_TIME;
         if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "bubble_check failed opimmo with rs1=r0" severity error;
+            report "bubble_check failed opimmo with rs1=1" severity error;
             wait;
         end if;
         
-        --jalr x2, x0, -1
-        opcode      := jalro;        
-        funct3      := "000";
+        shouldBubble := false;
+        rs1          := 0;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "bubble_check failed opimmo with rs1=0" severity error;
+            wait;
+        end if;
+        
+        --jalr x2, x2, -1
+        shouldBubble := true;
+        opcode       := jalro;
+        rs1          := 2;        
+        funct3       := "000";
                 
         IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
         wait for WAIT_TIME;
         if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "bubble_check failed jalro with rs1=r0" severity error;
+            report "bubble_check failed jalro with rs1=2" severity error;
+            wait;
+        end if;  
+        
+        shouldBubble := false;
+        rs1          := 0;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "bubble_check failed jalro with rs1=0" severity error;
             wait;
         end if;    
         
         report "bubble decode test successful" severity note;
         wait;
+        
+        
         
     end process test;  
 end architecture TB;
