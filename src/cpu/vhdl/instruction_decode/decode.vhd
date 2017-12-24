@@ -15,6 +15,7 @@ entity decode is
         DEST_REG_EX :  in REGISTER_ADDRESS_TYPE;
         DEST_REG_MA :  in REGISTER_ADDRESS_TYPE;
         DEST_REG_WB :  in REGISTER_ADDRESS_TYPE;
+        STORE       :  in std_logic;
 		----------------------------------------
 		IF_CNTRL    : out IF_CNTRL_TYPE;
 		ID_CNTRL    : out ID_CNTRL_TYPE;

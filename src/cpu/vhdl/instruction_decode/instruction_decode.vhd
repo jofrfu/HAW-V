@@ -19,6 +19,7 @@ entity instruction_decode is
         DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
         DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
         DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+        STORE        :  in std_logic;
         -------------------------------------------------
 		IF_CNTRL	 : out IF_CNTRL_TYPE;
 		WB_CNTRL	 : out WB_CNTRL_TYPE;
@@ -71,6 +72,7 @@ architecture beh of instruction_decode is
             DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
             DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
             DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+            STORE        :  in std_logic;
 			IF_CNTRL	 : out IF_CNTRL_TYPE;
 			ID_CNTRL	 : out ID_CNTRL_TYPE;
 			WB_CNTRL	 : out WB_CNTRL_TYPE;
@@ -104,6 +106,7 @@ begin
         DEST_REG_EX => DEST_REG_EX,
         DEST_REG_MA => DEST_REG_MA,
         DEST_REG_WB => DEST_REG_WB,
+        STORE => STORE,
 		IF_CNTRL => IF_CNTRL,
 		ID_CNTRL(11) => pc_en_s,
 		ID_CNTRL(10) => imm_sel_s,

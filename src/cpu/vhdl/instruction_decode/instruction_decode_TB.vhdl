@@ -18,6 +18,7 @@ architecture TB of instruction_decode_TB is
             DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
             DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
             DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+            STORE        :  in std_logic;
             IF_CNTRL	 : out IF_CNTRL_TYPE;
             WB_CNTRL	 : out WB_CNTRL_TYPE;
             MA_CNTRL	 : out MA_CNTRL_TYPE;
@@ -43,6 +44,7 @@ architecture TB of instruction_decode_TB is
     signal DEST_REG_EX_s: REGISTER_ADDRESS_TYPE := (others => '0');
     signal DEST_REG_MA_s: REGISTER_ADDRESS_TYPE := (others => '0');
     signal DEST_REG_WB_s: REGISTER_ADDRESS_TYPE := (others => '0');
+    signal STORE_s      : std_logic := '0';
     signal IF_CNTRL_s	: IF_CNTRL_TYPE;
     signal WB_CNTRL_s	: WB_CNTRL_TYPE;
     signal MA_CNTRL_s	: MA_CNTRL_TYPE;
@@ -69,6 +71,7 @@ begin
         DEST_REG_EX_s,
         DEST_REG_MA_s,
         DEST_REG_WB_s,
+        STORE_s,
         IF_CNTRL_s,
         WB_CNTRL_s,
         MA_CNTRL_s,

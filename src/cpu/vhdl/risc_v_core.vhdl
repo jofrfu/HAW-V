@@ -58,6 +58,7 @@ architecture beh of risc_v_core is
             DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
             DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
             DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+            STORE        :  in std_logic;
             
             IF_CNTRL	 : out IF_CNTRL_TYPE;
             WB_CNTRL	 : out WB_CNTRL_TYPE;
@@ -217,6 +218,7 @@ begin
         WB_CNTRL_EX_to_MA(4 downto 0),
         WB_CNTRL_MA_to_WB(4 downto 0),
         REG_ADDR_s,
+        MA_CNTRL_ID_to_EX(1),
         
         -- cntrl outs
         IF_CNTRL_s,

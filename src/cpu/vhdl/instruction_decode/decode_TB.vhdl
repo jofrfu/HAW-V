@@ -14,6 +14,7 @@ architecture TB of decode_TB is
             DEST_REG_EX :  in REGISTER_ADDRESS_TYPE;
             DEST_REG_MA :  in REGISTER_ADDRESS_TYPE;
             DEST_REG_WB :  in REGISTER_ADDRESS_TYPE;
+            STORE       :  in std_logic;
             ----------------------------------------
             IF_CNTRL    : out IF_CNTRL_TYPE;
             ID_CNTRL    : out ID_CNTRL_TYPE;
@@ -33,6 +34,7 @@ architecture TB of decode_TB is
     signal DEST_REG_EX_s : REGISTER_ADDRESS_TYPE;
     signal DEST_REG_MA_s : REGISTER_ADDRESS_TYPE;
     signal DEST_REG_WB_s : REGISTER_ADDRESS_TYPE;
+    signal STORE_s       : std_logic;
     ----------------------------------------
     signal IF_CNTRL_s    : IF_CNTRL_TYPE;
     signal ID_CNTRL_s    : ID_CNTRL_TYPE;
@@ -302,6 +304,7 @@ architecture TB of decode_TB is
         DEST_REG_EX => DEST_REG_EX_s,
         DEST_REG_MA => DEST_REG_MA_s,
         DEST_REG_WB => DEST_REG_WB_s,
+        STORE => STORE_s,
         IF_CNTRL => IF_CNTRL_s,
         ID_CNTRL => ID_CNTRL_s,
         EX_CNTRL => EX_CNTRL_s,        
