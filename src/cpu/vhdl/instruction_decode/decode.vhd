@@ -61,7 +61,7 @@ begin
     --! @brief decode unit for ID stage
     --! @detail controls the PC flow IF stage and operand selection for EX stage
     decode:
-    process(branch, IFR, rs1_in_pipe_s, rs2_in_pipe_s) is
+    process(branch, IFR, rs1_in_pipe_s, rs2_in_pipe_s, STORE) is
     
         variable branch_v   : std_logic;
         variable op_bits_v  : OP_CODE_BIT_TYPE;
@@ -152,7 +152,7 @@ begin
                         bubble_v   := '0';
                     end if;
                 when loado =>
-                    if  rs1_in_pipe_s = '1' then
+                    if  rs1_in_pipe_s = '1' or STORE = '1' then
                         IF_CNTRL_v := IF_CNTRL_BUB;
                         ID_CNTRL_v := ID_CNTRL_BUB;
                         EX_CNTRL_v := EX_CNTRL_BUB;
