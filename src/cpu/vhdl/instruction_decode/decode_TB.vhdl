@@ -1008,6 +1008,33 @@ architecture TB of decode_TB is
             wait;
         end if; 
         
+        
+        --lb x2, x1, -4
+        STORE_s      <= '0';
+        shouldBubble := false;
+        immediate    := -4;
+        opcode       := loado;
+        rs1          := 0;
+        rd           := 0;
+        funct3       := LB_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "bubble_check failed load after store with STORE=0 and rs1=0" severity error;
+            wait;
+        end if;  
+        
+        STORE_s      <= '1';
+        shouldBubble := true;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "bubble_check failed load after store with STORE=1 and rs1=0" severity error;
+            wait;
+        end if;  
+        
         report "bubble decode test successful" severity note;
         wait;
         
