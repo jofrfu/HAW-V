@@ -141,6 +141,11 @@ package riscv_pack is
 	constant MA_CNTRL_NOP : MA_CNTRL_TYPE := "00"; --no memory access
 	constant WB_CNTRL_NOP : WB_CNTRL_TYPE := "000000"; --write result to r0
     constant NOP_INSTRUCT : INSTRUCTION_BIT_TYPE := "00000000000000000000000000110011";
+    constant IF_CNTRL_BUB : IF_CNTRL_TYPE := "01"; --PC + rel => rel must be 0 then
+	constant ID_CNTRL_BUB : ID_CNTRL_TYPE := ID_CNTRL_NOP;
+	constant EX_CNTRL_BUB : EX_CNTRL_TYPE := EX_CNTRL_NOP;
+	constant MA_CNTRL_BUB : MA_CNTRL_TYPE := MA_CNTRL_NOP;
+	constant WB_CNTRL_BUB : WB_CNTRL_TYPE := WB_CNTRL_NOP;
 	
 	--! @brief execute
 	constant FLAGS_WIDTH : natural := 4;

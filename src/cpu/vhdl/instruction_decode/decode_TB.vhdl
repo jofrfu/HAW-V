@@ -11,6 +11,9 @@ architecture TB of decode_TB is
         port(   
             branch      :  in std_logic;
             IFR	        :  in INSTRUCTION_BIT_TYPE;
+            DEST_REG_EX :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_MA :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_WB :  in REGISTER_ADDRESS_TYPE;
             ----------------------------------------
             IF_CNTRL    : out IF_CNTRL_TYPE;
             ID_CNTRL    : out ID_CNTRL_TYPE;
@@ -27,6 +30,9 @@ architecture TB of decode_TB is
     
     signal branch_s      : std_logic := '0';
     signal IFR_s	     : INSTRUCTION_BIT_TYPE := IFR_I_TYPE(0, 0, "000", 0, opimmo);
+    signal DEST_REG_EX_s : REGISTER_ADDRESS_TYPE;
+    signal DEST_REG_MA_s : REGISTER_ADDRESS_TYPE;
+    signal DEST_REG_WB_s : REGISTER_ADDRESS_TYPE;
     ----------------------------------------
     signal IF_CNTRL_s    : IF_CNTRL_TYPE;
     signal ID_CNTRL_s    : ID_CNTRL_TYPE;
@@ -293,6 +299,9 @@ architecture TB of decode_TB is
     port map(
         branch => branch_s,
         IFR => IFR_s,
+        DEST_REG_EX => DEST_REG_EX_s,
+        DEST_REG_MA => DEST_REG_MA_s,
+        DEST_REG_WB => DEST_REG_WB_s,
         IF_CNTRL => IF_CNTRL_s,
         ID_CNTRL => ID_CNTRL_s,
         EX_CNTRL => EX_CNTRL_s,        
