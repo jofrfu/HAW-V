@@ -819,7 +819,7 @@ architecture TB of decode_TB is
         IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
         wait for WAIT_TIME;
         if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "bubble_check failed opimmo with rs1=1" severity error;
+            report "bubble_check failed opimm with rs1=1" severity error;
             wait;
         end if;
         
@@ -829,7 +829,7 @@ architecture TB of decode_TB is
         IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
         wait for WAIT_TIME;
         if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "bubble_check failed opimmo with rs1=0" severity error;
+            report "bubble_check failed opimm with rs1=0" severity error;
             wait;
         end if;
         
@@ -842,7 +842,7 @@ architecture TB of decode_TB is
         IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
         wait for WAIT_TIME;
         if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "bubble_check failed jalro with rs1=2" severity error;
+            report "bubble_check failed jalr with rs1=2" severity error;
             wait;
         end if;  
         
@@ -852,13 +852,164 @@ architecture TB of decode_TB is
         IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
         wait for WAIT_TIME;
         if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
-            report "bubble_check failed jalro with rs1=0" severity error;
+            report "bubble_check failed jalr with rs1=0" severity error;
             wait;
         end if;    
         
+        --lb x2, x1, -4
+        shouldBubble := true;
+        immediate    := -4;
+        opcode       := loado;
+        rs1          := 3;
+        rd           := 2;
+        funct3       := LB_FUNCT3;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "bubble_check failed load with rs1=3" severity error;
+            wait;
+        end if;  
+        
+        shouldBubble := false;
+        rs1          := 0;
+        
+        IFR_s <= IFR_I_TYPE(immediate, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, NO_REG, rs1, rd, funct3, NO_FUNCT7) then
+            report "bubble_check failed load with rs1=0" severity error;
+            wait;
+        end if;     
+        
+        --add x2, x1, x3
+        shouldBubble := true;
+        funct7  := ADD_FUNCT7;
+        funct3  := ADD_FUNCT3;
+        opcode  := opo;
+        rs2     := 3;
+        rs1     := 1;
+        rd      := 2;
+
+        IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+            report "bubble_check failed add with rs1=1, rs2=3" severity error;
+            wait;
+        end if;
+        
+        rs2 := 0;
+        IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+            report "bubble_check failed add with rs1=1, rs2=0" severity error;
+            wait;
+        end if;
+        
+        rs2 := 2;
+        rs1 := 0;
+        IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+            report "bubble_check failed add with rs1=0, rs2=2" severity error;
+            wait;
+        end if;
+        
+        rs2 := 0;
+        shouldBubble := false;
+        IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, rd, funct3, funct7) then
+            report "bubble_check failed add with rs1=0, rs2=0" severity error;
+            wait;
+        end if;
+        
+        --beq x1, x3, -4
+        shouldBubble := true;
+        opcode      := brancho;
+        immediate   := -4;         --only even numbers can be used with B-Type
+        rs1         := 1;
+        rs2         := 3;
+        funct3      := BEQ_FUNCT3;
+                
+        IFR_s <= IFR_B_TYPE(immediate, rs2, rs1, funct3, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+            report "decode_reponse_check failed branch wirh rs1=1, rs2=3" severity error;
+            wait;
+        end if;   
+        
+        rs2 := 0;
+        IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+            report "bubble_check failed branch with rs1=1, rs2=0" severity error;
+            wait;
+        end if;
+        
+        rs2 := 2;
+        rs1 := 0;
+        IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+            report "bubble_check failed branch with rs1=0, rs2=2" severity error;
+            wait;
+        end if;
+        
+        rs2 := 0;
+        shouldBubble := false;
+        IFR_s <= IFR_R_TYPE(funct7, rs2, rs1, funct3, rd, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+            report "bubble_check failed branch with rs1=0, rs2=0" severity error;
+            wait;
+        end if;
+        
+        --sb x1, x3, -4
+        shouldBubble := true;
+        immediate   := -4;
+        opcode      := storeo;
+        rs2         := 3;
+        rs1         := 1;
+        funct3      := SB_FUNCT3;
+        
+        IFR_s <= IFR_S_TYPE(immediate, rs2, rs1, funct3, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+            report "bubble_check failed store rs1=1, rs2=3" severity error;
+            wait;
+        end if; 
+        
+        rs1 := 0;
+        
+        IFR_s <= IFR_S_TYPE(immediate, rs2, rs1, funct3, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+            report "bubble_check failed store rs1=0, rs2=3" severity error;
+            wait;
+        end if; 
+        
+        rs2 := 0;
+        rs1 := 3;
+        
+        IFR_s <= IFR_S_TYPE(immediate, rs2, rs1, funct3, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+            report "bubble_check failed store rs1=3, rs2=0" severity error;
+            wait;
+        end if; 
+        
+        rs1 := 0;
+        shouldBubble := false;
+        
+        IFR_s <= IFR_S_TYPE(immediate, rs2, rs1, funct3, opcode);
+        wait for WAIT_TIME;
+        if not bubble_check(shouldBubble, immediate, opcode, rs2, rs1, NO_REG, funct3, NO_FUNCT7) then
+            report "bubble_check failed store rs1=0, rs2=0" severity error;
+            wait;
+        end if; 
+        
         report "bubble decode test successful" severity note;
         wait;
-        
         
         
     end process test;  
