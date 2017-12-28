@@ -56,57 +56,43 @@ begin
         
         PERIPH_cs_v := PERIPH_cs;
         
+        DOUT_v := (others => '0');
         DECODE_RESU_v := (others => (others => '0'));
         
         if EN_v = '1' then
-            case WEA_v is
-                when "0000" =>
-                    if to_integer(unsigned(ADDR_v)) + 3 < IO_BYTE_COUNT then
-                        DOUT_v(4*BYTE_WIDTH-1 downto 3*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 3);
-                    else
-                        DOUT_v(4*BYTE_WIDTH-1 downto 3*BYTE_WIDTH) := (others => '0');
-                    end if;
-                    
-                    if to_integer(unsigned(ADDR_v)) + 2 < IO_BYTE_COUNT then
-                        DOUT_v(3*BYTE_WIDTH-1 downto 2*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 2);
-                    else
-                        DOUT_v(3*BYTE_WIDTH-1 downto 2*BYTE_WIDTH) := (others => '0');
-                    end if;
-                    
-                    if to_integer(unsigned(ADDR_v)) + 1 < IO_BYTE_COUNT then
-                        DOUT_v(2*BYTE_WIDTH-1 downto 1*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 1);
-                    else
-                        DOUT_v(2*BYTE_WIDTH-1 downto 1*BYTE_WIDTH) := (others => '0');
-                    end if;
-                    
-                    if to_integer(unsigned(ADDR_v)) + 0 < IO_BYTE_COUNT then
-                        DOUT_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 0);
-                    else
-                        DOUT_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH) := (others => '0');
-                    end if;
+            -- read and write
+            if to_integer(unsigned(ADDR_v)) + 0 < IO_BYTE_COUNT then
+                DOUT_v(4*BYTE_WIDTH-1 downto 3*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 0);
                 
-                when "0001" =>
-                    DOUT_v := (others => '0');
-                    
-                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 0) := DIN_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH);
-                when "0011" =>
-                    DOUT_v := (others => '0');
-
-                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 0) := DIN_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH);
-                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 1) := DIN_v(2*BYTE_WIDTH-1 downto 1*BYTE_WIDTH);
-                when "1111" =>
-                    DOUT_v := (others => '0');
-                    
-                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 0) := DIN_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH);
-                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 1) := DIN_v(2*BYTE_WIDTH-1 downto 1*BYTE_WIDTH);
-                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 2) := DIN_v(3*BYTE_WIDTH-1 downto 2*BYTE_WIDTH);
-                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 3) := DIN_v(4*BYTE_WIDTH-1 downto 3*BYTE_WIDTH);
-                when others =>
-                    report "Unkwown write enable in IO!" severity error;
-                    DOUT_v := (others => '0');
-            end case;
-        else
-            DOUT_v := (others => '0');
+                if WEA_v(0) = '1' then
+                    DECODE_RESU_v(to_integer(unsigned(ADDR)) + 0) := DIN_v(4*BYTE_WIDTH-1 downto 3*BYTE_WIDTH);
+                end if;
+            end if;
+            
+            if to_integer(unsigned(ADDR_v)) + 1 < IO_BYTE_COUNT then
+                DOUT_v(3*BYTE_WIDTH-1 downto 2*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 1);
+                
+                if WEA_v(1) = '1' then
+                    DECODE_RESU_v(to_integer(unsigned(ADDR)) + 1) := DIN_v(3*BYTE_WIDTH-1 downto 2*BYTE_WIDTH);
+                end if;
+            end if;
+            
+            if to_integer(unsigned(ADDR_v)) + 2 < IO_BYTE_COUNT then
+                DOUT_v(2*BYTE_WIDTH-1 downto 1*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 2);
+                
+                if WEA_v(2) = '1' then
+                    DECODE_RESU_v(to_integer(unsigned(ADDR)) + 2) := DIN_v(2*BYTE_WIDTH-1 downto 1*BYTE_WIDTH);
+                end if;
+            end if;
+            
+            if to_integer(unsigned(ADDR_v)) + 3 < IO_BYTE_COUNT then
+                DOUT_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 3);
+            
+                if WEA_v(3) = '1' then
+                    DECODE_RESU_v(to_integer(unsigned(ADDR)) + 3) := DIN_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH);
+                end if;
+            end if;
+            
         end if;
         
         DECODE_RESU <= DECODE_RESU_v;
@@ -140,7 +126,7 @@ begin
         EN_v := EN;
         WEA_v := WEA;
     
-        for i in IO_BYTE_COUNT-1 downto 0 loop
+        for i in 0 downto IO_BYTE_COUNT-1 loop
             if PERIPH_IN_EN_v(i) = '1' then
                 PERIPH_ns_v(i) := PERIPH_IN_v(i);
             else
@@ -151,7 +137,7 @@ begin
                      (to_integer(unsigned(ADDR_v) + 3) = i and WEA_v(3) = '1')) then -- chip enable - only on write from core
                     PERIPH_ns_v(i) := DECODE_RESU_v(i);
                 else
-                    PERIPH_ns_v := PERIPH_cs_v;
+                    PERIPH_ns_v(i) := PERIPH_cs_v(i);
                 end if;
             end if;
         end loop;

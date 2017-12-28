@@ -119,6 +119,7 @@ begin
         begin
             writeMemory(testWord, wLength, address);
             readMemory(wLength, address);
+            wait for 1 ns;
             if DOUT /= testWord then
                 report errorMsg severity error;
                 simulation_running <= false;
@@ -145,6 +146,7 @@ begin
         adrVal := 0;
         while adrVal < 256 loop --read all bytes
             readMemory(BYTE, std_logic_vector(to_unsigned(adrVal, ADDRESS_WIDTH)));
+            wait for 1 ns;
             if DOUT /= std_logic_vector(to_unsigned(adrVal, ADDRESS_WIDTH)) then
                 report "error while reading bytewise" severity error;
                 simulation_running <= false;
@@ -153,9 +155,11 @@ begin
             adrVal := adrVal + 1;
         end loop;
         
+        adrVal := 0;
         while adrVal < 256 loop --loop through all words
             for offset in 0 to 2 loop --offset to distinguish between positions in words
                 readMemory(HALF, std_logic_vector(to_unsigned(adrVal+offset, ADDRESS_WIDTH)));
+                wait for 1 ns;
                 if DOUT /= x"0000" & std_logic_vector(to_unsigned(adrVal+offset+1, BYTE_WIDTH)) & std_logic_vector(to_unsigned(adrVal+offset, BYTE_WIDTH)) then
                     case offset is
                         when 0 => report "error while reading halfbytes; offset = 0" severity error;
@@ -169,8 +173,10 @@ begin
             adrVal := adrVal + 4;
         end loop;
         
+        adrVal := 0;
         while adrVal < 256 loop --loop through all words
             readMemory(WORD, std_logic_vector(to_unsigned(adrVal, ADDRESS_WIDTH)));
+            wait for 1 ns;
             if DOUT /= std_logic_vector(to_unsigned(adrVal+3, BYTE_WIDTH)) 
                      & std_logic_vector(to_unsigned(adrVal+2, BYTE_WIDTH)) 
                      & std_logic_vector(to_unsigned(adrVal+1, BYTE_WIDTH)) 

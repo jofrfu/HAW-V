@@ -76,6 +76,13 @@ architecture beh of memory_io_controller is
     
     signal io_en : std_logic;
     signal mem_en: std_logic;
+    
+    -- Register for little endian conversion -- needs to be delayed, read takes 1 clock cycle
+    signal WORD_LENGTH_cs : WORD_CNTRL_TYPE := (others => '0');
+    signal WORD_LENGTH_ns : WORD_CNTRL_TYPE;
+    
+    signal OFFSET_cs : std_logic_vector(1 downto 0) := (others => '0');
+    signal OFFSET_ns : std_logic_vector(1 downto 0);
 begin
 
     io_en <= EN and ADDR(ADDR'high);
@@ -119,7 +126,7 @@ begin
                    instruction_little_s(23 downto 16) & instruction_little_s(31 downto 24);
 				   
     dout_conv:		--for LOAD
-	process(ADDR, DOB_LITTLE_s, DO_LITTLE_s, WORD_LENGTH) is
+	process(OFFSET_cs, ADDR(ADDR'high), DOB_LITTLE_s, DO_LITTLE_s, WORD_LENGTH_cs) is
 		variable offset_v : std_logic_vector(1 downto 0);
 		variable dob_little_v : DATA_TYPE;
         variable do_little_v  : DATA_TYPE;
@@ -128,10 +135,10 @@ begin
 		variable dout_v : DATA_TYPE;
         variable io_not_mem_v : std_logic;
 	begin
-		offset_v := ADDR(1 downto 0);
+		offset_v := OFFSET_cs;
 		dob_little_v := DOB_LITTLE_s;
         do_little_v  := DO_LITTLE_s;
-		word_length_v := WORD_LENGTH;
+		word_length_v := WORD_LENGTH_cs;
         io_not_mem_v := ADDR(ADDR'high);
 		dout_v := (others => '0');
         
@@ -146,10 +153,10 @@ begin
 			when "00" =>
 				case word_length_v is
 					when BYTE =>
-						dout_v(7 downto 0) := conv_little_v (7 downto 0);
+						dout_v(7 downto 0) := conv_little_v(31 downto 24);
 					when HALF =>
-						dout_v(7 downto 0) := conv_little_v(15 downto 8);
-						dout_v(15 downto 8) := conv_little_v(7 downto 0);
+						dout_v(7 downto 0) := conv_little_v(31 downto 24);
+						dout_v(15 downto 8) := conv_little_v(23 downto 16);
 					when WORD =>
 						dout_v(7 downto 0) := conv_little_v(31 downto 24);
 						dout_v(15 downto 8) := conv_little_v(23 downto 16);
@@ -161,38 +168,38 @@ begin
 			when "01" =>
 				case word_length_v is
 					when BYTE =>
-						dout_v(7 downto 0) := conv_little_v (15 downto 8);
+						dout_v(7 downto 0) := conv_little_v(23 downto 16);
 					when HALF =>
 						dout_v(7 downto 0) := conv_little_v(23 downto 16);
 						dout_v(15 downto 8) := conv_little_v(15 downto 8);
 					when WORD =>
-						dout_v(15 downto 8) := conv_little_v(31 downto 24);
-						dout_v(23 downto 16) := conv_little_v(23 downto 16);
-						dout_v(31 downto 24) := conv_little_v(15 downto 8);
+						dout_v(7 downto 0) := conv_little_v(23 downto 16);
+						dout_v(15 downto 8) := conv_little_v(15 downto 8);
+						dout_v(23 downto 16) := conv_little_v(7 downto 0);
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(01) word_length" severity error;
 				end case;
 			when "10" =>
 				case word_length_v is
 					when BYTE =>
-						dout_v(7 downto 0) := conv_little_v (23 downto 16);
+						dout_v(7 downto 0) := conv_little_v(15 downto 8);
 					when HALF =>
-						dout_v(7 downto 0) := conv_little_v(31 downto 24);
-						dout_v(15 downto 8) := conv_little_v(23 downto 16);
+						dout_v(7 downto 0) := conv_little_v(15 downto 8);
+						dout_v(15 downto 8) := conv_little_v(7 downto 0);
 					when WORD =>
-						dout_v(23 downto 16) := conv_little_v(31 downto 24);
-						dout_v(31 downto 24) := conv_little_v(23 downto 16);
+						dout_v(7 downto 0) := conv_little_v(15 downto 8);
+						dout_v(15 downto 8) := conv_little_v(7 downto 0);
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(10) word_length" severity error;
 				end case;
 			when "11" =>
 				case word_length_v is
 					when BYTE =>
-						dout_v(7 downto 0) := conv_little_v (31 downto 24);
+						dout_v(7 downto 0) := conv_little_v(7 downto 0);
 					when HALF =>
-						dout_v(15 downto 8) := conv_little_v(31 downto 24);
+						dout_v(15 downto 8) := conv_little_v(7 downto 0);
 					when WORD =>
-						dout_v(31 downto 24) := conv_little_v(31 downto 24);						
+						dout_v(31 downto 24) := conv_little_v(7 downto 0);						
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(11) word_length" severity error;
 				end case;
@@ -221,53 +228,53 @@ begin
 			when "00" =>
 				case word_length_v is
 					when BYTE =>
-						din_little_v(7 downto 0) := din_v(7 downto 0);
-					when HALF =>
-						din_little_v(7 downto 0) := din_v(15 downto 8);
-						din_little_v(15 downto 8) := din_v(7 downto 0);
-					when WORD =>
-						din_little_v(7 downto 0) := din_v(31 downto 24);
-						din_little_v(15 downto 8) := din_v(23 downto 16);
-						din_little_v(23 downto 16) := din_v(15 downto 8);
 						din_little_v(31 downto 24) := din_v(7 downto 0);
+					when HALF =>
+						din_little_v(31 downto 24) := din_v(7 downto 0);
+						din_little_v(23 downto 16) := din_v(15 downto 8);
+					when WORD =>
+						din_little_v(31 downto 24) := din_v(7 downto 0);
+                        din_little_v(23 downto 16) := din_v(15 downto 8);
+                        din_little_v(15 downto 8) := din_v(23 downto 16);
+                        din_little_v(7 downto 0) := din_v(31 downto 24);
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(00) word_length" severity error;
 				end case;
 			when "01" =>
 				case word_length_v is
 					when BYTE =>
-						din_little_v(7 downto 0) := din_v (15 downto 8);
+						din_little_v(23 downto 16) := din_v(7 downto 0);
 					when HALF =>
-						din_little_v(7 downto 0) := din_v(23 downto 16);
+						din_little_v(23 downto 16) := din_v(7 downto 0);
 						din_little_v(15 downto 8) := din_v(15 downto 8);
 					when WORD =>
-						din_little_v(15 downto 8) := din_v(31 downto 24);
-						din_little_v(23 downto 16) := din_v(23 downto 16);
-						din_little_v(31 downto 24) := din_v(15 downto 8);
+						din_little_v(23 downto 16) := din_v(7 downto 0);
+						din_little_v(15 downto 8) := din_v(15 downto 8);
+						din_little_v(7 downto 0) := din_v(23 downto 16);
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(01) word_length" severity error;
 				end case;
 			when "10" =>
 				case word_length_v is
 					when BYTE =>
-						din_little_v(7 downto 0) := din_v (23 downto 16);
+						din_little_v(15 downto 8) := din_v(7 downto 0);
 					when HALF =>
-						din_little_v(7 downto 0) := din_v(31 downto 24);
-						din_little_v(15 downto 8) := din_v(23 downto 16);
+						din_little_v(15 downto 8) := din_v(7 downto 0);
+						din_little_v(7 downto 0) := din_v(15 downto 8);
 					when WORD =>
-						din_little_v(23 downto 16) := din_v(31 downto 24);
-						din_little_v(31 downto 24) := din_v(23 downto 16);
+						din_little_v(15 downto 8) := din_v(7 downto 0);
+						din_little_v(7 downto 0) := din_v(15 downto 8);
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(10) word_length" severity error;
 				end case;
 			when "11" =>
 				case word_length_v is
 					when BYTE =>
-						din_little_v(7 downto 0) := din_v (31 downto 24);
+						din_little_v(7 downto 0) := din_v(7 downto 0);
 					when HALF =>
-						din_little_v(15 downto 8) := din_v(31 downto 24);
+						din_little_v(7 downto 0) := din_v(7 downto 0);
 					when WORD =>
-						din_little_v(31 downto 24) := din_v(31 downto 24);						
+						din_little_v(7 downto 0) := din_v(7 downto 0);						
 					when others =>
 						report "memory_io_controller.vhdl: unsupported case in dout_conv offset_v(11) word_length" severity error;
 				end case;
@@ -295,9 +302,9 @@ begin
                 when "00" =>
                     case WORD_LENGTH_v is
                         when BYTE =>
-                            BYTE_WRITE_EN_v := "0001";
+                            BYTE_WRITE_EN_v := "1000";
                         when HALF =>
-                            BYTE_WRITE_EN_v := "0011";
+                            BYTE_WRITE_EN_v := "1100";
                         when WORD =>
                             BYTE_WRITE_EN_v := "1111";
                         when others =>
@@ -307,11 +314,11 @@ begin
                 when "01" =>
                     case WORD_LENGTH_v is
                         when BYTE =>
-                            BYTE_WRITE_EN_v := "0010";
+                            BYTE_WRITE_EN_v := "0100";
                         when HALF =>
                             BYTE_WRITE_EN_v := "0110";
                         when WORD =>
-                            BYTE_WRITE_EN_v := "1110";
+                            BYTE_WRITE_EN_v := "0111";
                         when others =>
                             BYTE_WRITE_EN_v := "0000";
                             report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
@@ -319,11 +326,11 @@ begin
                 when "10" =>
                     case WORD_LENGTH_v is
                         when BYTE =>
-                            BYTE_WRITE_EN_v := "0100";
+                            BYTE_WRITE_EN_v := "0010";
                         when HALF =>
-                            BYTE_WRITE_EN_v := "1100";
+                            BYTE_WRITE_EN_v := "0011";
                         when WORD =>
-                            BYTE_WRITE_EN_v := "1100";
+                            BYTE_WRITE_EN_v := "0011";
                         when others =>
                             BYTE_WRITE_EN_v := "0000";
                             report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
@@ -331,11 +338,11 @@ begin
                 when "11" =>
                     case WORD_LENGTH_v is
                         when BYTE =>
-                            BYTE_WRITE_EN_v := "1000";
+                            BYTE_WRITE_EN_v := "0001";
                         when HALF =>
-                            BYTE_WRITE_EN_v := "1000";
+                            BYTE_WRITE_EN_v := "0001";
                         when WORD =>
-                            BYTE_WRITE_EN_v := "1000";
+                            BYTE_WRITE_EN_v := "0001";
                         when others =>
                             BYTE_WRITE_EN_v := "0000";
                             report "Unknown word length in write_en conversion! Probable faulty implementation." severity warning;
@@ -350,5 +357,22 @@ begin
         
         BYTE_WRITE_EN_s <= BYTE_WRITE_EN_v;
     end process write_en;
+    
+    sequlo:
+    process(clk) is
+    begin
+        if clk = '1' and clk'event then
+            if reset = '1' then
+                WORD_LENGTH_cs <= (others => '0');
+                OFFSET_cs <= (others => '0');
+            else
+                WORD_LENGTH_cs <= WORD_LENGTH_ns;
+                OFFSET_cs <= OFFSET_ns;
+            end if;
+        end if;
+    end process sequlo;
+    
+    WORD_LENGTH_ns <= WORD_LENGTH;
+    OFFSET_ns <= ADDR(1 downto 0);
     
 end architecture beh;
