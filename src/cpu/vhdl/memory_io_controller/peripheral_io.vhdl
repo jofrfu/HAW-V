@@ -64,32 +64,32 @@ begin
             if to_integer(unsigned(ADDR_v)) + 0 < IO_BYTE_COUNT then
                 DOUT_v(4*BYTE_WIDTH-1 downto 3*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 0);
                 
-                if WEA_v(0) = '1' then
-                    DECODE_RESU_v(to_integer(unsigned(ADDR)) + 0) := DIN_v(4*BYTE_WIDTH-1 downto 3*BYTE_WIDTH);
+                if WEA_v(3) = '1' then
+                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 0) := DIN_v(4*BYTE_WIDTH-1 downto 3*BYTE_WIDTH);
                 end if;
             end if;
             
             if to_integer(unsigned(ADDR_v)) + 1 < IO_BYTE_COUNT then
                 DOUT_v(3*BYTE_WIDTH-1 downto 2*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 1);
                 
-                if WEA_v(1) = '1' then
-                    DECODE_RESU_v(to_integer(unsigned(ADDR)) + 1) := DIN_v(3*BYTE_WIDTH-1 downto 2*BYTE_WIDTH);
+                if WEA_v(2) = '1' then
+                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 1) := DIN_v(3*BYTE_WIDTH-1 downto 2*BYTE_WIDTH);
                 end if;
             end if;
             
             if to_integer(unsigned(ADDR_v)) + 2 < IO_BYTE_COUNT then
                 DOUT_v(2*BYTE_WIDTH-1 downto 1*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 2);
                 
-                if WEA_v(2) = '1' then
-                    DECODE_RESU_v(to_integer(unsigned(ADDR)) + 2) := DIN_v(2*BYTE_WIDTH-1 downto 1*BYTE_WIDTH);
+                if WEA_v(1) = '1' then
+                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 2) := DIN_v(2*BYTE_WIDTH-1 downto 1*BYTE_WIDTH);
                 end if;
             end if;
             
             if to_integer(unsigned(ADDR_v)) + 3 < IO_BYTE_COUNT then
                 DOUT_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH) := PERIPH_cs_v(to_integer(unsigned(ADDR_v)) + 3);
             
-                if WEA_v(3) = '1' then
-                    DECODE_RESU_v(to_integer(unsigned(ADDR)) + 3) := DIN_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH);
+                if WEA_v(0) = '1' then
+                    DECODE_RESU_v(to_integer(unsigned(ADDR_v)) + 3) := DIN_v(1*BYTE_WIDTH-1 downto 0*BYTE_WIDTH);
                 end if;
             end if;
             
@@ -126,15 +126,15 @@ begin
         EN_v := EN;
         WEA_v := WEA;
     
-        for i in 0 downto IO_BYTE_COUNT-1 loop
+        for i in 0 to IO_BYTE_COUNT-1 loop
             if PERIPH_IN_EN_v(i) = '1' then
                 PERIPH_ns_v(i) := PERIPH_IN_v(i);
             else
                 if EN_v = '1' and
-                    ((to_integer(unsigned(ADDR_v) + 0) = i and WEA_v(0) = '1') or 
-                     (to_integer(unsigned(ADDR_v) + 1) = i and WEA_v(1) = '1') or 
-                     (to_integer(unsigned(ADDR_v) + 2) = i and WEA_v(2) = '1') or 
-                     (to_integer(unsigned(ADDR_v) + 3) = i and WEA_v(3) = '1')) then -- chip enable - only on write from core
+                    ((to_integer(unsigned(ADDR_v) + 0) = i and WEA_v(3) = '1') or 
+                     (to_integer(unsigned(ADDR_v) + 1) = i and WEA_v(2) = '1') or 
+                     (to_integer(unsigned(ADDR_v) + 2) = i and WEA_v(1) = '1') or 
+                     (to_integer(unsigned(ADDR_v) + 3) = i and WEA_v(0) = '1')) then -- chip enable - only on write from core
                     PERIPH_ns_v(i) := DECODE_RESU_v(i);
                 else
                     PERIPH_ns_v(i) := PERIPH_cs_v(i);
