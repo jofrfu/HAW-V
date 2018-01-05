@@ -31,7 +31,6 @@ architecture beh of decode is
 
     signal rs1_in_pipe_s : std_logic;    --if high, rs1 is in the writeback of the following stages
     signal rs2_in_pipe_s : std_logic;    --if high, rs2 is in the writeback of the following stages
-    signal bubble_s      : std_logic;    --if high the immediate is set to 0
 
     signal imm_ifr_s     : DATA_TYPE;
     
@@ -80,7 +79,6 @@ begin
         variable WB_CNTRL_v : WB_CNTRL_TYPE;
         variable MA_CNTRL_v : MA_CNTRL_TYPE;
         variable EX_CNTRL_v : EX_CNTRL_TYPE;
-        variable bubble_v   : std_logic;
        
     begin
         branch_v            := branch;
@@ -98,7 +96,6 @@ begin
             EX_CNTRL_v := EX_CNTRL_NOP;
             MA_CNTRL_v := MA_CNTRL_NOP;
             WB_CNTRL_v := WB_CNTRL_NOP;
-            bubble_v   := '0';
         else
             --normal decoding 
             --always send this
@@ -111,13 +108,11 @@ begin
                     ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load immediate for opb and r0 for opa (r0 in do)
                     MA_CNTRL_v := "00";   --no load nor store
                     WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
-                    bubble_v   := '0';
                 when auipco =>
                     IF_CNTRL_v := "00";    --PC + 4
                     ID_CNTRL_v := '1' & '1' & "00000" & "00000";    --load pc in opa and immediate in opb (r0 in do)
                     MA_CNTRL_v := "00";   --no load nor store
                     WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
-                    bubble_v   := '0';
                 when jalo =>
                     if Imm_check /= imm_ifr_s then  --imediate is not yet in register
                         IF_CNTRL_v := IF_CNTRL_BUB;
@@ -125,13 +120,11 @@ begin
                         EX_CNTRL_v := EX_CNTRL_BUB;
                         MA_CNTRL_v := MA_CNTRL_BUB;
                         WB_CNTRL_v := WB_CNTRL_BUB;
-                        bubble_v   := '0';      --no bubble signal here, immediate must not be zeroed
                     else 
                         IF_CNTRL_v := "01";    --PC + rel
                         ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load r0 in opa and r0 in opb (r0 in do)
                         MA_CNTRL_v := "00";   --no load nor store
                         WB_CNTRL_v := '1' & rd_v;   --jump, write back (PC)
-                        bubble_v   := '0';
                     end if;
                 when jalro =>
                     if Imm_check /= imm_ifr_s then  --imediate is not yet in register
@@ -140,7 +133,6 @@ begin
                         EX_CNTRL_v := EX_CNTRL_BUB;
                         MA_CNTRL_v := MA_CNTRL_BUB;
                         WB_CNTRL_v := WB_CNTRL_BUB;
-                        bubble_v   := '0';      --no bubble signal here, immediate must not be zeroed
                     else 
                         if  rs1_in_pipe_s = '1' then
                             IF_CNTRL_v := IF_CNTRL_BUB;
@@ -148,13 +140,11 @@ begin
                             EX_CNTRL_v := EX_CNTRL_BUB;
                             MA_CNTRL_v := MA_CNTRL_BUB;
                             WB_CNTRL_v := WB_CNTRL_BUB;
-                            bubble_v   := '1';
                         else                    
                             IF_CNTRL_v := "11";    --abs + rel
                             ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
                             MA_CNTRL_v := "00";    --no load nor store
                             WB_CNTRL_v := '1' & rd_v;   --jump, write back (PC)
-                            bubble_v   := '0';
                         end if;
                     end if;
                 when brancho =>
@@ -164,13 +154,11 @@ begin
                         EX_CNTRL_v := EX_CNTRL_BUB;
                         MA_CNTRL_v := MA_CNTRL_BUB;
                         WB_CNTRL_v := WB_CNTRL_BUB;
-                        bubble_v   := '1';
                     else
                         IF_CNTRL_v := "00";    --next instruction will be loaded if no branching
                         ID_CNTRL_v := '0' & '0' & rs2_v & rs1_v;    --load rs1 in opa and rs2 in opb
                         MA_CNTRL_v := "00";    --no load nor store
                         WB_CNTRL_v := '0' & "00000";   --branch, no write back (no PC)
-                        bubble_v   := '0';
                     end if;
                 when loado =>
                     if  rs1_in_pipe_s = '1' or STORE = '1' then
@@ -179,13 +167,11 @@ begin
                         EX_CNTRL_v := EX_CNTRL_BUB;
                         MA_CNTRL_v := MA_CNTRL_BUB;
                         WB_CNTRL_v := WB_CNTRL_BUB;
-                        bubble_v   := '1';
                     else    
                         IF_CNTRL_v := "00";    --PC + 4
                         ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
                         MA_CNTRL_v := "01";    --load
                         WB_CNTRL_v := '0' & rd_v;   --write loaded value to rd (no PC)
-                        bubble_v   := '0';
                     end if;
                 when storeo =>
                     if rs1_in_pipe_s = '1' or rs2_in_pipe_s = '1' then
@@ -194,13 +180,11 @@ begin
                         EX_CNTRL_v := EX_CNTRL_BUB;
                         MA_CNTRL_v := MA_CNTRL_BUB;
                         WB_CNTRL_v := WB_CNTRL_BUB;
-                        bubble_v   := '1';
                     else
                         IF_CNTRL_v := "00";    --PC + 4
                         ID_CNTRL_v := '0' & '1' & rs2_v & rs1_v;    --load rs1 in opa, immediate in opb and rs2 in do
                         MA_CNTRL_v := "10";    --store
                         WB_CNTRL_v := '0' & "00000";   --value will be stored, no write back (no PC)
-                        bubble_v   := '0';
                     end if;
                 when opimmo =>
                     if  rs1_in_pipe_s = '1' then
@@ -209,13 +193,11 @@ begin
                         EX_CNTRL_v := EX_CNTRL_BUB;
                         MA_CNTRL_v := MA_CNTRL_BUB;
                         WB_CNTRL_v := WB_CNTRL_BUB;
-                        bubble_v   := '1';
                     else   
                         IF_CNTRL_v := "00";    --PC + 4
                         ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
                         MA_CNTRL_v := "00";    --no load nor store
                         WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
-                        bubble_v   := '0';
                     end if;
                 when opo =>
                     if rs1_in_pipe_s = '1' or rs2_in_pipe_s = '1' then
@@ -224,13 +206,11 @@ begin
                         EX_CNTRL_v := EX_CNTRL_BUB;
                         MA_CNTRL_v := MA_CNTRL_BUB;
                         WB_CNTRL_v := WB_CNTRL_BUB;
-                        bubble_v   := '1';
                     else
                         IF_CNTRL_v := "00";    --PC + 4
                         ID_CNTRL_v := '0' & '0' & rs2_v & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
                         MA_CNTRL_v := "00";    --no load nor store
                         WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
-                        bubble_v   := '0';
                     end if;
                 when others =>
                     report "decode.vhd - decode: unknown OP_CODE" severity error;
@@ -239,7 +219,6 @@ begin
                     EX_CNTRL_v := EX_CNTRL_NOP;
                     MA_CNTRL_v := MA_CNTRL_NOP;
                     WB_CNTRL_v := WB_CNTRL_NOP;
-                    bubble_v   := '0';
             end case;
         end if; --branch_v
         
@@ -248,55 +227,49 @@ begin
         EX_CNTRL <= EX_CNTRL_v;
         MA_CNTRL <= MA_CNTRL_v;
         WB_CNTRL <= WB_CNTRL_v;
-        bubble_s <= bubble_v;
     end process decode;
     
     --! @brief extracts the immediate in the IFR and sign extends it
     imm_constr:
-    process(IFR, bubble_s) is
+    process(IFR) is
         variable op_code_v   : OP_CODE_TYPE;
         variable imm_bits_v  : std_logic_vector( INSTRUCTION_WIDTH-1 downto OP_CODE_WIDTH );
         
         variable immediate_v : DATA_TYPE;
     begin
-        if bubble_s = '0' then
-            op_code_v := BITS_TO_OP_CODE_TYPE(IFR(OP_CODE_WIDTH-1 downto 0));
-            imm_bits_v := IFR(imm_bits_v'range);
-            immediate_v := (others => imm_bits_v(imm_bits_v'left)); --MSB is always the sign bit if immediate is available
+        op_code_v := BITS_TO_OP_CODE_TYPE(IFR(OP_CODE_WIDTH-1 downto 0));
+        imm_bits_v := IFR(imm_bits_v'range);
+        immediate_v := (others => imm_bits_v(imm_bits_v'left)); --MSB is always the sign bit if immediate is available
+        
+        case op_code_v is
+            when opimmo | jalro | loado | opo => -- I-Type  / opo has R-Type, no immediate so it does not matter where it goes
+                immediate_v(10 downto 0) := imm_bits_v(30 downto 20);
             
-            case op_code_v is
-                when opimmo | jalro | loado | opo => -- I-Type  / opo has R-Type, no immediate so it does not matter where it goes
-                    immediate_v(10 downto 0) := imm_bits_v(30 downto 20);
+            when luio | auipco => -- U-Type
+                immediate_v(30 downto 12) := imm_bits_v(30 downto 12);
+                immediate_v(11 downto 0) := (others => '0');
+            
+            when jalo => -- J-Type
+                immediate_v(19 downto 12) := imm_bits_v(19 downto 12);
+                immediate_v(11) := imm_bits_v(20);
+                immediate_v(10 downto 1) := imm_bits_v(30 downto 21);
+                immediate_v(0) := '0';
+            
+            when brancho => -- B-Type
+                immediate_v(11) := imm_bits_v(7);
+                immediate_v(10 downto 5) := imm_bits_v(30 downto 25);
+                immediate_v(4 downto 1) := imm_bits_v(11 downto 8);
+                immediate_v(0) := '0';
+            
+            when storeo => -- S-Type
+                immediate_v(10 downto 5) := imm_bits_v(30 downto 25);
+                immediate_v(4 downto 1) := imm_bits_v(11 downto 8);
+                immediate_v(0) := imm_bits_v(7);
                 
-                when luio | auipco => -- U-Type
-                    immediate_v(30 downto 12) := imm_bits_v(30 downto 12);
-                    immediate_v(11 downto 0) := (others => '0');
-                
-                when jalo => -- J-Type
-                    immediate_v(19 downto 12) := imm_bits_v(19 downto 12);
-                    immediate_v(11) := imm_bits_v(20);
-                    immediate_v(10 downto 1) := imm_bits_v(30 downto 21);
-                    immediate_v(0) := '0';
-                
-                when brancho => -- B-Type
-                    immediate_v(11) := imm_bits_v(7);
-                    immediate_v(10 downto 5) := imm_bits_v(30 downto 25);
-                    immediate_v(4 downto 1) := imm_bits_v(11 downto 8);
-                    immediate_v(0) := '0';
-                
-                when storeo => -- S-Type
-                    immediate_v(10 downto 5) := imm_bits_v(30 downto 25);
-                    immediate_v(4 downto 1) := imm_bits_v(11 downto 8);
-                    immediate_v(0) := imm_bits_v(7);
-                    
-                when others =>
-                    report "decode.vhd - imm_constr: unknown OP_CODE" severity error;
-                    immediate_v := (others => '0');
-            end case;
-        else 
-            --bubble_s = '1'  => when bubbling the immediate has to be zero to load the same PC again
-            immediate_v := (others => '0');
-        end if;
+            when others =>
+                report "decode.vhd - imm_constr: unknown OP_CODE" severity error;
+                immediate_v := (others => '0');
+        end case;
         
         imm_ifr_s <= immediate_v;
         
