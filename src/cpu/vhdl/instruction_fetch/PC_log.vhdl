@@ -1,11 +1,8 @@
 --!@file    PC_log.vhdl
---!@biref   This file contains the programm counter entity of the CPU
---!@author  Sebastian Br�ckner
---!@date    2017
-
---!@biref   Programm counter of the CPU
---!@details Contains the Programm counter logic
---!@author  Sebastian Br�ckner
+--!@brief   This file is part of the ach-ne projekt at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Sebastian Brückner
+--!@author  Felix Lorenz
 --!@date    2017
 
 use WORK.riscv_pack.all;
@@ -13,6 +10,14 @@ library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
+--!@brief Programm Counter of the CPU
+--!@details Computes the next adress from witch the next instruction will be loaded.
+--!         It has 5 operations modes:
+--!         1. increase PC by 4
+--!         2. add relative to PC
+--!         3. set PC to absolute
+--!         4. set PC to absolute + relative
+--!         5. stop PC for bubbles (+0)
 entity PC_log is
     port(
          clk, reset : in std_logic;
