@@ -16,6 +16,7 @@ entity decode is
         DEST_REG_MA :  in REGISTER_ADDRESS_TYPE;
         DEST_REG_WB :  in REGISTER_ADDRESS_TYPE;
         STORE       :  in std_logic;
+        Imm_check   :  in DATA_TYPE;
 		----------------------------------------
 		IF_CNTRL    : out IF_CNTRL_TYPE;
 		ID_CNTRL    : out ID_CNTRL_TYPE;
@@ -32,6 +33,8 @@ architecture beh of decode is
     signal rs2_in_pipe_s : std_logic;    --if high, rs2 is in the writeback of the following stages
     signal bubble_s      : std_logic;    --if high the immediate is set to 0
 
+    signal imm_ifr_s     : DATA_TYPE;
+    
 begin
 
     rs1_check_1:
@@ -61,7 +64,7 @@ begin
     --! @brief decode unit for ID stage
     --! @detail controls the PC flow IF stage and operand selection for EX stage
     decode:
-    process(branch, IFR, rs1_in_pipe_s, rs2_in_pipe_s, STORE) is
+    process(branch, IFR, rs1_in_pipe_s, rs2_in_pipe_s, STORE, Imm_check, imm_ifr_s) is
     
         variable branch_v   : std_logic;
         variable op_bits_v  : OP_CODE_BIT_TYPE;
@@ -116,25 +119,43 @@ begin
                     WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
                     bubble_v   := '0';
                 when jalo =>
-                    IF_CNTRL_v := "01";    --PC + rel
-                    ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load r0 in opa and r0 in opb (r0 in do)
-                    MA_CNTRL_v := "00";   --no load nor store
-                    WB_CNTRL_v := '1' & rd_v;   --jump, write back (PC)
-                    bubble_v   := '0';
-                when jalro =>
-                    if  rs1_in_pipe_s = '1' then
+                    if Imm_check /= imm_ifr_s then  --imediate is not yet in register
                         IF_CNTRL_v := IF_CNTRL_BUB;
                         ID_CNTRL_v := ID_CNTRL_BUB;
                         EX_CNTRL_v := EX_CNTRL_BUB;
                         MA_CNTRL_v := MA_CNTRL_BUB;
                         WB_CNTRL_v := WB_CNTRL_BUB;
-                        bubble_v   := '1';
-                    else                    
-                        IF_CNTRL_v := "11";    --abs + rel
-                        ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
-                        MA_CNTRL_v := "00";    --no load nor store
+                        bubble_v   := '0';      --no bubble signal here, immediate must not be zeroed
+                    else 
+                        IF_CNTRL_v := "01";    --PC + rel
+                        ID_CNTRL_v := '0' & '1' & "00000" & "00000";    --load r0 in opa and r0 in opb (r0 in do)
+                        MA_CNTRL_v := "00";   --no load nor store
                         WB_CNTRL_v := '1' & rd_v;   --jump, write back (PC)
                         bubble_v   := '0';
+                    end if;
+                when jalro =>
+                    if Imm_check /= imm_ifr_s then  --imediate is not yet in register
+                        IF_CNTRL_v := IF_CNTRL_BUB;
+                        ID_CNTRL_v := ID_CNTRL_BUB;
+                        EX_CNTRL_v := EX_CNTRL_BUB;
+                        MA_CNTRL_v := MA_CNTRL_BUB;
+                        WB_CNTRL_v := WB_CNTRL_BUB;
+                        bubble_v   := '0';      --no bubble signal here, immediate must not be zeroed
+                    else 
+                        if  rs1_in_pipe_s = '1' then
+                            IF_CNTRL_v := IF_CNTRL_BUB;
+                            ID_CNTRL_v := ID_CNTRL_BUB;
+                            EX_CNTRL_v := EX_CNTRL_BUB;
+                            MA_CNTRL_v := MA_CNTRL_BUB;
+                            WB_CNTRL_v := WB_CNTRL_BUB;
+                            bubble_v   := '1';
+                        else                    
+                            IF_CNTRL_v := "11";    --abs + rel
+                            ID_CNTRL_v := '0' & '1' & "00000" & rs1_v;    --load rs1 in opa and immediate in opb (r0 in do)
+                            MA_CNTRL_v := "00";    --no load nor store
+                            WB_CNTRL_v := '1' & rd_v;   --jump, write back (PC)
+                            bubble_v   := '0';
+                        end if;
                     end if;
                 when brancho =>
                     if rs1_in_pipe_s = '1' or rs2_in_pipe_s = '1' then
@@ -277,10 +298,11 @@ begin
             immediate_v := (others => '0');
         end if;
         
-        Imm <= immediate_v;
+        imm_ifr_s <= immediate_v;
         
     end process imm_constr;
-
+    
+    Imm <= imm_ifr_s;
     
     
 end architecture beh;

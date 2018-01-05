@@ -46,6 +46,7 @@ begin
         abso_v  := abso;
         pc_v     := pc_cs;
         
+        
         case cntrl_v(0) is  --choose a value to increment the PC
             when '0'    => increment_v := STD_PC_ADD;
             when '1'    => increment_v := rel_v;
@@ -58,8 +59,9 @@ begin
             when others => report "PC_log mux 1 has undefined signal" severity warning;
         end case ; 
         
-        if cntrl_v = "10" then
-            report "Wrong Control Bits in PC_log, 4 + abs does not make any sense!!!" severity warning;
+        if cntrl_v = IF_CNTRL_BUB then      --PC + 0 for bubbles
+            base_v := pc_v;
+            increment_v := (others => '0');
         end if;
         
         pc_ns_v := std_logic_vector(unsigned(base_v) + unsigned(increment_v)); 

@@ -65,8 +65,8 @@ begin
     reg : 
     process(clk) is
     begin
-        if clk'event and clk = '1' then
-            if branch = '1' or reset = '1' then
+        if clk'event and clk = '1' then     --when cntrl is 01 or 11 it means jump
+            if branch = '1' or reset = '1' or cntrl = "01" or cntrl = "11" then
                 IFR_cs <= NOP_INSTRUCT; --discard next instruction
             else
                 IFR_cs <= ins;  --store data from instruction memory to IFR at rising edge   

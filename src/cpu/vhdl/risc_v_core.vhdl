@@ -215,9 +215,9 @@ begin
         REG_ADDR_s,
         
         -- write back registers from stages
+        WB_CNTRL_ID_to_EX(4 downto 0),
         WB_CNTRL_EX_to_MA(4 downto 0),
         WB_CNTRL_MA_to_WB(4 downto 0),
-        REG_ADDR_s,
         MA_CNTRL_ID_to_EX(1),
         
         -- cntrl outs
