@@ -39,25 +39,39 @@ begin
     rs1_check_1:
     process(IFR(19 downto 15), DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
         variable rs1_v      : REGISTER_ADDRESS_TYPE;
+        variable rs1_in_pipe_v : std_logic;
     begin
         rs1_v := IFR(19 downto 15);
-        if rs1_v /= "00000" and ( rs1_v = DEST_REG_EX or rs1_v = DEST_REG_MA or rs1_v = DEST_REG_WB ) then
-            rs1_in_pipe_s <= '1';
+        if rs1_v /= "00000" then
+            if rs1_v = DEST_REG_EX or rs1_v = DEST_REG_MA or rs1_v = DEST_REG_WB then
+                rs1_in_pipe_v := '1';
+            else
+                rs1_in_pipe_v := '0';
+            end if;
         else 
-            rs1_in_pipe_s <= '0';
+            rs1_in_pipe_v := '0';
         end if;
+        
+        rs1_in_pipe_s <= rs1_in_pipe_v;
     end process rs1_check_1;
     
     rs2_check_2:
     process(IFR(24 downto 20), DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
         variable rs2_v      : REGISTER_ADDRESS_TYPE;
+        variable rs2_in_pipe_v : std_logic;
     begin
         rs2_v := IFR(24 downto 20);
-        if rs2_v /= "00000" and ( rs2_v = DEST_REG_EX or rs2_v = DEST_REG_MA or rs2_v = DEST_REG_WB ) then
-            rs2_in_pipe_s <= '1';
+        if rs2_v /= "00000" then
+            if ( rs2_v = DEST_REG_EX or rs2_v = DEST_REG_MA or rs2_v = DEST_REG_WB ) then
+                rs2_in_pipe_v := '1';
+            else
+                rs2_in_pipe_v := '0';
+            end if;
         else 
-            rs2_in_pipe_s <= '0';
+            rs2_in_pipe_v := '0';
         end if;
+        
+        rs2_in_pipe_s <= rs2_in_pipe_v;
     end process rs2_check_2;
     
     --! @brief decode unit for ID stage
