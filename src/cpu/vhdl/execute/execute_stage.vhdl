@@ -1,17 +1,21 @@
---!@file 	execute_stage.vhdl
---!@brief 	This file contains the execute stage entity of the CPU
---!@author 	Matthis Keppner, Jonas Fuhrmann
---!@date 	2017
+--!@file    execute_stage.vhdl
+--!@brief   This file is part of the ach-ne projekt at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Jonas Fuhrmann
+--!@atuhor  Matthis Keppner
+--!@author  Sebastian Brückner
+--!@date    2017 - 2018
 
 library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
 use WORK.riscv_pack.all;
---!@brief 	This is the execute stage of the CPU
---!@details This Stage contains the AlU, which calculates
---!@author 	Matthis Keppner, Jonas Fuhrmann
---!@date 	2017
+
+--!@brief   This is the execute stage of the CPU
+--!@details This Stage has two main Components:
+--!         1. ALU - responsible for calculation
+--!         2. Branch Checker - check if a branch needs to be taken
 entity execute_stage is
     port(
         clk, reset : in std_logic;
@@ -34,8 +38,8 @@ entity execute_stage is
         RESU_DAR_SYNCH        : out DATA_TYPE;       --!Result of calulation
         RESU_DAR_ASYNCH       : out DATA_TYPE;       --!Result of calulation
         Branch                : out std_logic;       --!For conditioned branching
-        ABS_OUT               : out DATA_TYPE;
-        REL_OUT               : out DATA_TYPE;
+        ABS_OUT               : out DATA_TYPE;       --!Absolute value for branch/jump (just loop through)
+        REL_OUT               : out DATA_TYPE;       --!Relative value for branch/jump (just loop through)
         DO_OUT                : out DATA_TYPE;       --!Data-output-register is passed to next stage
         PC_OUT                : out ADDRESS_TYPE     --!PC Register
     );
@@ -144,7 +148,7 @@ begin
     WB_CNTRL_ns <= WB_CNTRL_IN;
     MA_CNTRL_ns <= MA_CNTRL_IN;
     DO_ns <= DO_IN;
-    PC_ns <= std_logic_vector(unsigned(PC_IN) + to_unsigned(4, DATA_WIDTH));
+    PC_ns <= std_logic_vector(unsigned(PC_IN) + to_unsigned(4, DATA_WIDTH)); --TODO Explain this
     
     -- synchronous outputs
     WB_CNTRL_OUT <= WB_CNTRL_cs;
