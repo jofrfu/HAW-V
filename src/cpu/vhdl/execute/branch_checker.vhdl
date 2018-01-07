@@ -1,7 +1,9 @@
---!@file 	execute_arch.vhdl
---!@brief 	This file contains the branch checker
---!@author 	Jonas Fuhrmann
---!@date 	2017
+--!@file    execute_arch.vhdl
+--!@brief This file is part of the ach-ne procekt at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author Jonas Fuhrmann
+--!@author Sebastian Brückner
+--!@date    2017 - 2018
 
 library IEEE;
     use IEEE.std_logic_1164.all;
@@ -9,19 +11,29 @@ library IEEE;
 
 use WORK.riscv_pack.all;
 
+--!@brief   Checks if this operation is a branch and 
+--!         furthermore sets control bits for  Memory Access Stage
+--!@details The branch_checker has two functionalities:
+--!         1. Determine if a branch should be taken
+--!         2. Set control bits for following MA Stage
+--!         Compares conditional branch conditions to the FLAGS given to 
+--!         determine whether a branch should be taken or not.
+--!         When loading a signed byte or halfword, they need to be sign extended,
 entity branch_checker is
     port(
-        FUNCT3      : in FUNCT3_TYPE;
-        OP_CODE     : in OP_CODE_BIT_TYPE;
-        FLAGS       : in FLAGS_TYPE;
+        FUNCT3      : in FUNCT3_TYPE;      --!determins operation type in combination with OP_CODE
+        OP_CODE     : in OP_CODE_BIT_TYPE; --!used to determine if branch, load or store instruction
+        FLAGS       : in FLAGS_TYPE;       --!used to check the conditional branches, see FLAGS_TYPE
 
-        WORD_CNTRL  : out WORD_CNTRL_TYPE;
-        SIGN_EN     : out std_logic;
+        WORD_CNTRL  : out WORD_CNTRL_TYPE; --!see WORD_CNTRL_TYPE
+        SIGN_EN     : out std_logic;       --!determins if the load instruction needs to perform an sign extension
         
-        BRANCH      : out std_logic
+        BRANCH      : out std_logic        --!determins if branch should be taken
     );
 end entity branch_checker;
 
+
+--!@brief branch_checker.beh see entity documentation
 architecture beh of branch_checker is
 
 begin
