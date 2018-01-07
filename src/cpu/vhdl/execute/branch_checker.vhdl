@@ -18,7 +18,8 @@ use WORK.riscv_pack.all;
 --!         2. Set control bits for following MA Stage
 --!         Compares conditional branch conditions to the FLAGS given to 
 --!         determine whether a branch should be taken or not.
---!         When loading a signed byte or halfword, they need to be sign extended,
+--!         When loading a signed byte or halfword, they need to be sign extended.
+--!         If this is necessary is determined here
 entity branch_checker is
     port(
         FUNCT3      : in FUNCT3_TYPE;      --!determins operation type in combination with OP_CODE
