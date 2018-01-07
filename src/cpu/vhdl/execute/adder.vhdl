@@ -1,7 +1,8 @@
---!@file 	carry_ripple.vhdl
---!@brief 	This file contains the ALU of the CPU
---!@author 	Jonas Fuhrmann
---!@date 	2017
+--!@file    carry_ripple.vhdl
+--!@brief   This file is part of the ach-ne projekt at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Jonas Fuhrmann
+--!@date    2017 - 2018
 
 library IEEE;
     use IEEE.std_logic_1164.all;
@@ -9,18 +10,23 @@ library IEEE;
 
 use WORK.riscv_pack.all;
 
+--!@brief Simple adder/subtractor
+--!@details Adder capeable of adding or subtracting to operands, 
+--!          has add/sub control bit and return flag bits
 entity adder is
     port(
-        OPA         : in  DATA_TYPE;
-        OPB         : in  DATA_TYPE;
-        nadd_sub    : in  std_logic;
+        OPA         : in  DATA_TYPE; --!First operand
+        OPB         : in  DATA_TYPE; --!Second operand
+        nadd_sub    : in  std_logic; --!0 = add, 1 = subtract
         
-        RESULT      : out DATA_TYPE;
-        CARRY       : out std_logic;
-        OVERFLOW    : out std_logic
+        RESULT      : out DATA_TYPE; --!Result of operation
+        CARRY       : out std_logic; --!Carry Bit
+        OVERFLOW    : out std_logic  --!Overflow Bit
     );
 end entity adder;
 
+--!@brief adder.carry_ripple Ripple Carry implementation
+--!@details slowest implementation
 architecture carry_ripple of adder is
 begin
 
@@ -65,6 +71,8 @@ begin
 
 end architecture carry_ripple;
 
+--!@brief adder.carry_lookahead carry lookahead implementation
+--!@details Faster then ripple carry
 architecture carry_lookahead of adder is
 begin
 
@@ -112,6 +120,8 @@ begin
 
 end architecture carry_lookahead;
 
+--!@brief adder.numeric_adder using standard add
+--!@details uses std_logic_vector add implementation
 architecture numeric_adder of adder is
     
 begin
