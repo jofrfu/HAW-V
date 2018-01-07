@@ -51,22 +51,21 @@ begin
         abso_v  := abso;
         pc_v     := pc_cs;
         
-        
-        case cntrl_v(0) is  --choose a value to increment the PC
-            when '0'    => increment_v := STD_PC_ADD;
-            when '1'    => increment_v := rel_v;
-            when others => report "PC_log mux 0 has undefined signal" severity warning;
-        end case ; 
-        
-        case cntrl_v(1) is  --choose absolute branch or normals pc
-            when '0'    => base_v := pc_v;
-            when '1'    => base_v := abso_v;
-            when others => report "PC_log mux 1 has undefined signal" severity warning;
-        end case ; 
-        
         if cntrl_v = IF_CNTRL_BUB then      --PC + 0 for bubbles
             base_v := pc_v;
             increment_v := (others => '0');
+        else
+            case cntrl_v(0) is  --choose a value to increment the PC
+                when '0'    => increment_v := STD_PC_ADD;
+                when '1'    => increment_v := rel_v;
+                when others => report "PC_log mux 0 has undefined signal" severity warning;
+            end case ; 
+            
+            case cntrl_v(1) is  --choose absolute branch or normals pc
+                when '0'    => base_v := pc_v;
+                when '1'    => base_v := abso_v;
+                when others => report "PC_log mux 1 has undefined signal" severity warning;
+            end case ;             
         end if;
         
         pc_ns_v := std_logic_vector(unsigned(base_v) + unsigned(increment_v)); 
