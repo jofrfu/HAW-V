@@ -1,5 +1,5 @@
 --!@file    PC_log.vhdl
---!@brief   This file is part of the ach-ne projekt at the HAW Hamburg
+--!@brief   This file is part of the ach-ne project at the HAW Hamburg
 --!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
 --!@author  Sebastian Brückner
 --!@author  Felix Lorenz
@@ -10,8 +10,8 @@ library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
---!@brief Programm Counter of the CPU
---!@details Computes the next adress from witch the next instruction will be loaded.
+--!@brief Program Counter of the CPU
+--!@details Computes the next address from witch the next instruction will be loaded.
 --!         It has 5 operations modes:
 --!         1. increase PC by 4
 --!         2. add relative to PC
@@ -31,6 +31,7 @@ entity PC_log is
     );
 end entity PC_log;
 
+--!@brief pc.std_impl see entity documentation
 architecture std_impl of PC_log is 
     signal pc_cs : ADDRESS_TYPE := std_logic_vector(to_signed(-4,DATA_WIDTH));
     signal pc_ns : ADDRESS_TYPE;
