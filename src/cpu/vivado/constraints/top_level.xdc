@@ -7,6 +7,8 @@ create_clock -period 20.000 -name clk -waveform {0.000 10.000} [get_ports clk]
 
 set_property PACKAGE_PIN R18 [get_ports {nres}];
 set_property IOSTANDARD LVCMOS18 [get_ports {nres}];
+set_input_delay -clock clk -max 2.000 [get_ports {nres}];
+set_input_delay -clock clk -min 1.000 [get_ports {nres}];
 
 
 # ----------------------------------------------------------------------------
@@ -31,3 +33,6 @@ set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[4]}];  # "LD4"
 set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[5]}];  # "LD5"
 set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[6]}];  # "LD6"
 set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[7]}];  # "LD7"
+
+set_input_delay -clock clk -max 2.000 [get_ports {periph_bit_io[*]}];
+set_input_delay -clock clk -min 1.000 [get_ports {periph_bit_io[*]}];
