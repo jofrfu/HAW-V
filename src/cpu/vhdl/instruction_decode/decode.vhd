@@ -38,12 +38,18 @@ begin
 
     rs1_check_1:
     process(IFR(19 downto 15), DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
-        variable rs1_v      : REGISTER_ADDRESS_TYPE;
+        variable rs1_v         : REGISTER_ADDRESS_TYPE;
         variable rs1_in_pipe_v : std_logic;
+        variable DEST_REG_EX_v : REGISTER_ADDRESS_TYPE;
+        variable DEST_REG_MA_v : REGISTER_ADDRESS_TYPE;
+        variable DEST_REG_WB_v : REGISTER_ADDRESS_TYPE;   
     begin
-        rs1_v := IFR(19 downto 15);
+        rs1_v         := IFR(19 downto 15);
+        DEST_REG_EX_v := DEST_REG_EX;
+        DEST_REG_MA_v := DEST_REG_MA;
+        DEST_REG_WB_v := DEST_REG_WB;
         if rs1_v /= "00000" then
-            if rs1_v = DEST_REG_EX or rs1_v = DEST_REG_MA or rs1_v = DEST_REG_WB then
+            if rs1_v = DEST_REG_EX_v or rs1_v = DEST_REG_MA_v or rs1_v = DEST_REG_WB_v then
                 rs1_in_pipe_v := '1';
             else
                 rs1_in_pipe_v := '0';
@@ -57,12 +63,18 @@ begin
     
     rs2_check_2:
     process(IFR(24 downto 20), DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
-        variable rs2_v      : REGISTER_ADDRESS_TYPE;
+        variable rs2_v         : REGISTER_ADDRESS_TYPE;
         variable rs2_in_pipe_v : std_logic;
+        variable DEST_REG_EX_v : REGISTER_ADDRESS_TYPE;
+        variable DEST_REG_MA_v : REGISTER_ADDRESS_TYPE;
+        variable DEST_REG_WB_v : REGISTER_ADDRESS_TYPE;
     begin
-        rs2_v := IFR(24 downto 20);
+        rs2_v         := IFR(24 downto 20);
+        DEST_REG_EX_v := DEST_REG_EX;
+        DEST_REG_MA_v := DEST_REG_MA;
+        DEST_REG_WB_v := DEST_REG_WB;
         if rs2_v /= "00000" then
-            if ( rs2_v = DEST_REG_EX or rs2_v = DEST_REG_MA or rs2_v = DEST_REG_WB ) then
+            if ( rs2_v = DEST_REG_EX_v or rs2_v = DEST_REG_MA_v or rs2_v = DEST_REG_WB_v ) then
                 rs2_in_pipe_v := '1';
             else
                 rs2_in_pipe_v := '0';
@@ -93,6 +105,12 @@ begin
         variable WB_CNTRL_v : WB_CNTRL_TYPE;
         variable MA_CNTRL_v : MA_CNTRL_TYPE;
         variable EX_CNTRL_v : EX_CNTRL_TYPE;
+        
+        variable Imm_check_v   : DATA_TYPE;
+        variable imm_ifr_v     : DATA_TYPE;
+        variable rs1_in_pipe_v : std_logic;
+        variable rs2_in_pipe_v : std_logic;
+        variable STORE_v       : std_logic;
        
     begin
         branch_v            := branch;
@@ -103,6 +121,11 @@ begin
         rs1_v               := IFR(19 downto 15);
         rs2_v               := IFR(24 downto 20);
         funct7_v            := IFR(31 downto 25);
+        Imm_check_v         := Imm_check;
+        imm_ifr_v           := imm_ifr_s;
+        rs1_in_pipe_v       := rs1_in_pipe_s;
+        rs2_in_pipe_v       := rs2_in_pipe_s;
+        STORE_v             := STORE;
         
         if branch_v = '1' then
             IF_CNTRL_v := "01";    --rel + PC
@@ -128,7 +151,7 @@ begin
                     MA_CNTRL_v := "00";   --no load nor store
                     WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
                 when jalo =>
-                    if Imm_check /= imm_ifr_s then  --imediate is not yet in register
+                    if Imm_check_v /= imm_ifr_v then  --imediate is not yet in register
                         IF_CNTRL_v := IF_CNTRL_BUB;
                         ID_CNTRL_v := ID_CNTRL_BUB;
                         EX_CNTRL_v := EX_CNTRL_BUB;
@@ -141,14 +164,14 @@ begin
                         WB_CNTRL_v := '1' & rd_v;   --jump, write back (PC)
                     end if;
                 when jalro =>
-                    if Imm_check /= imm_ifr_s then  --imediate is not yet in register
+                    if Imm_check_v /= imm_ifr_v then  --imediate is not yet in register
                         IF_CNTRL_v := IF_CNTRL_BUB;
                         ID_CNTRL_v := ID_CNTRL_BUB;
                         EX_CNTRL_v := EX_CNTRL_BUB;
                         MA_CNTRL_v := MA_CNTRL_BUB;
                         WB_CNTRL_v := WB_CNTRL_BUB;
                     else 
-                        if  rs1_in_pipe_s = '1' then
+                        if  rs1_in_pipe_v = '1' then
                             IF_CNTRL_v := IF_CNTRL_BUB;
                             ID_CNTRL_v := ID_CNTRL_BUB;
                             EX_CNTRL_v := EX_CNTRL_BUB;
@@ -162,7 +185,7 @@ begin
                         end if;
                     end if;
                 when brancho =>
-                    if rs1_in_pipe_s = '1' or rs2_in_pipe_s = '1' then
+                    if rs1_in_pipe_v = '1' or rs2_in_pipe_v = '1' then
                         IF_CNTRL_v := IF_CNTRL_BUB;
                         ID_CNTRL_v := ID_CNTRL_BUB;
                         EX_CNTRL_v := EX_CNTRL_BUB;
@@ -175,7 +198,7 @@ begin
                         WB_CNTRL_v := '0' & "00000";   --branch, no write back (no PC)
                     end if;
                 when loado =>
-                    if  rs1_in_pipe_s = '1' or STORE = '1' then
+                    if  rs1_in_pipe_v = '1' or STORE_v = '1' then
                         IF_CNTRL_v := IF_CNTRL_BUB;
                         ID_CNTRL_v := ID_CNTRL_BUB;
                         EX_CNTRL_v := EX_CNTRL_BUB;
@@ -188,7 +211,7 @@ begin
                         WB_CNTRL_v := '0' & rd_v;   --write loaded value to rd (no PC)
                     end if;
                 when storeo =>
-                    if rs1_in_pipe_s = '1' or rs2_in_pipe_s = '1' then
+                    if rs1_in_pipe_v = '1' or rs2_in_pipe_v = '1' then
                         IF_CNTRL_v := IF_CNTRL_BUB;
                         ID_CNTRL_v := ID_CNTRL_BUB;
                         EX_CNTRL_v := EX_CNTRL_BUB;
@@ -201,7 +224,7 @@ begin
                         WB_CNTRL_v := '0' & "00000";   --value will be stored, no write back (no PC)
                     end if;
                 when opimmo =>
-                    if  rs1_in_pipe_s = '1' then
+                    if  rs1_in_pipe_v = '1' then
                         IF_CNTRL_v := IF_CNTRL_BUB;
                         ID_CNTRL_v := ID_CNTRL_BUB;
                         EX_CNTRL_v := EX_CNTRL_BUB;
@@ -214,7 +237,7 @@ begin
                         WB_CNTRL_v := '0' & rd_v;   --write result to rd (no PC)
                     end if;
                 when opo =>
-                    if rs1_in_pipe_s = '1' or rs2_in_pipe_s = '1' then
+                    if rs1_in_pipe_v = '1' or rs2_in_pipe_v = '1' then
                         IF_CNTRL_v := IF_CNTRL_BUB;
                         ID_CNTRL_v := ID_CNTRL_BUB;
                         EX_CNTRL_v := EX_CNTRL_BUB;
