@@ -36,3 +36,6 @@ set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[7]}];  # "LD7"
 
 set_input_delay -clock clk -max 2.000 [get_ports {periph_bit_io[*]}];
 set_input_delay -clock clk -min 1.000 [get_ports {periph_bit_io[*]}];
+
+set_output_delay -clock clk -max 2.000 [get_ports {periph_bit_io[*]}];
+set_output_delay -clock clk -min 1.000 [get_ports {periph_bit_io[*]}];
