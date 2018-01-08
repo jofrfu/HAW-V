@@ -22,6 +22,7 @@ entity PC_log is
     port(
          clk, reset : in std_logic;
          
+         branch    : in std_logic;
          cntrl     : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
          rel       : in DATA_TYPE;     --! relative branch adress
          abso      : in DATA_TYPE;     --! absolute branch adress, or base for relative jump
@@ -37,7 +38,7 @@ architecture std_impl of PC_log is
     signal pc_ns : ADDRESS_TYPE;
     
 begin
-    pc_logic : process(cntrl, rel, abso, pc_cs) is
+    pc_logic : process(cntrl, rel, abso, pc_cs, branch) is
         variable cntrl_v : IF_CNTRL_TYPE;
         variable rel_v   : DATA_TYPE;
         variable abso_v  : DATA_TYPE;
@@ -50,15 +51,15 @@ begin
         cntrl_v := cntrl;
         rel_v   := rel;
         abso_v  := abso;
-        pc_v     := pc_cs;
+        pc_v    := pc_cs;
         
-        if cntrl_v = IF_CNTRL_BUB then      --PC + 0 for bubbles
+        if cntrl_v = IF_CNTRL_BUB or branch = '1' then      --PC + 0 for bubbles
             base_v := pc_v;
             increment_v := (others => '0');
         else
             case cntrl_v(0) is  --choose a value to increment the PC
                 when '0'    => increment_v := STD_PC_ADD;
-                when '1'    => increment_v := rel_v;
+                when '1'    => increment_v := std_logic_vector(signed(rel_v) + to_signed(-4,DATA_WIDTH));
                 when others => report "PC_log mux 0 has undefined signal" severity warning;
             end case ; 
             

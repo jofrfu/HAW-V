@@ -23,8 +23,7 @@ entity peripherals_wrapper is
 end entity peripherals_wrapper;
 
 architecture beh of peripherals_wrapper is
-    signal PERIPH_BIT_IN  : PERIPH_IO_TYPE;
-    signal PERIPH_BIT_OUT : PERIPh_IO_TYPE;
+
 begin
     GPIO:
     process(MEM_to_PERIPH(0 to 1), PERIPH_BIT_IO(BYTE_WIDTH-1 downto 0)) is
