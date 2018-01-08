@@ -10,7 +10,8 @@ library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
---!@brief
+--!@brief   Simply connects to register_select
+--!@details select PC or DATA_IN as output
 entity  write_back is
     port(
         WB_CNTRL_IN : in WB_CNTRL_TYPE;
@@ -24,6 +25,7 @@ end entity write_back;
 
 architecture beh of write_back is
 begin
+    --!@brief select PC or DATA_IN as output
     pc_mux:
     process(DATA_IN, PC_IN, WB_CNTRL_IN(WB_CNTRL_IN'left)) is
     begin
