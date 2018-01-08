@@ -1,5 +1,6 @@
 --!@file    memory_access.vhdl
---!@brief   Contains entity and standard architecture for memory access stage
+--!@brief   This file is part of the ach-ne project at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
 --!@author  Jonas Fuhrmann
 --!@author  Sebastian Brückner
 --!@date    2017 - 2018
