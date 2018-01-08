@@ -68,7 +68,7 @@ begin
     process(rs1, pc_en, PC, reg_out_s) is
     begin
         if PC_en = '1' then
-            OPA <= PC;
+            OPA <= std_logic_vector(unsigned(PC) - to_unsigned(4, DATA_WIDTH));
         else
             OPA <= reg_out_s(to_integer(unsigned(rs1)));
         end if;
