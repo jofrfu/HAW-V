@@ -58,7 +58,7 @@ if [ "$SETUP" = yes ]; then
 	echo "TOOL_INSTALL: $TOOL_INSTALL"
 	echo
 
-	# install tools
+	# install 3rd party tools
 	if [ "$TOOL_INSTALL" = yes ]; then
 		echo "install tools .."
 		if [ "$LINUX" = ubuntu ]; then
@@ -73,9 +73,10 @@ if [ "$SETUP" = yes ]; then
 		echo "install tools .. ignored"
 	fi
 
-	#Download Git Repo
+	# Download Git Repo
 	if [ "$LOAD_REPO" = yes ]; then
 		echo "init git repo .."
+		# Check for existing repo
 		FILE=$REPO_PATH.git
 		if [ -s $FILE ]; then
 			echo "Update Repo"
@@ -98,7 +99,7 @@ else
 	echo "init git repo .. ignored"
 fi
 
-#Exports
+# Exports
 export TOP=$(pwd)
 export RISCV=$TOP/riscv
 export PATH=$PATH:$RISCV/bin
@@ -110,18 +111,21 @@ echo "RISCV: $RISCV"
 echo "PATH:  $PATH"
 
 cd $TOP/riscv-tools
+# Build Toolchain
 ./build.sh
 
-#Testing the toolchain
+# Testing the toolchain
 DIR=$RISCV/$TEST_NAME
 if [ ! -d $DIR ]; then
 	mkdir $FILE
 fi
 cd $DIR
 
+# Create test C programm
 echo -e '#include <stdio.h>\n int main(void) { printf("Your Toolchain ist working!\\n"); return 0; }' > $TEST_NAME.c
 $RISCV/bin/riscv64-unknown-elf-gcc -o $TEST_NAME $TEST_NAME.c
 
+# Run the test program with spike
 echo
 $RISCV/bin/spike pk $TEST_NAME
 echo

@@ -10,9 +10,9 @@ TOOLCHAIN_SETUP=no # Toolchain setup. options[full, no]
 LINUX=ubuntu # Set Host Linux Type. options[ubuntu, fedora]
 
 ### linux options ###
-LOAD_REPO=yes # 
+LOAD_REPO=yes #
 MAKEFILE=yes # Create Linux make file. options[yes, no]
-LINUX_VERSION=linux-4.14 # Set Linux Version to install. options[linux-4.14]
+LINUX_VERSION=linux-4.X # Set Linux Version to install. options[linux-4.14]
 LINUX_SETUP=yes # Download linux repository und kernel. options[yes, no]
 LINUX_BUILD=yes # Make linux. option[yes, no
 CROSS_COMPILER=riscv64-unknown-linux-gnu- # Coss Compiler for make operations. options[riscv64-unknown-linux-gnu-]
@@ -40,24 +40,24 @@ case $i in
         MAKEFILE=no
         shift # past argument=value
         ;;
-		-ls|--linux-setup)
+	-ls|--linux-setup)
         LINUX_SETUP=no
         shift # past argument=value
         ;;
-		-lb|--linux-build)
+	-lb|--linux-build)
         LINUX_BUILD=no
         shift # past argument=value
         ;;
-		-b|--busybox)
+	-b|--busybox)
         BUSY_BUILD=no
         shift # past argument=value
         ;;
-		-f|--filesystem)
-        DISK_BUILD=no
+	-f|--filesystem)
+        DISK_BUILD=yes
         shift # past argument=value
         ;;
-		-re|--rebuild)
-        RE_BUILD=no
+	-re|--rebuild)
+        RE_BUILD=yes
         shift # past argument=value
         ;;
         -h|--help)
@@ -66,12 +66,12 @@ case $i in
         echo
         echo "-l=, --linux=                 set Linux distribution for tool installation"
         echo "-s,  --setup                  skip toolchain download and installation"
-		echo "-m,  --make-makefile          disable the generation of the makefile"
-		echo "-ls, --linux-setup            skip download of the linux repository"
-		echo "-lb, --linux-build            disbale the compile of the kernel"
-		echo "-b,  --busybox                disable busybox istallation"
-		echo "-f,  --fileysystem            disable initramfs creation"
-		echo "-re, --rebuild                disable linux and pk rebuild"
+	echo "-m,  --make-makefile          disable the generation of the makefile"
+	echo "-ls, --linux-setup            skip download of the linux repository"
+	echo "-lb, --linux-build            disbale the compile of the kernel"
+	echo "-b,  --busybox                disable busybox istallation"
+	echo "-f,  --fileysystem            enable initramfs creation (Not Finished)"
+	echo "-re, --rebuild                enable linux and pk rebuild (Not Finished)"
         echo "-h,  --help                   help"
         exit 0
         ;;
@@ -120,9 +120,9 @@ echo
 
 # Create Linux makefiles
 if [ $MAKEFILE = yes ]; then
-	# Set workdirectory 
-	cd $TOP/riscv-tools/riscv-gnu-toolchain 
-	
+	# Set workdirectory
+	cd $TOP/riscv-tools/riscv-gnu-toolchain
+
 	# Configure makefile creation, Set the CROSS_COMPILE
 	./configure --prefix=$RISCV CROSS_COMPILE=$CROSS_COMPILER
 	make linux
@@ -135,10 +135,12 @@ cd $TOP
 # Riscv linux download and linux kernel
 if [ $LINUX_SETUP = yes ]; then
 	echo "Setup linux .."
-	if [ $LINUX_VERSION = linux-3.14.33 ]; then # does not work
+	if [ $LINUX_VERSION = linux-4.X ]; then # does not work
 		git clone https://github.com/riscv/riscv-linux.git $LINUX_VERSION
 
-		curl -L https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.14.33.tar.xz | tar -xJkf -
+		curl -L https://www.kernel.org/pub/linux/kernel/v4.x/linux-4.14.tar.xz | tar -xJkf -
+
+		$LINUX_VERSION/scripts/patchkernel $TOP/$LINUX_VERSION
 	elif [ $LINUX_VERSION = linux-4.14 ]; then
 		git clone -b riscv-linux-4.14 https://github.com/riscv/riscv-linux.git linux-4.14
 
@@ -160,7 +162,7 @@ if [ $LINUX_BUILD = yes ]; then
 	make ARCH=riscv defconfig
 	# make linux, set Cross Compile
 	make -j$CORE_NUMBER ARCH=riscv CROSS_COMPILE=$CROSS_COMPILER
-else 
+else
 	echo "Build kernel .. ignored"
 fi
 
@@ -193,6 +195,10 @@ else
 	echo "Busybox build .. ignored"
 fi
 
+##########################################################################################################################
+# Filesystem build and Linux Rebuild is not working and is under construction
+
+
 # Root Disk
 if [ $DISK_BUILD = yes ]; then
 	echo "Create initramfs .."
@@ -223,7 +229,7 @@ if [ $DISK_BUILD = yes ]; then
 
 	#  create our initramfs
 	find . | cpio --quiet -o -H newc > $TOP/$LINUX_VERSION/rootfs.cpio
-else 
+else
 	echo "Create initramfs .. ignored"
 fi
 
@@ -232,10 +238,22 @@ if [ $RE_BUILD = yes ]; then
 	cd $TOP/$LINUX_VERSION
 
 	echo "Rebuild Linux .."
-	
-	# Config initramfs use
-	sed -i 's/# CONFIG_INITRAMFS_SOURCE is not set/CONFIG_INITRAMFS_SOURCE="rootfs.cpio"/' .config
-	
+
+	# Config initramfs use (Note  dose not work, entry not included in default)
+#	sed -i 's/# CONFIG_INITRAMFS_SOURCE is not set/CONFIG_INITRAMFS_SOURCE="rootfs.cpio"/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_INITRAMFS_COMPRESSION=".gz"/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_RD_LZ4=y/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_RD_LZO=y/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_RD_XZ=y/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_RD_LZMA=y/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_RD_BZIP2=y/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_RD_GZIP=y/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_INITRAMFS_ROOT_GID=0/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_INITRAMFS_ROOT_UID=0/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_INITRAMFS_SOURCE="rootfs.cp"/' .config
+        sed -i '/# CONFIG_RELAY is not set/a\ CONFIG_BLK_DEV_INITRD=y/' .config
+
+
 	make -j$CORE_NUMBER ARCH=riscv CROSS_COMPILE=$CROSS_COMPILER vmlinux
 
 	echo "Rebuild PK"
@@ -244,6 +262,6 @@ if [ $RE_BUILD = yes ]; then
 	../configure --prefix=$RISCV --host=$HOST --with-payload=$TOP/$LINUX_VERSION/vmlinux
 	make
 	make install
-else 
+else
 	echo "Rebuild Linux .. ignored"
 fi
