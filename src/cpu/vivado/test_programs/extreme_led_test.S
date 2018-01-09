@@ -1,7 +1,7 @@
 # Author: Jonas Fuhrmann, Matthis Keppner
 .section .data
 iterations:
-    .word 1000000  # iteration count
+    .word 500000  # iteration count
     
 .section .text
 .globl _main
@@ -33,6 +33,6 @@ setLED:
     j loop
 
 resetLED:
-    mv a4, zero
+    li a4, 0x1
     j loop
     
