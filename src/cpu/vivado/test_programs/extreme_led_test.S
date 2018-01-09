@@ -8,7 +8,7 @@ iterations:
 _main:
     #la a1, iterations  # address of clock_speed variable
     auipc a1, 0
-    addi a1, a1, 0x40   # change
+    addi a1, a1, 0x50   # change
     lw a1, 0(a1)        # load clock_speed to a1
     # ------------------------------------------------------------
     li a2, 0x00000001   # for shifting
