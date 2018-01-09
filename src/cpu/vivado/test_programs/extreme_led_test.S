@@ -16,7 +16,7 @@ _main:
     addi a3, a2, 0x00000001 # LED register address => 0x80000001
     # ------------------------------------------------------------
     sb zero, 0(a2)  # store zero to LED config address - GPIOs are output
-    mv a4, zero     # led toggle variable
+    li a4, 0x1     # led toggle variable
     mv a5, zero     # iteration variable
     
     li a6, 0x80     # for check
