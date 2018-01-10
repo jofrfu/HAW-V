@@ -118,7 +118,7 @@ package riscv_pack is
     
 	type REG_OUT_TYPE is array(REGISTER_COUNT-1 downto 0) of DATA_TYPE;
     type IO_BYTE_TYPE is array(0 to IO_BYTE_COUNT-1) of BYTE_TYPE;
-    type IO_ENABLE_TYPE is array(0 to IO_BYTE_COUNT-1) of std_logic;
+    type IO_ENABLE_TYPE is array(0 to IO_BYTE_COUNT-1) of BYTE_TYPE;
     type GPIO_TYPE is array(1 downto 0) of BYTE_TYPE;
 	
 	--! @brief Instruction Fetch Constants

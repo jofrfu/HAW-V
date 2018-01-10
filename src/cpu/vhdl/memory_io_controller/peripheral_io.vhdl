@@ -127,19 +127,21 @@ begin
         WEA_v := WEA;
     
         for i in 0 to IO_BYTE_COUNT-1 loop
-            if PERIPH_IN_EN_v(i) = '1' then
-                PERIPH_ns_v(i) := PERIPH_IN_v(i);
-            else
-                if EN_v = '1' and
-                    ((to_integer(unsigned(ADDR_v) + 0) = i and WEA_v(3) = '1') or 
-                     (to_integer(unsigned(ADDR_v) + 1) = i and WEA_v(2) = '1') or 
-                     (to_integer(unsigned(ADDR_v) + 2) = i and WEA_v(1) = '1') or 
-                     (to_integer(unsigned(ADDR_v) + 3) = i and WEA_v(0) = '1')) then -- chip enable - only on write from core
-                    PERIPH_ns_v(i) := DECODE_RESU_v(i);
+            for j in 0 to BYTE_WIDTH-1 loop
+                if PERIPH_IN_EN_v(i)(j) = '1' then
+                    PERIPH_ns_v(i)(j) := PERIPH_IN_v(i)(j);
                 else
-                    PERIPH_ns_v(i) := PERIPH_cs_v(i);
+                    if EN_v = '1' and
+                        ((to_integer(unsigned(ADDR_v) + 0) = i and WEA_v(3) = '1') or 
+                         (to_integer(unsigned(ADDR_v) + 1) = i and WEA_v(2) = '1') or 
+                         (to_integer(unsigned(ADDR_v) + 2) = i and WEA_v(1) = '1') or 
+                         (to_integer(unsigned(ADDR_v) + 3) = i and WEA_v(0) = '1')) then -- chip enable - only on write from core
+                        PERIPH_ns_v(i)(j) := DECODE_RESU_v(i)(j);
+                    else
+                        PERIPH_ns_v(i)(j) := PERIPH_cs_v(i)(j);
+                    end if;
                 end if;
-            end if;
+            end loop;
         end loop;
         
         PERIPH_ns <= PERIPH_ns_v;

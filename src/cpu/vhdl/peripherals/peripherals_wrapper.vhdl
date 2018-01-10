@@ -30,7 +30,7 @@ begin
         variable MEM_to_PERIPH_v : GPIO_TYPE;
         variable PERIPH_BIT_IO_v : BYTE_TYPE;
         
-        variable PERIPH_WRITE_EN_v : std_logic;
+        variable PERIPH_WRITE_EN_v : BYTE_TYPE;
         variable PERIPH_to_MEM_v   : BYTE_TYPE;
     begin
         MEM_to_PERIPH_v(0) := MEM_to_PERIPH(0);
@@ -38,22 +38,25 @@ begin
         PERIPH_BIT_IO_v := PERIPH_BIT_IO(BYTE_WIDTH-1 downto 0);
         
         -- map periph write enable
-        PERIPH_WRITE_EN_v := MEM_to_PERIPH_v(0)(0);
+        PERIPH_WRITE_EN_v := MEM_to_PERIPH_v(0);
 
-        if PERIPH_WRITE_EN_v = '0' then
-            -- map memory to output
-            PERIPH_BIT_IO_v := MEM_to_PERIPH_v(1);
-            -- unmapped - not used in memory
-            PERIPH_to_MEM_v := (others => '0'); 
-        else
-            -- driven by input
-            PERIPH_BIT_IO_v := (others => 'Z');
-            -- map input to memory
-            PERIPH_to_MEM_v := PERIPH_BIT_IO_v;
-        end if;
+        
+        for i in BYTE_WIDTH-1 downto 0 loop
+            if PERIPH_WRITE_EN_v(i) = '0' then
+                -- map memory to output
+                PERIPH_BIT_IO_v(i) := MEM_to_PERIPH_v(1)(i);
+                -- unmapped - not used in memory
+                PERIPH_to_MEM_v(i) := '0'; 
+            else
+                -- driven by input
+                PERIPH_BIT_IO_v(i) := 'Z';
+                -- map input to memory
+                PERIPH_to_MEM_v(i) := PERIPH_BIT_IO_v(i);
+            end if;
+        end loop;
         
         PERIPH_BIT_IO(BYTE_WIDTH-1 downto 0) <= PERIPH_BIT_IO_v;
-        PERIPH_WRITE_EN(0) <= '0';
+        PERIPH_WRITE_EN(0) <= (others => '0');
         PERIPH_WRITE_EN(1) <= PERIPH_WRITE_EN_v;
         PERIPH_to_MEM(0)   <= (others => '0');
         PERIPH_to_MEM(1)   <= PERIPH_to_MEM_v;
