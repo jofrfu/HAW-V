@@ -72,10 +72,10 @@ begin
         for i in 0 to GPIO_WIDTH-1 loop
             for j in BYTE_WIDTH-1 downto 0 loop
                 if MEM_to_PERIPH_CONF_v(i)(j) = '0' then
-                    PERIPH_BIT_IO_v(i*j) := MEM_to_PERIPH_GPIO_v(i)(j);
+                    PERIPH_BIT_IO_v(i*BYTE_WIDTH + j) := MEM_to_PERIPH_GPIO_v(i)(j);
                     PERIPH_to_MEM_v(i)(j) := '0';
                 else
-                    PERIPH_BIT_IO_v(i*j) := 'Z';
+                    PERIPH_BIT_IO_v(i*BYTE_WIDTH + j) := 'Z';
                     PERIPH_to_MEM_v(i)(j) := PERIPH_BIT_IO_v(i*j);
                 end if;
             end loop;
@@ -124,7 +124,7 @@ begin
     strobe_proc:
     process(strobe_flag_s, strobe_flag_cs, ENABLE, ADDRESS) is
     begin 
-        if ENABLE = '1' and ADDRESS = x"80000009" then
+        if ENABLE = '1' and ADDRESS = '1' & std_logic_vector(to_unsigned(2*GPIO_WIDTH+3, 31)) then
             strobe_flag_ns <= strobe_flag_s;
         else
             if strobe_flag_cs = '1' then
