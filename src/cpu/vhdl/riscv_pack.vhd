@@ -101,8 +101,9 @@ package riscv_pack is
 	constant FUNCT7_WIDTH : natural := 7;
     constant WRITE_EN_WIDTH: natural := 4;
     constant BYTE_WIDTH    : natural := 8;
-    constant IO_BYTE_COUNT : natural := 2; -- todo: change - depends on peripherals
-    constant PERIPH_IO_WIDTH : natural := 8; -- todo: change - depends on peripherals
+    constant IO_BYTE_COUNT : natural := 6; -- todo: change - depends on peripherals
+    constant PERIPH_IO_WIDTH : natural := 24; -- todo: change - depends on peripherals
+    constant GPIO_WIDTH : natural := 3; -- 3 GPIO Bytes with 3 Bytes of configuration
 	
 	subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
 	subtype ADDRESS_TYPE is DATA_TYPE;
@@ -119,7 +120,7 @@ package riscv_pack is
 	type REG_OUT_TYPE is array(REGISTER_COUNT-1 downto 0) of DATA_TYPE;
     type IO_BYTE_TYPE is array(0 to IO_BYTE_COUNT-1) of BYTE_TYPE;
     type IO_ENABLE_TYPE is array(0 to IO_BYTE_COUNT-1) of BYTE_TYPE;
-    type GPIO_TYPE is array(1 downto 0) of BYTE_TYPE;
+    type GPIO_TYPE is array(GPIO_WIDTH-1 downto 0) of BYTE_TYPE;
 	
 	--! @brief Instruction Fetch Constants
 	constant STD_PC_ADD : DATA_TYPE := std_logic_vector(to_unsigned(4, DATA_WIDTH)); --! PC must be increased by 4 every clock cycle 
