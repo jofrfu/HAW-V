@@ -62,8 +62,8 @@ begin
             MEM_to_PERIPH_CONF_v(i) := MEM_to_PERIPH(i);
         end loop;
         
-        for i in GPIO_WIDTH to 2*GPIO_WIDTH-1 loop
-            MEM_to_PERIPH_GPIO_v(GPIO_WIDTH + i) := MEM_to_PERIPH(i);
+        for i in 0 to GPIO_WIDTH-1 loop
+            MEM_to_PERIPH_GPIO_v(i) := MEM_to_PERIPH(GPIO_WIDTH + i);
         end loop;
         
         PERIPH_BIT_IO_v := PERIPH_BIT_IO(GPIO_WIDTH*BYTE_WIDTH-1 downto 0);
@@ -113,6 +113,7 @@ begin
     );
     
     PERIPH_WRITE_EN(2*GPIO_WIDTH) <= (others => '0');
+    PERIPH_to_MEM(2*GPIO_WIDTH) <= (others => '0');
     PERIPH_WRITE_EN(2*GPIO_WIDTH+1)(0) <= '0';
     PERIPH_WRITE_EN(2*GPIO_WIDTH+1)(1) <= '1';
     PERIPH_WRITE_EN(2*GPIO_WIDTH+1)(BYTE_WIDTH-1 downto 2) <= (others => '1');
