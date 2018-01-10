@@ -101,8 +101,8 @@ package riscv_pack is
 	constant FUNCT7_WIDTH : natural := 7;
     constant WRITE_EN_WIDTH: natural := 4;
     constant BYTE_WIDTH    : natural := 8;
-    constant IO_BYTE_COUNT : natural := 6; -- todo: change - depends on peripherals
-    constant PERIPH_IO_WIDTH : natural := 24; -- todo: change - depends on peripherals
+    constant IO_BYTE_COUNT : natural := 10; -- todo: change - depends on peripherals
+    constant PERIPH_IO_WIDTH : natural := 26; -- todo: change - depends on peripherals
     constant GPIO_WIDTH : natural := 3; -- 3 GPIO Bytes with 3 Bytes of configuration
 	
 	subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
