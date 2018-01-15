@@ -251,7 +251,7 @@ begin
                     end if;
                 when others =>
                     report "decode.vhd - decode: unknown OP_CODE" severity error;
-                    IF_CNTRL_v := "01";    --rel + PC
+                    IF_CNTRL_v := "00";    
                     ID_CNTRL_v := ID_CNTRL_NOP; --discard instruction in pipeline
                     EX_CNTRL_v := EX_CNTRL_NOP;
                     MA_CNTRL_v := MA_CNTRL_NOP;
