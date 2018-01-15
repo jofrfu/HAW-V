@@ -55,6 +55,7 @@ begin
         variable MEM_to_PERIPH_CONF_v : GPIO_TYPE;
         variable MEM_to_PERIPH_GPIO_v : GPIO_TYPE;
         variable PERIPH_BIT_IO_v : std_logic_vector(GPIO_WIDTH*BYTE_WIDTH-1 downto 0);
+        variable PERIPH_BIT_IN_v : std_logic_vector(GPIO_WIDTH*BYTE_WIDTH-1 downto 0);
         
         variable PERIPH_to_MEM_v   : GPIO_TYPE;
     begin
@@ -67,7 +68,7 @@ begin
         end loop;
         
         PERIPH_BIT_IO_v := PERIPH_BIT_IO(GPIO_WIDTH*BYTE_WIDTH-1 downto 0);
-        
+        PERIPH_BIT_IN_v := PERIPH_BIT_IO(GPIO_WIDTH*BYTE_WIDTH-1 downto 0);
         
         for i in 0 to GPIO_WIDTH-1 loop
             for j in BYTE_WIDTH-1 downto 0 loop
@@ -76,7 +77,7 @@ begin
                     PERIPH_to_MEM_v(i)(j) := '0';
                 else
                     PERIPH_BIT_IO_v(i*BYTE_WIDTH + j) := 'Z';
-                    PERIPH_to_MEM_v(i)(j) := PERIPH_BIT_IO_v(i*j);
+                    PERIPH_to_MEM_v(i)(j) := PERIPH_BIT_IN_v(i*BYTE_WIDTH + j);
                 end if;
             end loop;
         end loop;

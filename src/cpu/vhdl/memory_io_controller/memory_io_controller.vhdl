@@ -83,7 +83,12 @@ architecture beh of memory_io_controller is
     
     signal OFFSET_cs : std_logic_vector(1 downto 0) := (others => '0');
     signal OFFSET_ns : std_logic_vector(1 downto 0);
+    
+    signal io_not_mem_cs : std_logic := '0';
+    signal io_not_mem_ns : std_logic;
 begin
+
+    io_not_mem_ns <= ADDR(ADDR'high);
 
     io_en <= EN and ADDR(ADDR'high);
     mem_en <= EN and not ADDR(ADDR'high);
@@ -126,7 +131,7 @@ begin
                    instruction_little_s(23 downto 16) & instruction_little_s(31 downto 24);
 				   
     dout_conv:		--for LOAD
-	process(OFFSET_cs, ADDR(ADDR'high), DOB_LITTLE_s, DO_LITTLE_s, WORD_LENGTH_cs) is
+	process(OFFSET_cs, io_not_mem_cs, DOB_LITTLE_s, DO_LITTLE_s, WORD_LENGTH_cs) is
 		variable offset_v : std_logic_vector(1 downto 0);
 		variable dob_little_v : DATA_TYPE;
         variable do_little_v  : DATA_TYPE;
@@ -139,7 +144,7 @@ begin
 		dob_little_v := DOB_LITTLE_s;
         do_little_v  := DO_LITTLE_s;
 		word_length_v := WORD_LENGTH_cs;
-        io_not_mem_v := ADDR(ADDR'high);
+        io_not_mem_v := io_not_mem_cs;
 		dout_v := (others => '0');
         
         -- mem/periph mux
@@ -365,9 +370,11 @@ begin
             if reset = '1' then
                 WORD_LENGTH_cs <= (others => '0');
                 OFFSET_cs <= (others => '0');
+                io_not_mem_cs <= '0';
             else
                 WORD_LENGTH_cs <= WORD_LENGTH_ns;
                 OFFSET_cs <= OFFSET_ns;
+                io_not_mem_cs <= io_not_mem_ns;
             end if;
         end if;
     end process sequlo;
