@@ -10,9 +10,9 @@ library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
---!@brief Program Counter of the CPU
+--!@brief Program counter of the CPU
 --!@details Computes the next address from witch the next instruction will be loaded.
---!         It has 5 operations modes:
+--!         It has 5 operation modes:
 --!         1. increase PC by 4
 --!         2. add relative to PC
 --!         3. set PC to absolute
@@ -24,11 +24,11 @@ entity PC_log is
          
          branch    : in std_logic;
          cntrl     : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
-         rel       : in DATA_TYPE;     --! relative branch adress
-         abso      : in DATA_TYPE;     --! absolute branch adress, or base for relative jump
+         rel       : in DATA_TYPE;     --! relative branch address
+         abso      : in DATA_TYPE;     --! absolute branch address, or base for relative jump
          
-         pc_asynch : out ADDRESS_TYPE; --! programm counter output
-         pc_synch  : out ADDRESS_TYPE  --! programm counter output
+         pc_asynch : out ADDRESS_TYPE; --! program counter output
+         pc_synch  : out ADDRESS_TYPE  --! program counter output
     );
 end entity PC_log;
 
@@ -63,7 +63,7 @@ begin
                 when others => report "PC_log mux 0 has undefined signal" severity warning;
             end case ; 
             
-            case cntrl_v(1) is  --choose absolute branch or normals pc
+            case cntrl_v(1) is  --choose absolute branch or normal pc
                 when '0'    => base_v := pc_v;
                 when '1'    => base_v := abso_v;
                 when others => report "PC_log mux 1 has undefined signal" severity warning;

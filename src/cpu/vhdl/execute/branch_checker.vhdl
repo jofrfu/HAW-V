@@ -1,4 +1,4 @@
---!@file    execute_arch.vhdl
+--!@file    branch_checker.vhdl
 --!@brief This file is part of the ach-ne procekt at the HAW Hamburg
 --!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
 --!@author Jonas Fuhrmann
@@ -12,19 +12,19 @@ library IEEE;
 use WORK.riscv_pack.all;
 
 --!@brief   Checks if this operation is a branch and 
---!         furthermore sets control bits for  Memory Access Stage
+--!         furthermore sets control bits for Memory Access Stage
 --!@details The branch_checker has two functionalities:
 --!         1. Determine if a branch should be taken
+--!             Compares conditional branch conditions with the FLAGS given from the ALU. 
+--!             Determine whether a branch should be taken or not.
 --!         2. Set control bits for following MA Stage
---!         Compares conditional branch conditions to the FLAGS given to 
---!         determine whether a branch should be taken or not.
---!         When loading a signed byte or halfword, they need to be sign extended.
---!         If this is necessary is determined here
+--!             When loading a signed byte or halfword, they need to be sign extended.
+--!             If this is necessary, it is determined here
 entity branch_checker is
     port(
         FUNCT3      : in FUNCT3_TYPE;      --!determins operation type in combination with OP_CODE
-        OP_CODE     : in OP_CODE_BIT_TYPE; --!used to determine if branch, load or store instruction
-        FLAGS       : in FLAGS_TYPE;       --!used to check the conditional branches, see FLAGS_TYPE
+        OP_CODE     : in OP_CODE_BIT_TYPE; --!is used to determine if branch, load or store instruction
+        FLAGS       : in FLAGS_TYPE;       --!is used to check the conditional branches, see FLAGS_TYPE
 
         WORD_CNTRL  : out WORD_CNTRL_TYPE; --!see WORD_CNTRL_TYPE
         SIGN_EN     : out std_logic;       --!determins if the load instruction needs to perform an sign extension

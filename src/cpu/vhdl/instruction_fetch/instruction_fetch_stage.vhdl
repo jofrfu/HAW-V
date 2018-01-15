@@ -16,38 +16,38 @@ entity instruction_fetch is
     port(
         clk, reset : in std_logic;
         
-        branch    : in std_logic;
-        cntrl     : in IF_CNTRL_TYPE;  --! Control the operation mode of the PC logic
-        rel    : in DATA_TYPE;         --! relative branch address
+        branch     : in std_logic;
+        cntrl      : in IF_CNTRL_TYPE;  --! Control the operation mode of the PC logic
+        rel        : in DATA_TYPE;         --! relative branch address
         abso       : in DATA_TYPE;     --! absolute branch address, or base for relative jump
         ins        : in DATA_TYPE;     --! the new instruction is loaded from here
         
-        IFR    : out DATA_TYPE;        --! Instruction fetch register contents
-        pc_asynch : out ADDRESS_TYPE;  --! clocked pc register for ID stage
-        pc_synch  : out ADDRESS_TYPE   --! asynchronous PC for instruction memory
+        IFR        : out DATA_TYPE;        --! Instruction fetch register contents
+        pc_asynch  : out ADDRESS_TYPE;  --! clocked pc register for ID stage
+        pc_synch   : out ADDRESS_TYPE   --! asynchronous PC for instruction memory
     );
 end entity instruction_fetch;
 
 --!@brief instruction_fetch.std_impl simply connects PC_log to memory and IFR
 architecture std_impl of instruction_fetch is 
 
-    signal IFR_cs : INSTRUCTION_BIT_TYPE := NOP_INSTRUCT;
-    signal IFR_ns : INSTRUCTION_BIT_TYPE;
+    signal IFR_cs   : INSTRUCTION_BIT_TYPE := NOP_INSTRUCT;
+    signal IFR_ns   : INSTRUCTION_BIT_TYPE;
     signal reset_cs : std_logic := '0';
     signal reset_ns : std_logic;
-    signal reset_s : std_logic;
+    signal reset_s  : std_logic;
     
     component PC_log is
     port(
         clk, reset : in std_logic;
         
-        branch    : in std_logic;
-        cntrl     : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
-        rel       : in DATA_TYPE;     --! relative branch adress
-        abso      : in DATA_TYPE;     --! absolute branch adress, or base for relative jump
+        branch     : in std_logic;
+        cntrl      : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
+        rel        : in DATA_TYPE;     --! relative branch address
+        abso       : in DATA_TYPE;     --! absolute branch address, or base for relative jump
         
-        pc_asynch : out ADDRESS_TYPE; --! programm counter output
-        pc_synch  : out ADDRESS_TYPE  --! programm counter output
+        pc_asynch  : out ADDRESS_TYPE; --! programm counter output
+        pc_synch   : out ADDRESS_TYPE  --! programm counter output
 
     );
     end component PC_log;    
