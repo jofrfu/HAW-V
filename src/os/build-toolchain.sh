@@ -1,14 +1,14 @@
 #!/bin/bash
 # Author: Mike Wüstenberg
 # Date: 26.11.2017
-# Version: 0.6
-# Description: This Script ist building the Risc-V toolchain.
+# Version: 0.7
+# Description: This Script is building the risc-V tool-chain.
 
 #Variable
-LOAD_REPO=yes # Download toolchain repository. options[yes, no]
+LOAD_REPO=yes # Download tool-chain repository. options[yes, no]
 LINUX=ubuntu # Set Host Linux Type. options[ubuntu, fedora]
 TOOL_INSTALL=yes # Install third party tools(needs sudo). options[yes, no]
-SETUP=yes	#skip toolchain download and installation. options[yes, no]
+SETUP=yes	# download and installation tool-chain. options[yes, no]
 TEST_NAME=toolchaintest # Name of the test file
 
 # Argument parse
@@ -33,7 +33,7 @@ case $i in
 	;;
 	-h|--help)
 	echo "Usage: build-toolchain.sh [OPTION]..."
-	echo "Download and build of the risc-v toolchain. Superuser rights required for tool installation"
+	echo "Download and build of the risc-v tool-chain. Superuser rights required for tool installation"
 	echo
 	echo "-r,  --repository-load        disable repository download"
 	echo "-t,  --tool-install           disable tool installation"
@@ -50,7 +50,7 @@ done
 
 if [ "$SETUP" = yes ]; then
 	echo
-	echo "setup risc-v toolchain"
+	echo "setup risc-v tool-chain"
 	echo
 	echo "REPO_PATH:    $REPO_PATH"
 	echo "LOAD_REPO:    $LOAD_REPO"
@@ -73,30 +73,30 @@ if [ "$SETUP" = yes ]; then
 		echo "install tools .. ignored"
 	fi
 
-	# Download Git Repo
+	# Download Git repository
 	if [ "$LOAD_REPO" = yes ]; then
-		echo "init git repo .."
+		echo "initialize git repository .."
 		# Check for existing repo
 		FILE=$REPO_PATH.git
 		if [ -s $FILE ]; then
-			echo "Update Repo"
+			echo "Update repository"
 			cd $REPO_PATH
 			git pull origin master
 			git submodule update --init --recursive
 		else
-			echo "Clone Repo"
+			echo "Clone repository"
 			git clone https://github.com/riscv/riscv-tools
 			cd $REPO_PATH
 			git submodule update --init --recursive
 		fi
 	cd ..
 	else
-		echo "init git repo .. ignored"
+		echo "initialize git repository .. ignored"
 	fi
 		echo
 else
 	echo "install tools .. ignored"
-	echo "init git repo .. ignored"
+	echo "initialize git repository .. ignored"
 fi
 
 # Exports
@@ -121,7 +121,7 @@ if [ ! -d $DIR ]; then
 fi
 cd $DIR
 
-# Create test C programm
+# Create test C program
 echo -e '#include <stdio.h>\n int main(void) { printf("Your Toolchain ist working!\\n"); return 0; }' > $TEST_NAME.c
 $RISCV/bin/riscv64-unknown-elf-gcc -o $TEST_NAME $TEST_NAME.c
 
