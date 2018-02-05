@@ -88,9 +88,6 @@ architecture beh of top_level is
         port(
             clk, reset      : in    std_logic;
             
-            ENABLE          : in    std_logic;
-            ADDRESS         : in    ADDRESS_TYPE;
-            
             -- memory connections
             PERIPH_WRITE_EN : out   IO_ENABLE_TYPE;
             PERIPH_to_MEM   : out   IO_BYTE_TYPE;
@@ -149,9 +146,6 @@ begin
     port map(
         CLK_50MHz_s,
         reset,
-        
-        EN_s,
-        ADDR_s,
         
         PERIPH_WRITE_EN_s,
         PERIPH_to_MEM_s,

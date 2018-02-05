@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------- 
 set_property PACKAGE_PIN Y9 [get_ports {clk}];  # "GCLK"
 set_property IOSTANDARD LVCMOS33 [get_ports {clk}];
-#create_clock -period 20.000 -name clk -waveform {0.000 10.000} [get_ports clk]
+#create_clock -period 20.000 -name clk -waveform {0.000 10.000} [get_ports clk] # just for synthesis checking
 
 set_property PACKAGE_PIN R18 [get_ports {reset}];   # "BTNR" right button
 set_property IOSTANDARD LVCMOS18 [get_ports {reset}];
@@ -63,14 +63,6 @@ set_property PACKAGE_PIN AA11 [get_ports {periph_bit_io[21]}]; # "JA2"
 set_property PACKAGE_PIN Y10  [get_ports {periph_bit_io[22]}]; # "JA3" 
 set_property PACKAGE_PIN AB11 [get_ports {periph_bit_io[23]}]; # "JA4"
 
-# ----------------------------------------------------------------------------
-# JB Pmod - Bank 13
-# ----------------------------------------------------------------------------
-
-# UART # BANK 13 PMOD JB1
-
-set_property PACKAGE_PIN W12 [get_ports {periph_bit_io[24]}]; # "JB1"        tx transmission
-set_property PACKAGE_PIN W11 [get_ports {periph_bit_io[25]}]; # "JB2"        rx receive
 
 # ============================================================================
 
@@ -111,9 +103,6 @@ set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[20]}];
 set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[21]}];
 set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[22]}];
 set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[23]}];
-
-set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[24]}];
-set_property IOSTANDARD LVCMOS33 [get_ports {periph_bit_io[25]}];
 
 # In- Output delay
 
