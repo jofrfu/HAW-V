@@ -148,7 +148,7 @@ begin
         --configure preipherals as inputs
         --every input byte has its address offset from 0x80000000 as value
         for i in 0 to IO_BYTE_COUNT-1 loop
-            PERIPH_IN_EN(i) <= '1';
+            PERIPH_IN_EN(i) <= x"FF";
             PERIPH_IN(i)    <= std_logic_vector(to_unsigned(i, BYTE_WIDTH));
         end loop;
         
@@ -170,17 +170,19 @@ begin
         adrVal := 0;
         while adrVal < IO_BYTE_COUNT loop --loop through all words
             for offset in 0 to 2 loop --offset to distinguish between positions in words
-                address31Bits := std_logic_vector(to_unsigned(adrVal+offset, ADDRESS_WIDTH));
-                readMemory(HALF, '1' & address31Bits(30 downto 0));
-                wait for 1 ns;
-                if DOUT /= x"0000" & std_logic_vector(to_unsigned(adrVal+offset+1, BYTE_WIDTH)) & std_logic_vector(to_unsigned(adrVal+offset, BYTE_WIDTH)) then
-                    case offset is
-                        when 0 => report "error while reading halfbytes; offset = 0" severity error;
-                        when 1 => report "error while reading halfbytes; offset = 1" severity error;
-                        when 2 => report "error while reading halfbytes; offset = 2" severity error;
-                    end case;                    
-                    simulation_running <= false;
-                    wait;
+                if adrVal+offset >= IO_BYTE_COUNT-1 then
+                    address31Bits := std_logic_vector(to_unsigned(adrVal+offset, ADDRESS_WIDTH));
+                    readMemory(HALF, '1' & address31Bits(30 downto 0));
+                    wait for 1 ns;
+                    if DOUT /= x"0000" & std_logic_vector(to_unsigned(adrVal+offset+1, BYTE_WIDTH)) & std_logic_vector(to_unsigned(adrVal+offset, BYTE_WIDTH)) then
+                        case offset is
+                            when 0 => report "error while reading halfbytes; offset = 0" severity error;
+                            when 1 => report "error while reading halfbytes; offset = 1" severity error;
+                            when 2 => report "error while reading halfbytes; offset = 2" severity error;
+                        end case;                    
+                        simulation_running <= false;
+                        wait;
+                    end if;
                 end if;
             end loop;
             adrVal := adrVal + 4;
@@ -210,7 +212,7 @@ begin
         
         --configure preipherals as inputs
         for i in 0 to IO_BYTE_COUNT-1 loop
-            PERIPH_IN_EN(i) <= '0';
+            PERIPH_IN_EN(i) <= (others => '0');
         end loop;
         
         --WRITE Tests

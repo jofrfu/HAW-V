@@ -148,7 +148,7 @@ begin
     WB_CNTRL_ns <= WB_CNTRL_IN;
     MA_CNTRL_ns <= MA_CNTRL_IN;
     DO_ns <= DO_IN;
-    PC_ns <= std_logic_vector(unsigned(PC_IN) + to_unsigned(4, DATA_WIDTH)); --TODO Explain this
+    PC_ns <= PC_IN; 
     
     -- synchronous outputs
     WB_CNTRL_OUT <= WB_CNTRL_cs;

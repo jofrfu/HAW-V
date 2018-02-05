@@ -53,24 +53,30 @@ begin
         abso_v  := abso;
         pc_v    := pc_cs;
         
-        if cntrl_v = IF_CNTRL_BUB or branch = '1' then      --PC + 0 for bubbles
+        --if cntrl_v = IF_CNTRL_BUB or branch = '1' then      --PC + 0 for bubbles
+        if branch = '1' then
             base_v := pc_v;
-            increment_v := (others => '0');
+            increment_v := std_logic_vector(signed(rel_v) + to_signed(-8,DATA_WIDTH));
         else
-            case cntrl_v(0) is  --choose a value to increment the PC
-                when '0'    => increment_v := STD_PC_ADD;
-                when '1'    => increment_v := std_logic_vector(signed(rel_v) + to_signed(-4,DATA_WIDTH));
-                when others => report "PC_log mux 0 has undefined signal" severity warning;
-            end case ; 
-            
-            case cntrl_v(1) is  --choose absolute branch or normal pc
-                when '0'    => base_v := pc_v;
-                when '1'    => base_v := abso_v;
-                when others => report "PC_log mux 1 has undefined signal" severity warning;
-            end case ;             
+            if cntrl_v = IF_CNTRL_BUB then
+                base_v := pc_v;
+                increment_v := (others => '0');
+            else
+                case cntrl_v(0) is  --choose a value to increment the PC
+                    when '0'    => increment_v := STD_PC_ADD;
+                    when '1'    => increment_v := std_logic_vector(signed(rel_v) + to_signed(-4,DATA_WIDTH));
+                    when others => report "PC_log mux 0 has undefined signal" severity warning;
+                end case ; 
+                
+                case cntrl_v(1) is  --choose absolute branch or normals pc
+                    when '0'    => base_v := pc_v;
+                    when '1'    => base_v := abso_v;
+                    when others => report "PC_log mux 1 has undefined signal" severity warning;
+                end case ;             
+            end if;
         end if;
         
-        pc_ns_v := std_logic_vector(unsigned(base_v) + unsigned(increment_v)); 
+        pc_ns_v := std_logic_vector(signed(base_v) + signed(increment_v)); 
         pc_ns <= pc_ns_v;
     end process pc_logic;
     
