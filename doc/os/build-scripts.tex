@@ -1,0 +1,74 @@
+\documentclass[a4paper, oneside]{scrreprt}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\author{Mike Wüstenberg}
+
+\begin{document}
+\chapter{Scripts}
+ The purpose of this Document is to give a overview over the script included in the git repository.
+ 
+\section{Table of Contents}
+\begin{enumerate}
+\item List of scripts 
+\item build-toolchain 
+\begin{enumerate}
+\item Tour of the Sources
+\item Using the tool-chain
+\end{enumerate}
+\item{Troubleshooting}
+\end{enumerate}
+
+\section{List of scripts}
+\begin{itemize}
+\item build-toolchain.sh, builds the riscv-tools.
+\item build-linux.sh, builds the riscv-linux.
+\end{itemize}
+
+\chapter{build-toolchain}
+The build of the 64bit tool-chain can be split in 4 parts. First we need to install 3rd party tools like "git" and "curl". After successful installation we can download the git repository and update the sub-modules.
+\begin{lstlisting}
+git clone https://github.com/riscv/riscv-tools
+git submodule update --init --recursive
+\end{lstlisting}
+Warning this will require a several gigabyte of space. Now we can build the the tool-chain with the build.sh script included in the riscv-tools repository.
+The last step is to test the tool-chain. The script writes a small C which should print "Your Toolchain is working!" on your Terminal.
+
+\section{Tour of the Sources}
+After the execute of the script the folder should look like this.
+\begin{itemize}
+\item build-toolchain.sh, the script.
+\item riscv-tools, the repository clone.
+\item riscv, the built tool-chain.
+\item riscv/toolchaintest, location of the test program.
+\item riscv/bin, location of the compiler and the spike emulator.
+\end{itemize}
+\section{Using the tool-chain}
+You compile a simple c program with with one of the gcc compiler located in "riscv/bin" for example.
+\begin{lstlisting}
+riscv/bin/riscv64-unknown-elf-gcc -o YOUR-PROGRAM YOUR-PROGRAM.c
+\end{lstlisting} 
+The tool-chain includes a risc-v emulator named spike to run C a program. The command is "spike pk YOUR-PROGRAM". The option "pk" provides a simple Proxy Kernel for your program to run in.
+\begin{lstlisting}
+riscv/bin/spike pk YOUR-PROGRAM
+\end{lstlisting}
+For easy access you can add the bin folder as a path variable. "PATH=\$PATH:riscv/bin"
+
+\chapter{build-linux}
+This script will build the a 64bit riscv-linux. This alone will not boot you will need a file system for that. 
+For the building process you will need the riscv-tools, and the 3rd party tools. 
+With the the 3rd party tool we will download the riscv-linux repository and a Linux kernel.
+\begin{lstlisting}
+git clone https://github.com/riscv/riscv-linux.git
+\end{lstlisting}
+After that we can configure the Linux makefile and build the image.
+
+
+\chapter{Troubleshooting}
+\section{Functions not found}
+It can happen that the make file dose not find some functions. If that happens you can try to set the cross compile variable.
+\begin{lstlisting}
+make -j4 ARCH=riscv CROSS_COMPILE=riscv64-unknown-linux-gnu-
+\end{lstlisting}
+
+\end{document}
