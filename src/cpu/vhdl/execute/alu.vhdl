@@ -19,7 +19,7 @@ use WORK.riscv_pack.all;
 --!         OPA is the data source, while OPB is the second argument for this operation
 --!         Example: when shifting right, OPA will be shifted right by OPB times
 --!         Flags will always be calculated and updated based on the adder/subtractor operation,
---!         even if the choosen operation wasn't an addition/subtraction
+--!         even if the chosen operation wasn't an addition/subtraction
 entity ALU is 
     port(
         OPB         : in DATA_TYPE;     --!second operand or function argument for operation on OPA
@@ -82,7 +82,7 @@ begin
     
     Flags <= flags_s;
 
-    --!@Puts together flags based on adder results
+    --!@brief Puts together flags based on adder results
     flag_proc:
     process (add_result, add_carry, add_overflow) is
     
@@ -249,8 +249,8 @@ begin
         sltu_resu <= resu_v;
     end process sltu_proc;
     
-    --! @brief ALU of the execute stage
-    --! @detail calculates OPA (+) OPB, mainly contains mux to choose the corresponding result to funct3 and funct7
+    --!@brief ALU of the execute stage
+    --!@detail calculates OPA (+) OPB, mainly contains mux to choose the corresponding result to funct3 and funct7
     choose:
     process (EX_CNTRL_IN, add_result, and_resu, or_resu, xor_resu, sll_resu, srl_resu, sra_resu, slt_resu, sltu_resu) is
         variable funct7_v  : FUNCT7_TYPE;
@@ -352,7 +352,7 @@ begin
                 case funct3_v is
                     when "000" => -- imm arithmetic
                         case funct7_v is
-                            when others => -- addi
+                            when others => -- ADDI
                                 nadd_sub_v := '0';
                                 resu_v := add_result;
                         end case;

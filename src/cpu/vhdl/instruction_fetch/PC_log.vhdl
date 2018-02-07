@@ -3,6 +3,7 @@
 --!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
 --!@author  Sebastian Brückner
 --!@author  Felix Lorenz
+--!@author  Jonas Fuhrmann
 --!@date    2017 - 2018
 
 use WORK.riscv_pack.all;
@@ -80,7 +81,7 @@ begin
         pc_ns <= pc_ns_v;
     end process pc_logic;
     
-    pc_asynch <= pc_ns;     --program counter to memory for intruction fetch
+    pc_asynch <= pc_ns;     --program counter to memory for instruction fetch
     pc_synch  <= pc_cs;     --clocked program counter for ID stage
     
     reg : process(clk) is

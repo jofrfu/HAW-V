@@ -12,7 +12,7 @@ library IEEE;
     use IEEE.numeric_std.all;
 
 --!@brief   Manages register read and write
---!@details Is capeable of reading two registers per clock and writing one
+--!@details Is capable of reading two registers per clock and writing one
 
 
 --!         Note that you can't read the old value and store a new one in the same register on the same rising edge.

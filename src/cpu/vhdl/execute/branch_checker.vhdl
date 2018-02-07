@@ -120,7 +120,7 @@ begin
                         word_cntrl_v := HALF;
                         sign_enable_v:= '0';
                     when others =>
-                        report "Unkown word length on load!" severity warning;
+                        report "Unknown word length on load!" severity warning;
                         word_cntrl_v        := WORD;
                         sign_enable_v       := '0';
                 end case;

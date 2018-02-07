@@ -35,8 +35,8 @@ entity execute_stage is
         WORD_CNTRL_OUT_SYNCH  : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
         WORD_CNTRL_OUT_ASYNCH : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
         SIGN_EN               : out std_logic;       --!Enables sign extension in memory access
-        RESU_DAR_SYNCH        : out DATA_TYPE;       --!Result of calulation (synchronous)
-        RESU_DAR_ASYNCH       : out DATA_TYPE;       --!Result of calulation (asynchronous)
+        RESU_DAR_SYNCH        : out DATA_TYPE;       --!Result of calculation (synchronous)
+        RESU_DAR_ASYNCH       : out DATA_TYPE;       --!Result of calculation (asynchronous)
         Branch                : out std_logic;       --!For conditioned branching
         ABS_OUT               : out DATA_TYPE;       --!Absolute value for branch/jump (just loop through)
         REL_OUT               : out DATA_TYPE;       --!Relative value for branch/jump (just loop through)
