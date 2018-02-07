@@ -101,7 +101,7 @@ architecture beh of top_level is
             PERIPH_BIT_IO   : inout PERIPH_IO_TYPE
         );
     end component peripherals;
-    for all : peripherals use entity work.peripherals_wrapper(beh); -- todo: change
+    for all : peripherals use entity work.peripherals_wrapper(beh);
 begin
  
     clk_wiz_0_i : clk_wiz_0

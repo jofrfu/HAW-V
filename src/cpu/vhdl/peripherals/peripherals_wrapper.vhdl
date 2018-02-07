@@ -10,8 +10,8 @@ library IEEE;
 
 use WORK.riscv_pack.all;
 
---!brief This wraps all peripherals mapped to the memory of the CPU.
---! Only GPIOs are present at the moment.
+--!@brief This wraps all peripherals mapped to the memory of the CPU.
+--!@details Only GPIOs are present at the moment.
 
 entity peripherals_wrapper is
     port(
@@ -31,8 +31,8 @@ architecture beh of peripherals_wrapper is
 
 begin
 
---!brief The process which maps GPIOs
---!details  This device does the following:
+--!@brief The process which maps GPIOs
+--!@details  This device does the following:
 --!         1. Get data from memory at GPIO-address (MEM_to_PERIPH)
 --!             1.1 Get GPIO configuration bytes
 --!             1.2 Get GPIO data bytes
