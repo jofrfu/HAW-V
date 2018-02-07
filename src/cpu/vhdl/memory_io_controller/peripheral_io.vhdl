@@ -1,12 +1,16 @@
---!@brief 	This file contains peripheral IO
---!@author 	Jonas Fuhrmann
---!@date 	2017
+--!@file    peripheral_io.vhdl
+--!@brief   This file is part of the ach-ne project at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Jonas Fuhrmann
+--!@date    2017 - 2018
 
 use WORK.riscv_pack.all;
 LIBRARY IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
     
+    
+--!@brief This device includes registers for peripherals and simulates the behavior of a block ram device.
 entity peripheral_io is
     port(
         CLK            : IN  STD_LOGIC;
@@ -25,9 +29,9 @@ entity peripheral_io is
 end entity peripheral_io;
 
 architecture beh of peripheral_io is
-    signal PERIPH_cs : IO_BYTE_TYPE := (others => (others => '0'));
+    signal PERIPH_cs : IO_BYTE_TYPE := (others => (others => '0')); -- peripheral registers
     signal PERIPH_ns : IO_BYTE_TYPE;
-    signal DOUT_cs   : DATA_TYPE := (others => '0');
+    signal DOUT_cs   : DATA_TYPE := (others => '0');    -- like memory latency on read (1 clock cycle)
     signal DOUT_ns   : DATA_TYPE;
     
     signal DECODE_RESU : IO_BYTE_TYPE;
