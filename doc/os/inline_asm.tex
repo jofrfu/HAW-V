@@ -1,0 +1,81 @@
+\documentclass[a4paper, oneside]{scrreprt}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\author{Andre Brand}
+
+\begin{document}
+\chapter{Write inline Assembler Code}
+
+Please check, that the RISC-V toolchain is already installed on your system!\\
+\\
+To write inline Assembler code for the RISC-V emulator spike, you have to write a C-File. Ever Assembler Command must be between two " Signs and have to end with a ';' and all Commands must be in an asm()-block.\\
+When you start your code with the ProxyKernel which is included by spike, you have to put a unique value in a register at the beginning of the program.\\
+Here is an example:\\
+\begin{verbatim}
+int main() {
+    asm(
+        "li a1, 0xaffedead;"
+        "li a1, 3;"
+        "add a2, a1, a1;"
+        "addi a2, a2, 1;"
+        "li a4, 2;"
+        "mul a3, a1, a4;"
+        "mul a3, a3, a4;"
+        "end: j end;"
+    );
+    return 0;
+}
+\end{verbatim}
+
+After that compile your written program with the command:
+\begin{verbatim}
+    riscv64-unknown-elf-gcc [-o <programm name>] <filename>
+\end{verbatim}
+
+\chapter{Start your code with Spike-Emulator}
+
+If you have compiled your program, you can start it with the command:
+\begin{verbatim}
+    spike -d pk <programm name>
+\end{verbatim}
+
+After that you can jump to the begining of your program with the command:
+\begin{verbatim}
+    until reg 0 <register> <unique value>
+\end{verbatim}
+With this command, you are able to jump to the line, where the value of the given register is equal to your unique value.\\
+\\
+Now you are able to ahve a look at all registers of the cpu by typing:
+\begin{verbatim}
+    reg 0 <register>
+\end{verbatim}
+By hitting the Enter-key you can go a single step forward.
+All other commands can be displayed when you type help. Here is the list, which will be shown:
+\begin{verbatim}
+    Interactive commands:
+    reg <core> [reg]                # Display [reg] (all if omitted) in <core>
+    fregs <core> <reg>              # Display single precision <reg> in <core>
+    fregd <core> <reg>              # Display double precision <reg> in <core>
+    pc <core>                       # Show current PC in <core>
+    mem <hex addr>                  # Show contents of physical memory
+    str <hex addr>                  # Show NUL-terminated C string
+    until reg <core> <reg> <val>    # Stop when <reg> in <core> hits <val>
+    until pc <core> <val>           # Stop when PC in <core> hits <val>
+    until mem <addr> <val>          # Stop when memory <addr> becomes <val>
+    while reg <core> <reg> <val>    # Run while <reg> in <core> is <val>
+    while pc <core> <val>           # Run while PC in <core> is <val>
+    while mem <addr> <val>          # Run while memory <addr> is <val>
+    run [count]                     # Resume noisy execution 
+                                      (until CTRL+C, or [count] insns)
+    r [count]                         Alias for run
+    rs [count]                      # Resume silent execution 
+                                      (until CTRL+C, or [count] insns)
+    quit                            # End the simulation
+    q                                 Alias for quit
+    help                            # This screen!
+    h                                 Alias for help
+    Note: Hitting enter is the same as: run 1
+\end{verbatim}
+
+\end{document}

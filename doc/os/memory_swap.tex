@@ -1,0 +1,29 @@
+\documentclass[a4paper, oneside]{scrreprt}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\author{Andre Brand}
+
+\begin{document}
+\chapter{What is swappiness}
+
+Swappiness is a factor for swapping pages from memory to the swap-partition on your hard-drive. Since Linux-Kernel 2.6 you are able to change the swappiness factor. The value can be between 0 and 100. If you choose 0 as a value, swapping will be disabled and you might run out of memory, because no pages from applications which are currently nit needed will stay in the memory.\\
+If you choose the factor 100, every page of a freshly started program will instantly be swapped to the hard-drive and your computer might become really slow.\\
+The default value is 60. At this value, pages will be swapped, when 40\% of the memory is used, so only 60\% is left free.
+
+\chapter{Change the swappiness of Linux}
+
+There are two ways to change the swappiness factor of Linux. The first one will change it imediately without a reboot, but it will be overwritten by the default value after a restart.
+\begin{verbatim}
+    sudo sysctl vm.swappiness=15
+\end{verbatim}
+This will change the swappiness factor to 15 so pages will be swapped to the hard-drive when 85\% of the memory is used.\\
+\\
+The other way will only take effect after a reboot, but it will change the swappiness factor constantly.\\
+You have to change or add the line:
+\begin{verbatim}
+    vm.swappiness = 20
+\end{verbatim}
+in the file '/etc/sysctl.conf'.
+
+\end{document}
