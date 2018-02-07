@@ -1,12 +1,16 @@
---!@brief 	This file contains the top level entity of the System
---!@author 	Jonas Fuhrmann
---!@date 	2017
+--!@file    top_level.vhdl
+--!@brief   This file is part of the ach-ne project at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Jonas Fuhrmann
+--!@date    2017 - 2018
 
 library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
 use WORK.riscv_pack.all;
+
+--!@brief This device contains the complete processor (Core, Memory and Peripherals).
 
 entity top_level is
     port(
