@@ -1,29 +1,37 @@
---!@brief 	This file contains the memory/IO controller
---!@author 	Jonas Fuhrmann + Felix Lorenz
---!@date 	2017
+--!@file    memory_io_controller.vhdl
+--!@brief   This file is part of the ach-ne project at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Jonas Fuhrmann
+--!@author  Felix Lorenz
+--!@date    2017 - 2018
 
 use WORK.riscv_pack.all;
 LIBRARY IEEE;
     USE IEEE.STD_LOGIC_1164.ALL;   
-   
+
+--!@brief This device wraps the memory and peripheral registers.
+--!@details Peripheral registers are located at position 0x80000000 and above (address MSB=1).
+--!The memory "ignores" position 0 to 1 from the address. Therefore, the peripheral registers also ignores these.
+--!This makes the conversions a bit more complex, because bytes needs to be "shifted" differently on different word lengths. 
+    
 entity memory_io_controller is
     port(
         CLK            : IN STD_LOGIC;
         reset          : IN STD_LOGIC;
-        pc_asynch      : IN ADDRESS_TYPE;
-        instruction    : OUT INSTRUCTION_BIT_TYPE;
+        pc_asynch      : IN ADDRESS_TYPE;   -- the current program counter
+        instruction    : OUT INSTRUCTION_BIT_TYPE;  -- the current in instruction at PC address
         
-        EN             : IN STD_LOGIC;
-        WEN            : IN STD_LOGIC;
-        WORD_LENGTH    : in WORD_CNTRL_TYPE;
-        ADDR           : IN ADDRESS_TYPE;
-        DIN            : IN DATA_TYPE;
-        DOUT           : OUT DATA_TYPE;
+        EN             : IN STD_LOGIC;  -- enables the memory/peripheral registers
+        WEN            : IN STD_LOGIC;  -- enables writing to memory/peripheral registers
+        WORD_LENGTH    : in WORD_CNTRL_TYPE;    -- the width of the read/written word (1-4 bytes)
+        ADDR           : IN ADDRESS_TYPE;   -- the address of the read/written word
+        DIN            : IN DATA_TYPE;  -- Data In
+        DOUT           : OUT DATA_TYPE; -- Data Out
         
         -- IO
-        PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;-- disables write access - register is written from peripheral
-        PERIPH_IN      : IN  IO_BYTE_TYPE;  -- input for peripheral connections
-        PERIPH_OUT     : OUT IO_BYTE_TYPE   -- output for peripheral connections 
+        PERIPH_IN_EN   : IN  IO_ENABLE_TYPE;    -- disables write access - register is written from peripheral
+        PERIPH_IN      : IN  IO_BYTE_TYPE;      -- input for peripheral connections
+        PERIPH_OUT     : OUT IO_BYTE_TYPE       -- output for peripheral connections 
     );
 end entity memory_io_controller;
     
@@ -88,21 +96,21 @@ architecture beh of memory_io_controller is
     signal io_not_mem_ns : std_logic;
 begin
 
-    io_not_mem_ns <= ADDR(ADDR'high);
+    io_not_mem_ns <= ADDR(ADDR'high);   -- for result mux (check MSB)
 
-    io_en <= EN and ADDR(ADDR'high);
-    mem_en <= EN and not ADDR(ADDR'high);
+    io_en <= EN and ADDR(ADDR'high);    -- enable on MSB=1
+    mem_en <= EN and not ADDR(ADDR'high);   -- enable on MSB=0
 
     mem : memory
     port map(
-        '1',                --always enable
-        "0000",             --never write => read only
-        pc_asynch,          --address is PC
-        (others => '0'),    --READ ONLY, NO WRITE
-        instruction_little_s,        --write to instruction ou
+        '1',                -- always enable
+        "0000",             -- never write => read only
+        pc_asynch,          -- address is PC
+        (others => '0'),    -- READ ONLY, NO WRITE
+        instruction_little_s,   -- write to instruction out
         CLK,
         ----------------
-        mem_en,   --enable when enabled memory (when MSB is 1 is an IO access)
+        mem_en,   -- enable when enabled memory (when MSB is 1 is an IO access)
         BYTE_WRITE_EN_s,
         ADDR,
         DIN_LITTLE_s,
@@ -114,7 +122,7 @@ begin
     port map(
         CLK,
         reset,
-        io_en, -- peripheral enable
+        io_en,  -- peripheral enable
         BYTE_WRITE_EN_s,
         ADDR,
         DIN_LITTLE_s,
@@ -130,7 +138,7 @@ begin
     instruction <= instruction_little_s( 7 downto  0) & instruction_little_s(15 downto  8) &
                    instruction_little_s(23 downto 16) & instruction_little_s(31 downto 24);
 				   
-    dout_conv:		--for LOAD
+    dout_conv:  -- for LOAD
 	process(OFFSET_cs, io_not_mem_cs, DOB_LITTLE_s, DO_LITTLE_s, WORD_LENGTH_cs) is
 		variable offset_v : std_logic_vector(1 downto 0);
 		variable dob_little_v : DATA_TYPE;
@@ -217,7 +225,7 @@ begin
 	end process dout_conv;
     
     -- big to little endian
-    din_conv:		--for STORE
+    din_conv:   -- for STORE
 	process(ADDR(1 downto 0), DIN, WORD_LENGTH) is
 		variable offset_v : std_logic_vector(1 downto 0);
 		variable din_v : DATA_TYPE;
@@ -291,7 +299,7 @@ begin
 		
 	end process din_conv;
     
-    write_en:
+    write_en:   -- write enable conversion
     process(WORD_LENGTH, WEN, ADDR(1 downto 0)) is
         variable WORD_LENGTH_v   : WORD_CNTRL_TYPE;
         variable WRITE_EN_v      : std_logic;
