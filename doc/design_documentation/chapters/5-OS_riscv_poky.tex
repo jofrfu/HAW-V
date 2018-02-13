@@ -1,0 +1,111 @@
+% File		: 	5-OS_riscv_poky.tex
+% Created by:	Mike Wüstenberg
+% Created at :	13.02.2018
+% Authors	:	MIke Wüstenberg
+
+\chapter{Riscv Poky}
+
+\section{Poky}
+
+Riscv-poky is a port of the Yocto project. It's a full Linux distribution which enables user to 
+cross-compile and package software as file system.
+
+\subsection{Yocto project}
+
+The open source project Yocto provides tools, templates and methods to create Linux based systems. 
+The package creation is based on recipe. A recipe describes how to cross-compile and fetch a package.
+This allows to build recipes for a wide range of build targets. The complete Linux images is build with
+the BitBake tool.
+
+\subsection{BitBake}
+
+BitBake is a efficient execution engine which works in parallel and executes Python tasks.
+The instructions on what tasks BitBake should run are stored in recipe(.bb), configuration(.conf) and 
+class(.bbclass) files.
+\\
+The recipes includes:
+\begin{itemize}
+\item Description
+\item Recipe version
+\item Dependencies
+\item Where to get the Source code
+\item patch for the source code
+\item Compile instructions
+\item install location
+\end{itemize}
+A list of all BitBake recipe versions can be shown with the "bitbake -s" command.
+\\ \\
+The Configuration file defines various configurations. This includes user configuration options, 
+compiler tuning options and more. The Class files contains information which are useful the to 
+share between files. For more information take a look at the Yocto documentation.
+
+\begin{itemize}
+\item Yocto Project: http://www.yoctoproject.org/docs/current/ref-manual/ref-manual.html
+\item BitBake: http://www.yoctoproject.org/docs/1.6/bitbake-user-manual/bitbake-user-manual.html
+\end{itemize}
+
+\section{Quickstart}
+
+First donwload the riscv-poky repository and initialize the OpenEmbedded environment.
+
+\begin{verbatim}
+git clone https://github.com/riscv/riscv-poky.git
+cd riscv-poky
+source oe-init-build-env
+\end{verbatim}
+
+This takes you to the build directory. The "conf/local.conf" file is preconfigured to build for riscv64. 
+In case you want to use a already installed tool-chain you can change the configuration. Once the
+compilation has finished you will find is inside the "tmp" folder. To start the build process run 
+the following command.
+
+\begin{verbatim}
+bitbake core-image-riscv
+\end{verbatim}
+This will build a a riscv-v image which includes Python, Perl, SSH and other tools. Since this will
+download a large amount of data this can take several hours. But you can on completion run a fully
+operational Linux. Test your Linux with the following command.
+
+\begin{verbatim}
+runspike riscv64
+\end{verbatim}
+
+\section{Adding recipes}
+To add a recipe to your image you need to change the image .bb file. The file can be found in the following 
+path.
+
+\begin{verbatim}
+/riscv-porky/meta-riscv/recipes-core/image
+\end{verbatim}
+The default image has the name "core-image-riscv.bb". Copy the default which creates a basic Linux.
+Now go edit the new file. You can add new recipes with.
+\begin{verbatim}
+IMAGE_INSTALL += "git"
+\end{verbatim}
+As long as there is a recipe for the package you want to install this will install it on your new image.
+Build your Linux image with the "bitbake" command and the new image recipe you just created. BitBake will use
+previous build software to speed up the process.
+
+\section{Troubleshooting}
+\subsection{Failed to fetch URL}
+ In case a commit got orphaned and is not "visible" from any branch you can add nobranch=1; add to the fetch command.
+ \\
+ Source: https://github.com/riscv/riscv-poky/issues/15
+
+\begin{verbatim}
+WARNING: qemu-native-2.5.0-r0 do_fetch: Failed to fetch URL gitsm://github.com/riscv/riscv-qemu.git;destsuffix=/home/user/RISC-V/riscv-poky/build/tmp/work/x86_64-linux/qemu-native/2.5.0-r0/qemu-2.5.0, attempting MIRRORS if available
+ERROR: qemu-native-2.5.0-r0 do_fetch: Fetcher failure: Unable to find revision 9bfcd4717b3010eb7efc50057232e92ecb741cac in branch master even from upstream
+ERROR: qemu-native-2.5.0-r0 do_fetch: Fetcher failure for URL: 'gitsm://github.com/riscv/riscv-qemu.git;destsuffix=/home/user/RISC-V/riscv-poky/build/tmp/work/x86_64-linux/qemu-native/2.5.0-r0/qemu-2.5.0'. Unable to fetch URL from any source.
+ERROR: qemu-native-2.5.0-r0 do_fetch: Function failed: base_do_fetch
+ERROR: Logfile of failure stored in: /home/user/RISC-V/riscv-poky/build/tmp/work/x86_64-linux/qemu-native/2.5.0-r0/temp/log.do_fetch.1244
+ERROR: Task (virtual:native:/home/user/RISC-V/riscv-poky/build/../meta-riscv/recipes-devtools/qemu/qemu_2.5.0.bb:do_fetch) failed with exit code '1'
+\end{verbatim}
+\begin{verbatim}
+In the file meta-riscv/recipes-devtools/qemu/qemu_2.5.0.bb replace SRC_URI as follows:
+SRC_URI = "git://github.com/riscv/riscv-qemu.git;nobranch=1;destsuffix=${S}
+\end{verbatim}
+
+
+
+
+
