@@ -277,7 +277,8 @@ begin
         WB_CNTRL <= WB_CNTRL_v;
     end process decode;
     
-    --! @brief extracts the immediate in the IFR and sign extends it
+    --! @brief  Immediate construction
+    --! @detail Extracts the immediate in the IFR and sign extends it
     imm_constr:
     process(IFR) is
         variable op_code_v   : OP_CODE_TYPE;
