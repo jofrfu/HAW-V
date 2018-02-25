@@ -1,6 +1,10 @@
---! @brief register_select.vhd
---! @author Jonas Fuhrmann + Felix Lorenz + Matthis Keppner
---! project: ach ne! @ HAW-Hamburg
+--!@file    instruction_decode.vhd
+--!@brief   This file is part of the ach-ne projekt at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Felix Lorenz
+--!@author  Jonas Fuhrmann
+--!@atuhor  Matthis Keppner
+--!@date    2017 - 2018
 
 use WORK.riscv_pack.all;
 library IEEE;
@@ -9,21 +13,21 @@ library IEEE;
     
 entity decode is
 	port(
-		--clk, reset  :  in std_logic;  --neccessary?? TO DO: delete?
-		branch      :  in std_logic;
-		IFR	        :  in INSTRUCTION_BIT_TYPE;
-        DEST_REG_EX :  in REGISTER_ADDRESS_TYPE;
-        DEST_REG_MA :  in REGISTER_ADDRESS_TYPE;
-        DEST_REG_WB :  in REGISTER_ADDRESS_TYPE;
-        STORE       :  in std_logic;
-        Imm_check   :  in DATA_TYPE;
-		----------------------------------------
-		IF_CNTRL    : out IF_CNTRL_TYPE;
-		ID_CNTRL    : out ID_CNTRL_TYPE;
-		WB_CNTRL    : out WB_CNTRL_TYPE;
-		MA_CNTRL    : out MA_CNTRL_TYPE;
-		EX_CNTRL    : out EX_CNTRL_TYPE;
-		Imm         : out DATA_TYPE
+		--clk, reset  :  in std_logic;  --maybe a state machine would have been more beneficial here...
+		branch      :  in std_logic;             --!Signal from branch checker
+		IFR	        :  in INSTRUCTION_BIT_TYPE;  --!actual Instruction word to be decoded
+        DEST_REG_EX :  in REGISTER_ADDRESS_TYPE; --!DESTination REGister in EXectute stage
+        DEST_REG_MA :  in REGISTER_ADDRESS_TYPE; --!DESTination REGister in Memory Access stage
+        DEST_REG_WB :  in REGISTER_ADDRESS_TYPE; --!DESTination REGister in Write Back stage
+        STORE       :  in std_logic;             --!Checks if STORE bit is set in last instruction
+        Imm_check   :  in DATA_TYPE;             --!IMMediate CHECK is needed for the jump execution
+		---------------------------------------- 
+		IF_CNTRL    : out IF_CNTRL_TYPE;         --!Controlbits for IF-Stage
+		ID_CNTRL    : out ID_CNTRL_TYPE;         --!Controlbits for ID-Stage
+		WB_CNTRL    : out WB_CNTRL_TYPE;         --!Controlbits for WB-Stage
+		MA_CNTRL    : out MA_CNTRL_TYPE;         --!Controlbits for MA-Stage
+		EX_CNTRL    : out EX_CNTRL_TYPE;         --!Controlbits for EX-Stage
+		Imm         : out DATA_TYPE              --!IMMediate for EX-Stage
 	);
 end entity decode;
 
@@ -36,6 +40,8 @@ architecture beh of decode is
     
 begin
 
+    --!@brief  First helping process to detect necessity of bubble
+    --!@detail Compares if the bits in the IFR where rs1 could be, will be changed by one of the following pipeline stages
     rs1_check_1:
     process(IFR(19 downto 15), DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
         variable rs1_v         : REGISTER_ADDRESS_TYPE;
@@ -61,6 +67,8 @@ begin
         rs1_in_pipe_s <= rs1_in_pipe_v;
     end process rs1_check_1;
     
+    --!@brief  First helping process to detect necessity of bubble
+    --!@detail See rs1_check_1
     rs2_check_2:
     process(IFR(24 downto 20), DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
         variable rs2_v         : REGISTER_ADDRESS_TYPE;
@@ -87,7 +95,10 @@ begin
     end process rs2_check_2;
     
     --! @brief decode unit for ID stage
-    --! @detail controls the PC flow IF stage and operand selection for EX stage
+    --! @detail controls the PC flow in IF stage 
+    --!         the operand selection for EX stage
+    --!         data output from register file
+    --!         and creates bubble for the pipeline if needed
     decode:
     process(branch, IFR, rs1_in_pipe_s, rs2_in_pipe_s, STORE, Imm_check, imm_ifr_s) is
     
