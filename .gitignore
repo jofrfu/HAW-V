@@ -12,13 +12,16 @@ src/cpu/vhdl/**/*.*
 src/cpu/java/**/*.*
 !src/cpu/java/**/*.java
 
-# for memory generation - add whole project
+#for memory generation - add whole project
 !src/cpu/vhdl/memory/**
 
-#ignore doxygen files
-src/cpu/vhdl/latex/
-src/cpu/vhdl/html/
+#
+doc/
+!doc/main.tex
+!doc/chapters/*.tex
 
+#ignore doxygen files
+ach_ne_doxy/
 
 
 doc/doxygen/Thumbs\.db
