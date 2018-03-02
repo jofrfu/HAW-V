@@ -15,6 +15,12 @@ entity instruction_decode is
 		PC           :  in DATA_TYPE;
 		DI	  		 :  in DATA_TYPE;
 		rd			 :  in REGISTER_ADDRESS_TYPE;
+        -------------------------------------------------
+        DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
+        DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
+        DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+        STORE        :  in std_logic;
+        -------------------------------------------------
 		IF_CNTRL	 : out IF_CNTRL_TYPE;
 		WB_CNTRL	 : out WB_CNTRL_TYPE;
 		MA_CNTRL	 : out MA_CNTRL_TYPE;
@@ -49,8 +55,8 @@ architecture beh of instruction_decode is
 	signal ma_cntrl_reg_ns 	: MA_CNTRL_TYPE;
 	signal ex_cntrl_reg_cs 	: EX_CNTRL_TYPE := EX_CNTRL_NOP;
 	signal ex_cntrl_reg_ns 	: EX_CNTRL_TYPE;
-	signal imm_reg_cs 		: DATA_TYPE 	:= (others => '0');
-	signal imm_reg_ns 		: DATA_TYPE;
+    signal imm_reg_cs       : DATA_TYPE   := (others => '0'); 
+    signal imm_reg_ns       : DATA_TYPE; 
 	signal opb_reg_cs 		: DATA_TYPE 	:= (others => '0');
 	signal opb_reg_ns 		: DATA_TYPE;
 	signal opa_reg_cs 		: DATA_TYPE 	:= (others => '0');
@@ -65,6 +71,11 @@ architecture beh of instruction_decode is
 		port(
 			branch		 :  in std_logic;
 			IFR			 :  in INSTRUCTION_BIT_TYPE;
+            DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+            STORE        :  in std_logic;
+            Imm_check    :  in DATA_TYPE;
 			IF_CNTRL	 : out IF_CNTRL_TYPE;
 			ID_CNTRL	 : out ID_CNTRL_TYPE;
 			WB_CNTRL	 : out WB_CNTRL_TYPE;
@@ -95,6 +106,11 @@ begin
 	port map(
 		branch => branch,
 		IFR => IFR,
+        DEST_REG_EX => DEST_REG_EX,
+        DEST_REG_MA => DEST_REG_MA,
+        DEST_REG_WB => DEST_REG_WB,
+        STORE => STORE,
+        Imm_check => imm_reg_cs,
 		IF_CNTRL => IF_CNTRL,
 		ID_CNTRL(11) => pc_en_s,
 		ID_CNTRL(10) => imm_sel_s,
@@ -144,7 +160,7 @@ begin
                 wb_cntrl_reg_cs <= (others => '0');
                 ma_cntrl_reg_cs <= (others => '0');
                 ex_cntrl_reg_cs <= (others => '0');
-                imm_reg_cs 		<= (others => '0');
+                imm_reg_cs      <= (others => '0');
                 opb_reg_cs 		<= (others => '0');
                 opa_reg_cs 		<= (others => '0');
                 do_reg_cs 		<= (others => '0');
@@ -153,7 +169,7 @@ begin
             	wb_cntrl_reg_cs <= wb_cntrl_reg_ns;
                 ma_cntrl_reg_cs <= ma_cntrl_reg_ns;
                 ex_cntrl_reg_cs <= ex_cntrl_reg_ns;
-                imm_reg_cs 		<= imm_reg_ns;
+                imm_reg_cs      <= imm_reg_ns;
                 opb_reg_cs 		<= opb_reg_ns;
                 opa_reg_cs 		<= opa_reg_ns;
                 do_reg_cs 		<= do_reg_ns;
@@ -167,7 +183,7 @@ begin
     WB_CNTRL  <= wb_cntrl_reg_cs;
     MA_CNTRL  <= ma_cntrl_reg_cs;
     EX_CNTRL  <= ex_cntrl_reg_cs;
-    Imm       <= imm_reg_cs 	;
+    Imm       <= imm_reg_cs   ;
     OPB       <= opb_reg_cs 	;
     OPA       <= opa_reg_cs 	;
     DO        <= do_reg_cs 	;
