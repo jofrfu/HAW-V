@@ -165,15 +165,15 @@ begin
         end if;
         
         -- test4
-        -- MA_CNTRL_SYNCH = "10"
-        -- MA_CNTRL_ASYNCH = "10"
+        -- MA_CNTRL_SYNCH = "01"
+        -- MA_CNTRL_ASYNCH = "01"
         -- asynchronous and after clock for memory
         -- DATA_IN = 86
         -- Action: DI gets loaded with DATA_IN
         -- Result: DI should be 86 after clk,
         -- ENABLE should be 1, WRITE_EN should be 0
-        MA_CNTRL_SYNCH_s <= "10";
-        MA_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_ASYNCH_s <= "01";
         wait for 1 ns;
         if ENABLE_s /= '1' or WRITE_EN_s /= '0' then
             report "Error! ENABLE should be 1 and WRITE_EN should be 0!";
@@ -189,12 +189,12 @@ begin
         end if;
         
         -- test5
-        -- MA_CNTRL_SYNCH = "01"
+        -- MA_CNTRL_SYNCH = "10"
         -- DO = 93
         -- Action: DATA_OUT gets value from DO
         -- Result: DATA_OUT should be 93 instantly,
         -- ENABLE and WRITE_EN should be 1
-        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_SYNCH_s <= "10";
         MA_CNTRL_ASYNCH_s <= "00";
         DO_s <= std_logic_vector(to_unsigned(93, DATA_WIDTH));
         wait for 1 ns;
@@ -213,7 +213,7 @@ begin
         -- Action: WORD_LENGTH gets set
         -- Result: WORD_LENGTH should be "10" instantly
         WORD_CNTRL_SYNCH_s <= "10";
-        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_SYNCH_s <= "10";
         MA_CNTRL_ASYNCH_s <= "00";
         wait for 1 ns;
         if WORD_LENGTH_s /= "10" then
@@ -226,7 +226,7 @@ begin
         -- Action: WORD_LENGTH gets set
         -- Result: WORD_LENGTH should be "01" instantly
         WORD_CNTRL_ASYNCH_s <= "01";
-        MA_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_ASYNCH_s <= "01";
         MA_CNTRL_SYNCH_s <= "00";
         wait for 1 ns;
         if WORD_LENGTH_s /= "01" then
@@ -249,15 +249,15 @@ begin
         -- test8
         -- SIGN_EN = 1
         -- WORD_CNTRL = 00
-        -- MA_CNTRL = 10 : load
+        -- MA_CNTRL = 01 : load
         -- Data_in = 0x80
         -- action: load signextended negative byte 
         -- result : DI should be 0xFFFFFF80
         SIGN_EN_s <= '1';
         WORD_CNTRL_SYNCH_s <= "00";
         WORD_CNTRL_ASYNCH_s <= "00";
-        MA_CNTRL_SYNCH_s <= "10";
-        MA_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_ASYNCH_s <= "01";
         DATA_IN_s <= x"00000080";
         wait until '1'=clk_s and clk_s'event;
         wait for 1 ns;
@@ -276,8 +276,8 @@ begin
         SIGN_EN_s <= '1';
         WORD_CNTRL_SYNCH_s <= "00";
         WORD_CNTRL_ASYNCH_s <= "00";
-        MA_CNTRL_SYNCH_s <= "10";
-        MA_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_ASYNCH_s <= "01";
         DATA_IN_s <= x"00000070";
         wait until '1'=clk_s and clk_s'event;
         wait for 1 ns;
@@ -296,8 +296,8 @@ begin
         SIGN_EN_s <= '1';
         WORD_CNTRL_SYNCH_s <= "01";
         WORD_CNTRL_ASYNCH_s <= "01";
-        MA_CNTRL_SYNCH_s <= "10";
-        MA_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_ASYNCH_s <= "01";
         DATA_IN_s <= x"00008000";
         wait until '1'=clk_s and clk_s'event;
         wait for 1 ns;
@@ -316,8 +316,8 @@ begin
         SIGN_EN_s <= '1';
         WORD_CNTRL_SYNCH_s <= "01";
         WORD_CNTRL_ASYNCH_s <= "01";
-        MA_CNTRL_SYNCH_s <= "10";
-        MA_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_ASYNCH_s <= "01";
         DATA_IN_s <= x"00007000";
         wait until '1'=clk_s and clk_s'event;
         wait for 1 ns;
@@ -336,8 +336,8 @@ begin
         SIGN_EN_s <= '1';
         WORD_CNTRL_SYNCH_s <= "10";
         WORD_CNTRL_ASYNCH_s <= "10";
-        MA_CNTRL_SYNCH_s <= "10";
-        MA_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "01";
+        MA_CNTRL_ASYNCH_s <= "01";
         DATA_IN_s <= x"80000000";
         wait until '1'=clk_s and clk_s'event;
         wait for 1 ns;
@@ -355,11 +355,11 @@ begin
         -- result : DI should be 0x70000000
         SIGN_EN_s <= '1';
         WORD_CNTRL_ASYNCH_s <= "10";
-        MA_CNTRL_ASYNCH_s <= "10";
+        MA_CNTRL_ASYNCH_s <= "01";
         DATA_IN_s <= x"70000000";
         wait until '1'=clk_s and clk_s'event;
         WORD_CNTRL_SYNCH_s <= "10";
-        MA_CNTRL_SYNCH_s <= "10";
+        MA_CNTRL_SYNCH_s <= "01";
         -- test correct timing
         WORD_CNTRL_ASYNCH_s <= "00";
         MA_CNTRL_ASYNCH_s <= "00";
