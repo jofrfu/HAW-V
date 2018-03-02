@@ -30,7 +30,7 @@ architecture beh of risc_v_core is
         port(
              clk, reset : in std_logic;
 		 
-             branch    : in std_logic;      --! when branch the IFR has to be resetted
+             branch    : in std_logic;
              cntrl     : in IF_CNTRL_TYPE;  --! Control the operation mode of the PC logic
              rel	   : in DATA_TYPE;		--! relative branch address
              abso	   : in DATA_TYPE;		--! absolute branch address, or base for relative jump
@@ -54,6 +54,11 @@ architecture beh of risc_v_core is
             PC           :  in DATA_TYPE;
             DI	  		 :  in DATA_TYPE;
             rd			 :  in REGISTER_ADDRESS_TYPE;
+            
+            DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+            STORE        :  in std_logic;
             
             IF_CNTRL	 : out IF_CNTRL_TYPE;
             WB_CNTRL	 : out WB_CNTRL_TYPE;
@@ -91,30 +96,36 @@ architecture beh of risc_v_core is
             DO_IN         : in DATA_TYPE;        --!Data-output-register
             PC_IN         : in ADDRESS_TYPE;     --!PC Register
             
-            WB_CNTRL_OUT  : out WB_CNTRL_TYPE;   --!Controlbits for WB-Stage 
-            MA_CNTRL_OUT  : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
-            WORD_CNTRL_OUT: out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
-            SIGN_EN       : out std_logic;       --!Enables sign extension in memory access
-            RESU_DAR      : out DATA_TYPE;       --!Result of calulation
-            Branch        : out std_logic;       --!For conditioned branching
-            ABS_OUT       : out DATA_TYPE;
-            REL_OUT       : out DATA_TYPE;
-            DO_OUT        : out DATA_TYPE;       --!Data-output-register is passed to next stage
-            PC_OUT        : out ADDRESS_TYPE     --!PC Register
+            WB_CNTRL_OUT          : out WB_CNTRL_TYPE;   --!Controlbits for WB-Stage 
+            MA_CNTRL_OUT_SYNCH    : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
+            MA_CNTRL_OUT_ASYNCH   : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
+            WORD_CNTRL_OUT_SYNCH  : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
+            WORD_CNTRL_OUT_ASYNCH : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
+            SIGN_EN               : out std_logic;       --!Enables sign extension in memory access
+            RESU_DAR_SYNCH        : out DATA_TYPE;       --!Result of calulation
+            RESU_DAR_ASYNCH       : out DATA_TYPE;       --!Result of calulation
+            Branch                : out std_logic;       --!For conditioned branching
+            ABS_OUT               : out DATA_TYPE;
+            REL_OUT               : out DATA_TYPE;
+            DO_OUT                : out DATA_TYPE;       --!Data-output-register is passed to next stage
+            PC_OUT                : out ADDRESS_TYPE     --!PC Register
         );
     end component execute_stage;
     for all : execute_stage use entity work.execute_stage(beh);
     
-    signal WB_CNTRL_EX_to_MA : WB_CNTRL_TYPE;
-    signal MA_CNTRL_EX_to_MA : MA_CNTRL_TYPE;
-    signal WORD_CNTRL_s      : WORD_CNTRL_TYPE;
-    signal SIGN_EN_s         : std_logic;
-    signal RESU_DAR_s        : DATA_TYPE;
-    signal BRANCH_s          : std_logic;
-    signal ABS_OUT_s         : DATA_TYPE;
-    signal REL_OUT_s         : DATA_TYPE;
-    signal DO_EX_to_MA       : DATA_TYPE;
-    signal PC_EX_to_MA       : ADDRESS_TYPE;
+    signal WB_CNTRL_EX_to_MA        : WB_CNTRL_TYPE;
+    signal MA_CNTRL_SYNCH_EX_to_MA  : MA_CNTRL_TYPE;
+    signal MA_CNTRL_ASYNCH_EX_to_MA : MA_CNTRL_TYPE;
+    signal WORD_CNTRL_SYNCH_s       : WORD_CNTRL_TYPE;
+    signal WORD_CNTRL_ASYNCH_s      : WORD_CNTRL_TYPE;
+    signal SIGN_EN_s                : std_logic;
+    signal RESU_DAR_SYNCH_s         : DATA_TYPE;
+    signal RESU_DAR_ASYNCH_s        : DATA_TYPE;
+    signal BRANCH_s                 : std_logic;
+    signal ABS_OUT_s                : DATA_TYPE;
+    signal REL_OUT_s                : DATA_TYPE;
+    signal DO_EX_to_MA              : DATA_TYPE;
+    signal PC_EX_to_MA              : ADDRESS_TYPE;
     
     component memory_access is
         port(
@@ -122,10 +133,13 @@ architecture beh of risc_v_core is
             
             --! @brief stage inputs
             WB_CNTRL_IN : in WB_CNTRL_TYPE;
-            MA_CNTRL    : in MA_CNTRL_TYPE;
-            WORD_CNTRL  : in WORD_CNTRL_TYPE;
+            MA_CNTRL_SYNCH : in MA_CNTRL_TYPE;
+            MA_CNTRL_ASYNCH: in MA_CNTRL_TYPE;
+            WORD_CNTRL_SYNCH  : in WORD_CNTRL_TYPE;
+            WORD_CNTRL_ASYNCH : in WORD_CNTRL_TYPE;
             SIGN_EN     : in std_logic;
-            RESU        : in DATA_TYPE;
+            RESU_SYNCH  : in DATA_TYPE;
+            RESU_ASYNCH : in ADDRESS_TYPE; -- asynchronous address for reading from mem
             DO          : in DATA_TYPE;
             PC_IN       : in ADDRESS_TYPE;
             
@@ -173,8 +187,8 @@ begin
         clk,
         reset,
         
-        -- cntrl and pc adds
         BRANCH_s,
+        -- cntrl and pc adds
         IF_CNTRL_s,
         REL_OUT_s,
         ABS_OUT_s,
@@ -199,6 +213,12 @@ begin
         pc_synch_s,
         WRITE_BACK_s,
         REG_ADDR_s,
+        
+        -- write back registers from stages
+        WB_CNTRL_ID_to_EX(4 downto 0),
+        WB_CNTRL_EX_to_MA(4 downto 0),
+        WB_CNTRL_MA_to_WB(4 downto 0),
+        MA_CNTRL_ID_to_EX(1),
         
         -- cntrl outs
         IF_CNTRL_s,
@@ -235,12 +255,15 @@ begin
         
         -- cntrl outs
         WB_CNTRL_EX_to_MA,
-        MA_CNTRL_EX_to_MA,
-        WORD_CNTRL_s,
+        MA_CNTRL_SYNCH_EX_to_MA,
+        MA_CNTRL_ASYNCH_EX_to_MA,
+        WORD_CNTRL_SYNCH_s,
+        WORD_CNTRL_ASYNCH_s,
         SIGN_EN_s,
         
         -- outs
-        RESU_DAR_s,
+        RESU_DAR_SYNCH_s,
+        RESU_DAR_ASYNCH_s,
         BRANCH_s,
         ABS_OUT_s,
         REL_OUT_s,
@@ -256,12 +279,15 @@ begin
         
         -- cntrl ins
         WB_CNTRL_EX_to_MA,
-        MA_CNTRL_EX_to_MA,
-        WORD_CNTRL_s,
+        MA_CNTRL_SYNCH_EX_to_MA,
+        MA_CNTRL_ASYNCH_EX_to_MA,
+        WORD_CNTRL_SYNCH_s,
+        WORD_CNTRL_ASYNCH_s,
         SIGN_EN_s,
         
         -- ins
-        RESU_DAR_s,
+        RESU_DAR_SYNCH_s,
+        RESU_DAR_ASYNCH_s,
         
         DO_EX_to_MA,
         PC_EX_to_MA,
