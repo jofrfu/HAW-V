@@ -11,10 +11,16 @@ entity instruction_decode is
 	port(
 		clk, reset   :  in std_logic;
 		branch		 :  in std_logic;
-		IFR			 :  in INSTRUCTION_TYPE;
+		IFR			 :  in INSTRUCTION_BIT_TYPE;
 		PC           :  in DATA_TYPE;
 		DI	  		 :  in DATA_TYPE;
 		rd			 :  in REGISTER_ADDRESS_TYPE;
+        -------------------------------------------------
+        DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
+        DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
+        DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+        STORE        :  in std_logic;
+        -------------------------------------------------
 		IF_CNTRL	 : out IF_CNTRL_TYPE;
 		WB_CNTRL	 : out WB_CNTRL_TYPE;
 		MA_CNTRL	 : out MA_CNTRL_TYPE;
@@ -49,8 +55,8 @@ architecture beh of instruction_decode is
 	signal ma_cntrl_reg_ns 	: MA_CNTRL_TYPE;
 	signal ex_cntrl_reg_cs 	: EX_CNTRL_TYPE := EX_CNTRL_NOP;
 	signal ex_cntrl_reg_ns 	: EX_CNTRL_TYPE;
-	signal imm_reg_cs 		: DATA_TYPE 	:= (others => '0');
-	signal imm_reg_ns 		: DATA_TYPE;
+    signal imm_reg_cs       : DATA_TYPE   := (others => '0'); 
+    signal imm_reg_ns       : DATA_TYPE; 
 	signal opb_reg_cs 		: DATA_TYPE 	:= (others => '0');
 	signal opb_reg_ns 		: DATA_TYPE;
 	signal opa_reg_cs 		: DATA_TYPE 	:= (others => '0');
@@ -63,9 +69,13 @@ architecture beh of instruction_decode is
 	--! @brief decode unit
 	component decode is
 		port(
-			clk, reset   :  in std_logic;
 			branch		 :  in std_logic;
-			IFR			 :  in INSTRUCTION_TYPE;
+			IFR			 :  in INSTRUCTION_BIT_TYPE;
+            DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
+            DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
+            STORE        :  in std_logic;
+            Imm_check    :  in DATA_TYPE;
 			IF_CNTRL	 : out IF_CNTRL_TYPE;
 			ID_CNTRL	 : out ID_CNTRL_TYPE;
 			WB_CNTRL	 : out WB_CNTRL_TYPE;
@@ -74,6 +84,7 @@ architecture beh of instruction_decode is
 			Imm			 : out DATA_TYPE
 		);
 	end component decode;
+    for all : decode use entity work.decode(beh);
 	
 	--! @brief register file
 	component register_select is
@@ -87,15 +98,19 @@ architecture beh of instruction_decode is
             PC_en        :   in  std_logic
 	    );--]port
 	end component register_select;
+    for all : register_select use entity work.register_select(beh);
 	
 begin
 	
 	decode_i : decode
 	port map(
-		clk => clk,
-		reset => reset,
 		branch => branch,
 		IFR => IFR,
+        DEST_REG_EX => DEST_REG_EX,
+        DEST_REG_MA => DEST_REG_MA,
+        DEST_REG_WB => DEST_REG_WB,
+        STORE => STORE,
+        Imm_check => imm_reg_cs,
 		IF_CNTRL => IF_CNTRL,
 		ID_CNTRL(11) => pc_en_s,
 		ID_CNTRL(10) => imm_sel_s,
@@ -106,21 +121,25 @@ begin
 		EX_CNTRL => ex_cntrl_reg_ns,
 		Imm	=> imm_s
 	);
+    
+    imm_reg_ns <= imm_s;    
 	
 	reg_sel_i : register_select
 	port map(
-		clk => clk, 
-		reset => reset,
-	    DI => DI,
-        rs1 => rs1_s, 
-        rs2 => rs2_s, 
-        rd => rd,
-        OPA => opa_s, 
-        OPB => opb_s, 
-        DO => do_reg_ns,
-        PC_en => pc_en_s,
-        PC => PC
+		clk, 
+		reset,
+	    DI,
+        rs1_s, 
+        rs2_s, 
+        rd,
+        opa_s, 
+        opb_s, 
+        do_reg_ns,
+        pc,
+        pc_en_s
 	);
+    
+    opa_reg_ns <= opa_s;
 	
 	--! @brief multiplexer for immediate and operand b selection
 	imm_mux:
@@ -134,14 +153,14 @@ begin
 	end process imm_mux;
 
 	sequ_log:
-	process(clk,reset) is
+	process(clk) is
 	begin
 		if clk'event and clk = '1' then
             if reset = '1' then
                 wb_cntrl_reg_cs <= (others => '0');
                 ma_cntrl_reg_cs <= (others => '0');
                 ex_cntrl_reg_cs <= (others => '0');
-                imm_reg_cs 		<= (others => '0');
+                imm_reg_cs      <= (others => '0');
                 opb_reg_cs 		<= (others => '0');
                 opa_reg_cs 		<= (others => '0');
                 do_reg_cs 		<= (others => '0');
@@ -150,7 +169,7 @@ begin
             	wb_cntrl_reg_cs <= wb_cntrl_reg_ns;
                 ma_cntrl_reg_cs <= ma_cntrl_reg_ns;
                 ex_cntrl_reg_cs <= ex_cntrl_reg_ns;
-                imm_reg_cs 		<= imm_reg_ns;
+                imm_reg_cs      <= imm_reg_ns;
                 opb_reg_cs 		<= opb_reg_ns;
                 opa_reg_cs 		<= opa_reg_ns;
                 do_reg_cs 		<= do_reg_ns;
@@ -160,6 +179,14 @@ begin
 	end process sequ_log;
 	
     pc_reg_ns <= pc;
-    PC_o <= pc_reg_cs;
+    PC_o      <= pc_reg_cs;
+    WB_CNTRL  <= wb_cntrl_reg_cs;
+    MA_CNTRL  <= ma_cntrl_reg_cs;
+    EX_CNTRL  <= ex_cntrl_reg_cs;
+    Imm       <= imm_reg_cs   ;
+    OPB       <= opb_reg_cs 	;
+    OPA       <= opa_reg_cs 	;
+    DO        <= do_reg_cs 	;
+    
 
 end architecture beh;

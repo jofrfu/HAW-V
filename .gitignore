@@ -6,6 +6,14 @@ BuildPath.txt
 src/cpu/vhdl/**/*.*
 !src/cpu/vhdl/**/*.vhdl
 !src/cpu/vhdl/**/*.do
+!src/cpu/vhdl/**/*.coe
+
+#java sources
+src/cpu/java/**/*.*
+!src/cpu/java/**/*.java
+
+# for memory generation - add whole project
+!src/cpu/vhdl/memory/**
 
 #ignore doxygen files
 src/cpu/vhdl/latex/

@@ -1,7 +1,11 @@
---!@file 	ALU.vhdl
---!@brief 	This file contains the ALU of the CPU
---!@author 	Matthis Keppner, Jonas Fuhrmann
---!@date 	2017
+--!@file    ALU.vhdl
+--!@brief   This file contains the ALU of the CPU
+--!@brief   This file is part of the ach-ne projekt at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Matthis Keppner
+--!@author  Jonas Fuhrmann
+--!@author  Sebastian Brückner
+--!@date    2017 - 2018
 
 library IEEE;
     use IEEE.std_logic_1164.all;
@@ -9,73 +13,109 @@ library IEEE;
 
 use WORK.riscv_pack.all;
 
+--!@brief Arithmetic logic unit
+--!@details Executes one operation on one or two operands
+--!         if a operation only operates on one operand,
+--!         OPA is the data source, while OPB is the second argument for this operation
+--!         Example: when shifting right, OPA will be shifted right by OPB times
+--!         Flags will always be calculated and updated based on the adder/subtractor operation,
+--!         even if the choosen operation wasn't an addition/subtraction
 entity ALU is 
     port(
-        OPB         : in DATA_TYPE;
-        OPA         : in DATA_TYPE;
-        EX_CNTRL_IN : in EX_CNTRL_TYPE;
+        OPB         : in DATA_TYPE;     --!second operand or function argument for operation on OPA
+        OPA         : in DATA_TYPE;     --!first operand
+        EX_CNTRL_IN : in EX_CNTRL_TYPE; --!See EX_CNTRL_TYPE documentation
         
-        Flags       : out FLAGS_TYPE;
-        Resu        : out DATA_TYPE
+        Flags       : out FLAGS_TYPE;   --!See FLAGS_TYPE documentation
+        Resu        : out DATA_TYPE     --!Result of the operation
     );
 end entity ALU;
 
+--!@brief   ALU.beh std alu implementation
+--!@details performs all operations, sets flags and chooses result on funct3 and 
+--!         funct7 given in EX_CNTRL.
 architecture beh of ALU is
 
-    signal alu_resu     : DATA_TYPE  := (others => '0');
+    component adder is
+        port(
+            OPA         : in  DATA_TYPE;
+            OPB         : in  DATA_TYPE;
+            nadd_sub    : in  std_logic;
+            
+            RESULT      : out DATA_TYPE;
+            CARRY       : out std_logic;
+            OVERFLOW    : out std_logic
+        );
+    end component adder;
+    for all : adder use entity work.adder(numeric_adder);
     
     signal nadd_sub     : std_logic;
 
-    signal and_resu     : DATA_TYPE  := (others => '0');   
-    signal or_resu      : DATA_TYPE  := (others => '0'); 
-    signal xor_resu     : DATA_TYPE  := (others => '0');   
-    signal sll_resu     : DATA_TYPE  := (others => '0');   
-    signal srl_resu     : DATA_TYPE  := (others => '0');    
-    signal sra_resu     : DATA_TYPE  := (others => '0');   
-    signal slt_resu     : DATA_TYPE  := (others => '0');
-    signal sltu_resu    : DATA_TYPE  := (others => '0');
+    signal and_resu     : DATA_TYPE;   
+    signal or_resu      : DATA_TYPE; 
+    signal xor_resu     : DATA_TYPE;   
+    signal sll_resu     : DATA_TYPE;   
+    signal srl_resu     : DATA_TYPE;    
+    signal sra_resu     : DATA_TYPE;   
+    signal slt_resu     : DATA_TYPE;
+    signal sltu_resu    : DATA_TYPE;
     
     signal flags_s      : FLAGS_TYPE;
+    
+    -- adder signals
+    signal add_result   : DATA_TYPE;
+    signal add_carry    : std_logic;
+    signal add_overflow : std_logic;
 
 begin
+
+    adder_i : adder
+    port map(
+        OPA,
+        OPB,
+        nadd_sub,
+        
+        add_result,
+        add_carry,
+        add_overflow
+    );
     
     Flags <= flags_s;
 
-    alu_proc:
-    process (OPA, OPB, nadd_sub) is
+    --!@Puts together flags based on adder results
+    flag_proc:
+    process (add_result, add_carry, add_overflow) is
     
-    variable OPA_v    : std_logic_vector(DATA_WIDTH downto 0); --extend to 33 for carry/borrow bit
-    variable OPB_v    : std_logic_vector(DATA_WIDTH downto 0);
-    
-    variable resu_v   : std_logic_vector(DATA_WIDTH downto 0);
-    variable flags_v  : FLAGS_TYPE;
-    
-    variable temp_v   : DATA_TYPE;
-    
+        variable add_result_v   : DATA_TYPE := (others => '0');
+        variable add_carry_v    : std_logic := '0';
+        variable add_overflow_v : std_logic := '0';
+        variable flags_v        : FLAGS_TYPE;
+            
     begin
+        add_result_v   := add_result;
+        add_carry_v    := add_carry;
+        add_overflow_v := add_overflow;
     
-        OPA_v := '0' & OPA;
-        OPB_v := '0' & OPB;
-        for i in DATA_WIDTH-1 downto 0 loop
-            OPB_v(i) := OPB(i) xor nadd_sub;
-        end loop;
+        -- carry flag
+        flags_v(0) := add_carry_v;
         
-        resu_v := std_logic_vector(unsigned(OPA_v) + unsigned(OPB_v));
-        flags_v(0) := resu_v(resu_v'left);
-        flags_v(1) := resu_v(resu_v'left - 1);
-        if resu_v = std_logic_vector(to_unsigned(0, DATA_WIDTH+1)) then
+        -- negative flag
+        flags_v(1) := add_result_v(add_result_v'left);
+        
+        -- zero flag
+        if add_result_v = std_logic_vector(to_unsigned(0, DATA_WIDTH)) then
             flags_v(2) := '1';
         else
             flags_v(2) := '0';
         end if;
-        -- todo: change adder to adder which supports carry outputs
-        temp_v := std_logic_vector(unsigned(OPA_v(OPA_v'left-1 downto 0)) + unsigned(OPB_v(OPB_v'left-1 downto 0)));
-        flags_v(3) := temp_v(temp_v'left) xor resu_v(resu_v'left);
         
-        alu_resu <= resu_v(resu_v'left-1 downto 0);
+        -- overflow flag
+        flags_v(3) := add_overflow_v;
+        
         flags_s <= flags_v;
-    end process alu_proc;
+    end process flag_proc;
     
+    --!@brief AND operation on OPA, OPB
     and_proc:
     process (OPA, OPB) is
 
@@ -92,6 +132,7 @@ begin
         and_resu <= resu_v;
     end process and_proc;
     
+    --!@brief OR operation on OPA, OPB
     or_proc:
     process (OPA, OPB) is
 
@@ -108,6 +149,7 @@ begin
         or_resu <= resu_v;
     end process or_proc;
     
+    --!@brief XOR operation on OPA, OPB
     xor_proc:
     process (OPA, OPB) is
 
@@ -124,6 +166,7 @@ begin
         xor_resu <= resu_v;
     end process xor_proc;
     
+    --!@brief Shift left logical on OPA, OPB times
     sll_proc:
     process (OPA, OPB) is
 
@@ -140,6 +183,7 @@ begin
         sll_resu <= resu_v;
     end process sll_proc;
     
+    --!@brief Shift right logical on OPA, OPB times
     srl_proc:
     process (OPA, OPB) is
 
@@ -156,6 +200,7 @@ begin
         srl_resu <= resu_v;
     end process srl_proc;
     
+    --!@brief Shift right arithmetic on OPA, OPB times
     sra_proc:
     process (OPA, OPB) is
 
@@ -172,6 +217,7 @@ begin
         sra_resu <= resu_v;
     end process sra_proc;
     
+    --!@brief Set less then, compares OPA and OPB (see riscv-spec-v2.2: 2.4 Integer Computational Instructions)
     slt_proc:
     process(flags_s) is
         variable flags_v : FLAGS_TYPE;
@@ -187,6 +233,7 @@ begin
         slt_resu <= resu_v;
     end process slt_proc;
     
+    --!@brief Set less then unsigned, see slt_proc
     sltu_proc:
     process(flags_s) is
         variable flags_v : FLAGS_TYPE;
@@ -203,11 +250,11 @@ begin
     end process sltu_proc;
     
     --! @brief ALU of the execute stage
-    --! @detail calculates OPA (+) OPB;
+    --! @detail calculates OPA (+) OPB, mainly contains mux to choose the corresponding result to funct3 and funct7
     choose:
-    process (EX_CNTRL_IN) is
-        variable func7_v  : FUNCT7_TYPE;
-        variable func3_v  : FUNCT3_TYPE;
+    process (EX_CNTRL_IN, add_result, and_resu, or_resu, xor_resu, sll_resu, srl_resu, sra_resu, slt_resu, sltu_resu) is
+        variable funct7_v  : FUNCT7_TYPE;
+        variable funct3_v  : FUNCT3_TYPE;
         variable op_bits_v: OP_CODE_BIT_TYPE;
         variable op_code_v: OP_CODE_TYPE;
         variable resu_v   : DATA_TYPE;
@@ -216,28 +263,28 @@ begin
 
         op_bits_v           := EX_CNTRL_IN(OP_CODE_WIDTH-1 downto 0);
         op_code_v           := BITS_TO_OP_CODE_TYPE(op_bits_v);
-        func3_v             := EX_CNTRL_IN(9 downto 7);
-        func7_v             := EX_CNTRL_IN(16 downto 10);
+        funct3_v            := EX_CNTRL_IN(9 downto 7);
+        funct7_v            := EX_CNTRL_IN(16 downto 10);
         nadd_sub_v          := '0';
         resu_v              := (others => '0');
         
         case op_code_v is
             when opo =>
-                case func3_v is
+                case funct3_v is
                     when "000" => -- standard arithmetic
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- add
                                 nadd_sub_v := '0';
-                                resu_v := alu_resu;
+                                resu_v := add_result;
                             when "0100000" => -- sub
                                 nadd_sub_v := '1';
-                                resu_v := alu_resu;
+                                resu_v := add_result;
                             when others =>
                                 report "Unknown alu command!" severity warning;
                         end case;
                      
                     when "001" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SLL
                                 resu_v := sll_resu;
                             when others =>
@@ -245,7 +292,7 @@ begin
                         end case;
                     
                     when "010" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SLT
                                 nadd_sub_v := '1';
                                 resu_v := slt_resu;
@@ -254,7 +301,7 @@ begin
                         end case;
                     
                     when "011" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SLTU
                                 nadd_sub_v := '1';
                                 resu_v := sltu_resu;
@@ -263,7 +310,7 @@ begin
                         end case;
                     
                     when "100" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- XOR
                                 resu_v := xor_resu;
                             when others =>
@@ -271,7 +318,7 @@ begin
                         end case;
                     
                     when "101" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SRL
                                 resu_v := srl_resu;
                             when "0100000" => -- SRA
@@ -281,7 +328,7 @@ begin
                         end case;
                     
                     when "110" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- OR
                                 resu_v := or_resu;
                             when others =>
@@ -289,7 +336,7 @@ begin
                         end case;
                     
                     when "111" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- AND
                                 resu_v := and_resu;
                             when others =>
@@ -302,48 +349,48 @@ begin
                     end case;
             
             when opimmo =>
-                case func3_v is
+                case funct3_v is
                     when "000" => -- imm arithmetic
-                        case func7_v is
+                        case funct7_v is
                             when others => -- addi
                                 nadd_sub_v := '0';
-                                resu_v := alu_resu;
+                                resu_v := add_result;
                         end case;
                     
                     when "010" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- SLTI
                                 nadd_sub_v := '1';
                                 resu_v := slt_resu;
                         end case;
                     
                     when "011" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- SLTIU
                                 nadd_sub_v := '1';
                                 resu_v := sltu_resu;
                         end case;
                     
                     when "100" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- XORI
                                 resu_v := xor_resu;
                         end case;
                     
                     when "110" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- ORI
                                 resu_v := or_resu;
                         end case;
                     
                     when "111" =>
-                        case func7_v is
+                        case funct7_v is
                             when others => -- ANDI
                                 resu_v := and_resu;
                         end case;
                     
                     when "001" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SLLI
                                 resu_v := sll_resu;
                             when others =>
@@ -351,7 +398,7 @@ begin
                         end case;
                     
                     when "101" =>
-                        case func7_v is
+                        case funct7_v is
                             when "0000000" => -- SRLI
                                 resu_v := srl_resu;
                             when "0100000" => -- SRAI
@@ -366,12 +413,16 @@ begin
                 
             when brancho => -- flags
                 nadd_sub_v := '1';
-                resu_v := alu_resu;
+                resu_v := add_result;
+            
+            when luio | auipco | storeo | loado =>
+                nadd_sub_v := '0';
+                resu_v := add_result;
             
             when others =>
                 report "Maybe unknown opcode!" severity note;
                 nadd_sub_v := '0';
-                resu_v := alu_resu;
+                resu_v := add_result;
         end case;
        
        nadd_sub <= nadd_sub_v;
