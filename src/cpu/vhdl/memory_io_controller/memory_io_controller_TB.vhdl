@@ -32,6 +32,7 @@ component dut is
     );
 end component dut;
 for all : dut use entity work.memory_io_controller(beh);
+--use dummy_bmem architecture in memory_io_controller for component blk_mem_gen_0_wrapper
 
     signal CLK: STD_LOGIC;
     signal reset: STD_LOGIC;

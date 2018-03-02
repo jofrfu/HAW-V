@@ -1,7 +1,11 @@
---!@file 	ALU.vhdl
---!@brief 	This file contains the ALU of the CPU
---!@author 	Matthis Keppner, Jonas Fuhrmann
---!@date 	2017
+--!@file    ALU.vhdl
+--!@brief   This file contains the ALU of the CPU
+--!@brief   This file is part of the ach-ne projekt at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Matthis Keppner
+--!@author  Jonas Fuhrmann
+--!@author  Sebastian Brückner
+--!@date    2017 - 2018
 
 library IEEE;
     use IEEE.std_logic_1164.all;
@@ -9,17 +13,27 @@ library IEEE;
 
 use WORK.riscv_pack.all;
 
+--!@brief Arithmetic logic unit
+--!@details Executes one operation on one or two operands
+--!         if a operation only operates on one operand,
+--!         OPA is the data source, while OPB is the second argument for this operation
+--!         Example: when shifting right, OPA will be shifted right by OPB times
+--!         Flags will always be calculated and updated based on the adder/subtractor operation,
+--!         even if the choosen operation wasn't an addition/subtraction
 entity ALU is 
     port(
-        OPB         : in DATA_TYPE;
-        OPA         : in DATA_TYPE;
-        EX_CNTRL_IN : in EX_CNTRL_TYPE;
+        OPB         : in DATA_TYPE;     --!second operand or function argument for operation on OPA
+        OPA         : in DATA_TYPE;     --!first operand
+        EX_CNTRL_IN : in EX_CNTRL_TYPE; --!See EX_CNTRL_TYPE documentation
         
-        Flags       : out FLAGS_TYPE;
-        Resu        : out DATA_TYPE
+        Flags       : out FLAGS_TYPE;   --!See FLAGS_TYPE documentation
+        Resu        : out DATA_TYPE     --!Result of the operation
     );
 end entity ALU;
 
+--!@brief   ALU.beh std alu implementation
+--!@details performs all operations, sets flags and chooses result on funct3 and 
+--!         funct7 given in EX_CNTRL.
 architecture beh of ALU is
 
     component adder is
@@ -68,6 +82,7 @@ begin
     
     Flags <= flags_s;
 
+    --!@Puts together flags based on adder results
     flag_proc:
     process (add_result, add_carry, add_overflow) is
     
@@ -100,6 +115,7 @@ begin
         flags_s <= flags_v;
     end process flag_proc;
     
+    --!@brief AND operation on OPA, OPB
     and_proc:
     process (OPA, OPB) is
 
@@ -116,6 +132,7 @@ begin
         and_resu <= resu_v;
     end process and_proc;
     
+    --!@brief OR operation on OPA, OPB
     or_proc:
     process (OPA, OPB) is
 
@@ -132,6 +149,7 @@ begin
         or_resu <= resu_v;
     end process or_proc;
     
+    --!@brief XOR operation on OPA, OPB
     xor_proc:
     process (OPA, OPB) is
 
@@ -148,6 +166,7 @@ begin
         xor_resu <= resu_v;
     end process xor_proc;
     
+    --!@brief Shift left logical on OPA, OPB times
     sll_proc:
     process (OPA, OPB) is
 
@@ -164,6 +183,7 @@ begin
         sll_resu <= resu_v;
     end process sll_proc;
     
+    --!@brief Shift right logical on OPA, OPB times
     srl_proc:
     process (OPA, OPB) is
 
@@ -180,6 +200,7 @@ begin
         srl_resu <= resu_v;
     end process srl_proc;
     
+    --!@brief Shift right arithmetic on OPA, OPB times
     sra_proc:
     process (OPA, OPB) is
 
@@ -196,6 +217,7 @@ begin
         sra_resu <= resu_v;
     end process sra_proc;
     
+    --!@brief Set less then, compares OPA and OPB (see riscv-spec-v2.2: 2.4 Integer Computational Instructions)
     slt_proc:
     process(flags_s) is
         variable flags_v : FLAGS_TYPE;
@@ -211,6 +233,7 @@ begin
         slt_resu <= resu_v;
     end process slt_proc;
     
+    --!@brief Set less then unsigned, see slt_proc
     sltu_proc:
     process(flags_s) is
         variable flags_v : FLAGS_TYPE;
@@ -227,7 +250,7 @@ begin
     end process sltu_proc;
     
     --! @brief ALU of the execute stage
-    --! @detail calculates OPA (+) OPB;
+    --! @detail calculates OPA (+) OPB, mainly contains mux to choose the corresponding result to funct3 and funct7
     choose:
     process (EX_CNTRL_IN, add_result, and_resu, or_resu, xor_resu, sll_resu, srl_resu, sra_resu, slt_resu, sltu_resu) is
         variable funct7_v  : FUNCT7_TYPE;

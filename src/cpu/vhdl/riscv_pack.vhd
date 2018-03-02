@@ -101,8 +101,9 @@ package riscv_pack is
 	constant FUNCT7_WIDTH : natural := 7;
     constant WRITE_EN_WIDTH: natural := 4;
     constant BYTE_WIDTH    : natural := 8;
-    constant IO_BYTE_COUNT : natural := 2; -- todo: change - depends on peripherals
-    constant PERIPH_IO_WIDTH : natural := 8; -- todo: change - depends on peripherals
+    constant IO_BYTE_COUNT : natural := 6; -- 6 Bytes at the moment (just GPIOs)
+    constant PERIPH_IO_WIDTH : natural := 24; -- 24 Bit for in and output (3 GPIO Bytes)
+    constant GPIO_WIDTH : natural := 3; -- 3 GPIO Bytes with 3 Bytes of configuration
 	
 	subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
 	subtype ADDRESS_TYPE is DATA_TYPE;
@@ -117,9 +118,9 @@ package riscv_pack is
     subtype PERIPH_IO_TYPE is std_logic_vector(PERIPH_IO_WIDTH-1 downto 0);
     
 	type REG_OUT_TYPE is array(REGISTER_COUNT-1 downto 0) of DATA_TYPE;
-    type IO_BYTE_TYPE is array(IO_BYTE_COUNT-1 downto 0) of BYTE_TYPE;
-    type IO_ENABLE_TYPE is array(IO_BYTE_COUNT-1 downto 0) of std_logic;
-    type GPIO_TYPE is array(1 downto 0) of BYTE_TYPE;
+    type IO_BYTE_TYPE is array(0 to IO_BYTE_COUNT-1) of BYTE_TYPE;
+    type IO_ENABLE_TYPE is array(0 to IO_BYTE_COUNT-1) of BYTE_TYPE;
+    type GPIO_TYPE is array(GPIO_WIDTH-1 downto 0) of BYTE_TYPE;
 	
 	--! @brief Instruction Fetch Constants
 	constant STD_PC_ADD : DATA_TYPE := std_logic_vector(to_unsigned(4, DATA_WIDTH)); --! PC must be increased by 4 every clock cycle 
@@ -141,7 +142,7 @@ package riscv_pack is
 	constant MA_CNTRL_NOP : MA_CNTRL_TYPE := "00"; --no memory access
 	constant WB_CNTRL_NOP : WB_CNTRL_TYPE := "000000"; --write result to r0
     constant NOP_INSTRUCT : INSTRUCTION_BIT_TYPE := "00000000000000000000000000110011";
-    constant IF_CNTRL_BUB : IF_CNTRL_TYPE := "01"; --PC + rel => rel must be 0 then
+    constant IF_CNTRL_BUB : IF_CNTRL_TYPE := "10"; --PC + rel => rel must be 0 then
 	constant ID_CNTRL_BUB : ID_CNTRL_TYPE := ID_CNTRL_NOP;
 	constant EX_CNTRL_BUB : EX_CNTRL_TYPE := EX_CNTRL_NOP;
 	constant MA_CNTRL_BUB : MA_CNTRL_TYPE := MA_CNTRL_NOP;
@@ -150,13 +151,14 @@ package riscv_pack is
 	--! @brief execute
 	constant FLAGS_WIDTH : natural := 4;
 	constant WORD_CNTRL_WIDTH  : natural := 2;
-    constant BYTE : std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0) := "00";
-    constant HALF : std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0) := "01";
-    constant WORD : std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0) := "10";
-    constant DOUBLE : std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0) := "11";
-    
-	subtype FLAGS_TYPE is std_logic_vector(FLAGS_WIDTH-1 downto 0);
+    subtype FLAGS_TYPE is std_logic_vector(FLAGS_WIDTH-1 downto 0);
 	subtype WORD_CNTRL_TYPE  is std_logic_vector(WORD_CNTRL_WIDTH-1 downto 0);
+    constant BYTE : WORD_CNTRL_TYPE := "00";
+    constant HALF : WORD_CNTRL_TYPE := "01";
+    constant WORD : WORD_CNTRL_TYPE := "10";
+    constant DOUBLE : WORD_CNTRL_TYPE := "11";
+    
+	
 	
 	--functions 
 	--! @brief LUT as function to convert op_code as std_logic_vector to OP_CODE_TYPE

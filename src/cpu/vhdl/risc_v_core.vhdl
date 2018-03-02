@@ -30,7 +30,7 @@ architecture beh of risc_v_core is
         port(
              clk, reset : in std_logic;
 		 
-             branch    : in std_logic;      --! when branch the IFR has to be resetted
+             branch    : in std_logic;
              cntrl     : in IF_CNTRL_TYPE;  --! Control the operation mode of the PC logic
              rel	   : in DATA_TYPE;		--! relative branch address
              abso	   : in DATA_TYPE;		--! absolute branch address, or base for relative jump
@@ -187,8 +187,8 @@ begin
         clk,
         reset,
         
-        -- cntrl and pc adds
         BRANCH_s,
+        -- cntrl and pc adds
         IF_CNTRL_s,
         REL_OUT_s,
         ABS_OUT_s,
@@ -215,9 +215,9 @@ begin
         REG_ADDR_s,
         
         -- write back registers from stages
+        WB_CNTRL_ID_to_EX(4 downto 0),
         WB_CNTRL_EX_to_MA(4 downto 0),
         WB_CNTRL_MA_to_WB(4 downto 0),
-        REG_ADDR_s,
         MA_CNTRL_ID_to_EX(1),
         
         -- cntrl outs

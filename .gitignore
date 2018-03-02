@@ -6,6 +6,7 @@ BuildPath.txt
 src/cpu/vhdl/**/*.*
 !src/cpu/vhdl/**/*.vhdl
 !src/cpu/vhdl/**/*.do
+!src/cpu/vhdl/**/*.coe
 
 #java sources
 src/cpu/java/**/*.*
