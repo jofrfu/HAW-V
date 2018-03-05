@@ -4,6 +4,23 @@
 --!@author  Jonas Fuhrmann
 --!@date    2017 - 2018
 
+--!@mainpage    HAW risc-v Processor
+--!@section     Introduction
+--!             The HAW risc-v processor is a simple risc-v RV32I Instruction set processor aimed educational purposes.
+--!             Therefore the architecture is kept simple and performance is of secondary importance.
+--!             At the moments the Core isn't finished, so use with care
+--!@section     missing_features Missing features
+--!@subsection  rv32i RV32I
+--!             At the moment the System Instructions specified by the risc-v instruction RV32I instruction set are missing
+--!@subsection  isr Interrupts
+--!             For an potential OS support and if the processor should be capable of replacing an ARM core interrupts are needed.
+--!@subsection  timers Timers
+--!             Because Interrupts are missing, timers are also missing
+--!@section     Testbenches
+--!             Many testbenches are outdated and do no longer work. Mostly because it ware easier to update the testbench of an higher level entity,
+--!             which will test the lower level component as well. If a testbench on master branch fails, it needs to be updated. 
+--!@section     RAM
+--!             At the moment, the RAM is specific to the Xilinx FGPA used. The RAM is generated via Xilinx IP blockram (see RAM generation guide)
 library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
