@@ -1,12 +1,22 @@
---!@brief 	This file contains the top level entity of the CPU
---!@author 	Jonas Fuhrmann
---!@date 	2017
+--!@file    risc_v_core.vhdl
+--!@brief   This file is part of the ach-ne project at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Jonas Fuhrmann
+--!@date    2017 - 2018
 
 library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
 use WORK.riscv_pack.all;
+
+--!@brief This device contains the core of the processor.
+--!@details This includes all pipeline stages:
+--!     1. Instruction Fetch
+--!     2. Instruction Decode
+--!     3. Execute
+--!     4. Memory Access
+--!     5. Write Back
 
 entity risc_v_core is
     port(

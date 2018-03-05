@@ -12,19 +12,19 @@ library IEEE;
     use IEEE.numeric_std.all;
 
 --!@brief   Manages register read and write
---!@details Is capeable of reading two registers per clock and writing one
+--!@details Is capable of reading two registers per clock and writing one
 
 
 --!         Note that you can't read the old value and store a new one in the same register on the same rising edge.
---!         The value of DI is always stored to a register, if the value is not needed, store to r0
+--!         The value of DI is always stored to a register, if the value is not needed, store to r0.
 entity register_select is
     port(   clk, reset   :   in  std_logic;
             DI           :   in  DATA_TYPE;             --!data to write to rd
             rs1, rs2, rd :   in  REGISTER_ADDRESS_TYPE; --!rs1 and rs2 are the registers to read, rd is the register to write
             OPA, OPB, DO :   out DATA_TYPE;             --!OPA contains rs1 value or PC log, OPB and DO contain rs2 value
             -------- PC ports
-            PC           :   in  ADDRESS_TYPE;          --!Programm Counter
-            PC_en        :   in  std_logic              --!Enable loading Programm Counter
+            PC           :   in  ADDRESS_TYPE;          --!Program Counter
+            PC_en        :   in  std_logic              --!Enable loading Program Counter
     );--]port
 end entity register_select;
 

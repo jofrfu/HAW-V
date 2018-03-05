@@ -1,6 +1,8 @@
---! @brief instruction decode stage
---! @author Jonas Fuhrmann + Felix Lorenz + Matthis Keppner
---! project: ach ne! @ HAW-Hamburg
+--!@file    instruction_decode.vhd
+--!@brief   This file is part of the ach-ne projekt at the HAW Hamburg
+--!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
+--!@author  Felix Lorenz
+--!@date    2017 - 2018
 
 use WORK.riscv_pack.all;
 library IEEE;
@@ -10,30 +12,33 @@ library IEEE;
 entity instruction_decode is
 	port(
 		clk, reset   :  in std_logic;
-		branch		 :  in std_logic;
-		IFR			 :  in INSTRUCTION_BIT_TYPE;
-		PC           :  in DATA_TYPE;
-		DI	  		 :  in DATA_TYPE;
-		rd			 :  in REGISTER_ADDRESS_TYPE;
+		branch		 :  in std_logic;             --!Signal from branch checker
+		IFR			 :  in INSTRUCTION_BIT_TYPE;  --!actual Instruction word to be decoded
+		PC           :  in DATA_TYPE;             --!Program Counter from that instruction in IFR
+		DI	  		 :  in DATA_TYPE;             --!Data In from Write Back stage
+		rd			 :  in REGISTER_ADDRESS_TYPE; --!Register Destination from Write Back stage
         -------------------------------------------------
-        DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE;
-        DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE;
-        DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE;
-        STORE        :  in std_logic;
+        DEST_REG_EX  :  in REGISTER_ADDRESS_TYPE; --!DESTination REGister in EXectute stage
+        DEST_REG_MA  :  in REGISTER_ADDRESS_TYPE; --!DESTination REGister in Memory Access stage
+        DEST_REG_WB  :  in REGISTER_ADDRESS_TYPE; --!DESTination REGister in Write Back stage
+        STORE        :  in std_logic;             --!Checks if STORE bit is set in last instruction
         -------------------------------------------------
-		IF_CNTRL	 : out IF_CNTRL_TYPE;
-		WB_CNTRL	 : out WB_CNTRL_TYPE;
-		MA_CNTRL	 : out MA_CNTRL_TYPE;
-		EX_CNTRL	 : out EX_CNTRL_TYPE;
-		Imm			 : out DATA_TYPE;
-		OPB			 : out DATA_TYPE;
-		OPA			 : out DATA_TYPE;
-		DO			 : out DATA_TYPE;
-        PC_o         : out ADDRESS_TYPE
+		IF_CNTRL	 : out IF_CNTRL_TYPE;         --!Controlbits for IF-Stage
+		WB_CNTRL	 : out WB_CNTRL_TYPE;         --!Controlbits for WB-Stage
+		MA_CNTRL	 : out MA_CNTRL_TYPE;         --!Controlbits for MA-Stage
+		EX_CNTRL	 : out EX_CNTRL_TYPE;         --!Controlbits for EX-Stage
+		Imm			 : out DATA_TYPE;             --!IMMediate for EX-Stage
+		OPB			 : out DATA_TYPE;             --!OPerand B for EX-Stage
+		OPA			 : out DATA_TYPE;             --!OPerand A for EX-Stage
+		DO			 : out DATA_TYPE;             --!Data Out when register file is read
+        PC_o         : out ADDRESS_TYPE           --!PC Out for Jump and Link
 	);
 end entity instruction_decode;
 
---! @brief register selection and decode of instructions
+--!@brief   This is the instruction decode stage of the CPU
+--!@details This stage hast two main components
+--!         1. decode unit
+--!         2. the register file, including x0 to x31
 architecture beh of instruction_decode is
 
 	-- immediate mux
@@ -48,7 +53,7 @@ architecture beh of instruction_decode is
     signal opa_s            : DATA_TYPE;
 	signal opb_s			: DATA_TYPE;
 
-	--! registers
+	-- registers
 	signal wb_cntrl_reg_cs 	: WB_CNTRL_TYPE := WB_CNTRL_NOP;
 	signal wb_cntrl_reg_ns 	: WB_CNTRL_TYPE;
 	signal ma_cntrl_reg_cs 	: MA_CNTRL_TYPE := MA_CNTRL_NOP;
@@ -66,7 +71,7 @@ architecture beh of instruction_decode is
     signal pc_reg_cs        : ADDRESS_TYPE  := (others => '0');
     signal pc_reg_ns        : ADDRESS_TYPE;
 	
-	--! @brief decode unit
+	-- decode unit
 	component decode is
 		port(
 			branch		 :  in std_logic;
@@ -86,7 +91,7 @@ architecture beh of instruction_decode is
 	end component decode;
     for all : decode use entity work.decode(beh);
 	
-	--! @brief register file
+	-- register file
 	component register_select is
 	    port(   
 	    	clk, reset   :   in  std_logic;
@@ -141,7 +146,7 @@ begin
     
     opa_reg_ns <= opa_s;
 	
-	--! @brief multiplexer for immediate and operand b selection
+	--! @brief multiplexer for immediate OR OPB selection
 	imm_mux:
 	process(opb_s, imm_s, imm_sel_s) is
 	begin

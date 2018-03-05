@@ -10,42 +10,42 @@ library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
---!@brief   Memory Acess Stage
+--!@brief   Memory Access Stage
 --!@details Tasks:
 --!         1. Write to RAM
 --!         2. Control LOAD
---!         Note that reading from ram needs the adress before the next rising edge,
+--!         Note that reading from RAM needs the address before the next rising edge,
 --!         so it can deliver the data on the next rising edge. 
---!         This makes ansynchronous inputs for MA necessary.
+--!         This makes asynchronous inputs for MA necessary.
 entity memory_access is
     port(
-        clk, reset : in std_logic;
+        clk, reset        : in std_logic;
         
-        WB_CNTRL_IN : in WB_CNTRL_TYPE;
-        MA_CNTRL_SYNCH : in MA_CNTRL_TYPE; --!see MA_CNTRL_TYPE doc, synchronous for write
-        MA_CNTRL_ASYNCH: in MA_CNTRL_TYPE; --!see MA_CNTRL_TYPE doc, asynchronous for read
-        WORD_CNTRL_SYNCH  : in WORD_CNTRL_TYPE; --!see WORD_CNTRL_TYPE doc, synchronous for write
-        WORD_CNTRL_ASYNCH : in WORD_CNTRL_TYPE; --!see WORD_CNTRL_TYPE doc, asynchronous for read
-        SIGN_EN     : in std_logic;     --!enable sign extension of data loaded from memory
-        RESU_SYNCH  : in DATA_TYPE;     --!synchronous adress for writing, or data to be simply piped through 
-        RESU_ASYNCH : in ADDRESS_TYPE;  --!asynchronous address for reading from mem
-        DO          : in DATA_TYPE;     --!data to be stored
-        PC_IN       : in ADDRESS_TYPE;  --!PC pipe through
+        WB_CNTRL_IN       : in WB_CNTRL_TYPE;
+        MA_CNTRL_SYNCH    : in MA_CNTRL_TYPE;     --!see MA_CNTRL_TYPE doc, synchronous for write
+        MA_CNTRL_ASYNCH   : in MA_CNTRL_TYPE;     --!see MA_CNTRL_TYPE doc, asynchronous for read
+        WORD_CNTRL_SYNCH  : in WORD_CNTRL_TYPE;   --!see WORD_CNTRL_TYPE doc, synchronous for write
+        WORD_CNTRL_ASYNCH : in WORD_CNTRL_TYPE;   --!see WORD_CNTRL_TYPE doc, asynchronous for read
+        SIGN_EN           : in std_logic;         --!enable sign extension of data loaded from memory
+        RESU_SYNCH        : in DATA_TYPE;         --!synchronous address for writing, or data to be simply piped through 
+        RESU_ASYNCH       : in ADDRESS_TYPE;      --!asynchronous address for reading from mem
+        DO                : in DATA_TYPE;         --!data to be stored
+        PC_IN             : in ADDRESS_TYPE;      --!PC pipe through
         
         --input from memory
-        DATA_IN     : in DATA_TYPE;         --!data that is read from memory
+        DATA_IN           : in DATA_TYPE;         --!data that is read from memory
         
         --! @brief stage outputs
-        WB_CNTRL_OUT: out WB_CNTRL_TYPE;    --!write back conrol
-        DI          : out DATA_TYPE;        --!contains either data read from memory or piped through data from RESU_SYNCH
-        PC_OUT      : out ADDRESS_TYPE;     --!PC pipe through
+        WB_CNTRL_OUT      : out WB_CNTRL_TYPE;    --!write back control
+        DI                : out DATA_TYPE;        --!contains either data read from memory or piped through data from RESU_SYNCH
+        PC_OUT            : out ADDRESS_TYPE;     --!PC pipe through
         
         --output to memory
-        ENABLE      : out std_logic;        --!memory enable
-        WRITE_EN    : out std_logic;        --!write enable
-        DATA_OUT    : out DATA_TYPE;        --!data to be written to memory
-        ADDRESS     : out ADDRESS_TYPE;     --!adress to read/write from/to memory
-        WORD_LENGTH : out WORD_CNTRL_TYPE   --!length of the data to be stored
+        ENABLE            : out std_logic;        --!memory enable
+        WRITE_EN          : out std_logic;        --!write enable
+        DATA_OUT          : out DATA_TYPE;        --!data to be written to memory
+        ADDRESS           : out ADDRESS_TYPE;     --!address to read/write from/to memory
+        WORD_LENGTH       : out WORD_CNTRL_TYPE   --!length of the data to be stored
     );
 end entity memory_access;
 
@@ -73,7 +73,7 @@ begin
         end if;
     end process load_mux;
     
-    --!@brief Sign extension for loading from memroy
+    --!@brief Sign extension for loading from memory
     sign_ext:
     process(WORD_CNTRL_SYNCH, SIGN_EN, DATA_IN) is
         variable MIN_SIGN_v : natural;

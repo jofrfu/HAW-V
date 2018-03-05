@@ -3,6 +3,7 @@
 --!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
 --!@author  Sebastian Brückner
 --!@author  Felix Lorenz
+--!@author  Jonas Fuhrmann
 --!@date    2017 - 2018
 
 use WORK.riscv_pack.all;
@@ -10,9 +11,9 @@ library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
---!@brief Program Counter of the CPU
+--!@brief Program counter of the CPU
 --!@details Computes the next address from witch the next instruction will be loaded.
---!         It has 5 operations modes:
+--!         It has 5 operation modes:
 --!         1. increase PC by 4
 --!         2. add relative to PC
 --!         3. set PC to absolute
@@ -24,11 +25,11 @@ entity PC_log is
          
          branch    : in std_logic;
          cntrl     : in IF_CNTRL_TYPE; --! Control the operation mode of the PC logic
-         rel       : in DATA_TYPE;     --! relative branch adress
-         abso      : in DATA_TYPE;     --! absolute branch adress, or base for relative jump
+         rel       : in DATA_TYPE;     --! relative branch address
+         abso      : in DATA_TYPE;     --! absolute branch address, or base for relative jump
          
-         pc_asynch : out ADDRESS_TYPE; --! programm counter output
-         pc_synch  : out ADDRESS_TYPE  --! programm counter output
+         pc_asynch : out ADDRESS_TYPE; --! program counter output
+         pc_synch  : out ADDRESS_TYPE  --! program counter output
     );
 end entity PC_log;
 
@@ -80,7 +81,7 @@ begin
         pc_ns <= pc_ns_v;
     end process pc_logic;
     
-    pc_asynch <= pc_ns;     --program counter to memory for intruction fetch
+    pc_asynch <= pc_ns;     --program counter to memory for instruction fetch
     pc_synch  <= pc_cs;     --clocked program counter for ID stage
     
     reg : process(clk) is

@@ -13,30 +13,30 @@ library IEEE;
 use WORK.riscv_pack.all;
 
 --!@brief   This is the execute stage of the CPU
---!@details This Stage has two main Components:
+--!@details This stage has two main components:
 --!         1. ALU - responsible for calculation
 --!         2. Branch Checker - check if a branch needs to be taken
 entity execute_stage is
     port(
         clk, reset : in std_logic;
         
-        WB_CNTRL_IN   : in WB_CNTRL_TYPE;    --!Controlbits for WB-Stage 
-        MA_CNTRL_IN   : in MA_CNTRL_TYPE;    --!Controlbits for MA-Stage 
-        EX_CNTRL_IN   : in EX_CNTRL_TYPE;    --!Controlbits for EX-Stage will be used here    
-        Imm           : in DATA_TYPE;        --!Immediate
-        OPB           : in DATA_TYPE;        --!Operand B
-        OPA           : in DATA_TYPE;        --!Operand A
-        DO_IN         : in DATA_TYPE;        --!Data-output-register
-        PC_IN         : in ADDRESS_TYPE;     --!PC Register
+        WB_CNTRL_IN           : in WB_CNTRL_TYPE;    --!Controlbits for WB-Stage 
+        MA_CNTRL_IN           : in MA_CNTRL_TYPE;    --!Controlbits for MA-Stage 
+        EX_CNTRL_IN           : in EX_CNTRL_TYPE;    --!Controlbits for EX-Stage will be used here    
+        Imm                   : in DATA_TYPE;        --!Immediate
+        OPB                   : in DATA_TYPE;        --!Operand B
+        OPA                   : in DATA_TYPE;        --!Operand A
+        DO_IN                 : in DATA_TYPE;        --!Data-output-register
+        PC_IN                 : in ADDRESS_TYPE;     --!PC Register
         
         WB_CNTRL_OUT          : out WB_CNTRL_TYPE;   --!Controlbits for WB-Stage 
-        MA_CNTRL_OUT_SYNCH    : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
-        MA_CNTRL_OUT_ASYNCH   : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage
+        MA_CNTRL_OUT_SYNCH    : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage (synchronous)
+        MA_CNTRL_OUT_ASYNCH   : out MA_CNTRL_TYPE;   --!Controlbits for MA-Stage (asynchronous)
         WORD_CNTRL_OUT_SYNCH  : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
         WORD_CNTRL_OUT_ASYNCH : out WORD_CNTRL_TYPE; --!Controlbits for MA-Stage (word length)
         SIGN_EN               : out std_logic;       --!Enables sign extension in memory access
-        RESU_DAR_SYNCH        : out DATA_TYPE;       --!Result of calulation
-        RESU_DAR_ASYNCH       : out DATA_TYPE;       --!Result of calulation
+        RESU_DAR_SYNCH        : out DATA_TYPE;       --!Result of calculation (synchronous)
+        RESU_DAR_ASYNCH       : out DATA_TYPE;       --!Result of calculation (asynchronous)
         Branch                : out std_logic;       --!For conditioned branching
         ABS_OUT               : out DATA_TYPE;       --!Absolute value for branch/jump (just loop through)
         REL_OUT               : out DATA_TYPE;       --!Relative value for branch/jump (just loop through)

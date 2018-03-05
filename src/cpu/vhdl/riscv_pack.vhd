@@ -3,12 +3,16 @@
 --! @author Sebastian Brueckner
 --! @author Jonas Fuhrmann
 --! @author Matthis Keppner
+--! @author Sebastian Brueckner
+--! @date 2017-2018
 --! project: ach ne! @ HAW-Hamburg
 
 library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
+--! @brief Mainly contains auxiliary functions and constants defined by the risv-v instruction set, as well as processor specific constants
+--! @details Most functions and constants aren't explained in detail here, because values and/or usage can be easily deducted from the risc v specification
 package riscv_pack is
 
 	--! @brief list of instructions
@@ -31,7 +35,8 @@ package riscv_pack is
 	                        --miscmemo,systemo
                             testerror
 	                        );
-                            
+    
+    -- funct3 definitions
     constant NO_FUNCT3     : std_logic_vector(2 downto 0) := "000";
     constant BEQ_FUNCT3    : std_logic_vector(2 downto 0) := "000";
     constant BNE_FUNCT3    : std_logic_vector(2 downto 0) := "001";
@@ -76,6 +81,7 @@ package riscv_pack is
     constant CSRRSI_FUNCT3 : std_logic_vector(2 downto 0) := "110";
     constant CSRRCI_FUNCT3 : std_logic_vector(2 downto 0) := "111";
     
+    --funct7 definitions
     constant NO_FUNCT7     : std_logic_vector(6 downto 0) := "0000000";
     constant SLLI_FUNCT7   : std_logic_vector(6 downto 0) := "0000000";
     constant SRLI_FUNCT7   : std_logic_vector(6 downto 0) := "0000000";
@@ -91,19 +97,19 @@ package riscv_pack is
     constant OR_FUNCT7     : std_logic_vector(6 downto 0) := "0000000";
     constant AND_FUNCT7    : std_logic_vector(6 downto 0) := "0000000";                        
 	                        
-	constant DATA_WIDTH : natural := 32;
-	constant ADDRESS_WIDTH : natural := 32;
-	constant REGISTER_ADDRESS_WIDTH : natural := 5;
-	constant REGISTER_COUNT : natural := 32;
-	constant INSTRUCTION_WIDTH : natural := 32;
-	constant OP_CODE_WIDTH : natural := 7;
-	constant FUNCT3_WIDTH : natural := 3;
-	constant FUNCT7_WIDTH : natural := 7;
-    constant WRITE_EN_WIDTH: natural := 4;
-    constant BYTE_WIDTH    : natural := 8;
-    constant IO_BYTE_COUNT : natural := 6; -- 6 Bytes at the moment (just GPIOs)
+	constant DATA_WIDTH : natural := 32;            --! 32Bit standard width of data
+	constant ADDRESS_WIDTH : natural := 32;         --! Address width
+	constant REGISTER_ADDRESS_WIDTH : natural := 5; --! 5 bit to adress 32 registers
+	constant REGISTER_COUNT : natural := 32;        --! Number of registers used in this processor
+	constant INSTRUCTION_WIDTH : natural := 32;     --!32bit architecture
+	constant OP_CODE_WIDTH : natural := 7;  --!see risc-v spec
+	constant FUNCT3_WIDTH : natural := 3;   --!see risc-v spec
+	constant FUNCT7_WIDTH : natural := 7;   --!see risc-v spec
+    constant WRITE_EN_WIDTH: natural := 4;  --!
+    constant BYTE_WIDTH    : natural := 8;  --!a byte has 8 bits
+    constant IO_BYTE_COUNT : natural := 6;    -- 6 Bytes at the moment (just GPIOs)
     constant PERIPH_IO_WIDTH : natural := 24; -- 24 Bit for in and output (3 GPIO Bytes)
-    constant GPIO_WIDTH : natural := 3; -- 3 GPIO Bytes with 3 Bytes of configuration
+    constant GPIO_WIDTH : natural := 3;       -- 3 GPIO Bytes with 3 Bytes of configuration
 	
 	subtype DATA_TYPE is std_logic_vector(DATA_WIDTH-1 downto 0);
 	subtype ADDRESS_TYPE is DATA_TYPE;
