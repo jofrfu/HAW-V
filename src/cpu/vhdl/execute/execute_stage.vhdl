@@ -2,7 +2,7 @@
 --!@brief   This file is part of the ach-ne projekt at the HAW Hamburg
 --!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
 --!@author  Jonas Fuhrmann
---!@atuhor  Matthis Keppner
+--!@author  Matthis Keppner
 --!@author  Sebastian Brückner
 --!@date    2017 - 2018
 

@@ -250,7 +250,7 @@ begin
     end process sltu_proc;
     
     --!@brief ALU of the execute stage
-    --!@detail calculates OPA (+) OPB, mainly contains mux to choose the corresponding result to funct3 and funct7
+    --!@details calculates OPA (+) OPB, mainly contains mux to choose the corresponding result to funct3 and funct7
     choose:
     process (EX_CNTRL_IN, add_result, and_resu, or_resu, xor_resu, sll_resu, srl_resu, sra_resu, slt_resu, sltu_resu) is
         variable funct7_v  : FUNCT7_TYPE;

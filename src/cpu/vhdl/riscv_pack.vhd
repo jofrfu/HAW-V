@@ -16,7 +16,7 @@ library IEEE;
 package riscv_pack is
 
 	--! @brief list of instructions
-	--! @detail last i stands for "instruction"
+	--! @details last i stands for "instruction"
 	type INSTRUCTION_TYPE is (  luii, auipci, jali, jalri,
 	                            beqi, bnei, blti, bgei, bltui, bgeui,
 	                            lbi, lhi, lwi, lbui, lhui,
@@ -29,7 +29,7 @@ package riscv_pack is
     
 		
 	--! @brief list of op codes
-	--! @detail last o stands for "opcode", testerror indicates error for sim and test                    
+	--! @details last o stands for "opcode", testerror indicates error for sim and test                    
 	type OP_CODE_TYPE is (   luio, auipco, jalo, jalro,
 	                        brancho, loado, storeo, opimmo, opo,
 	                        --miscmemo,systemo
@@ -200,7 +200,7 @@ package riscv_pack is
     return INSTRUCTION_BIT_TYPE;
     
     --!@brief create IFR I-Type special for shift operation
-    --!@detail immediate(11 downto 5) is funct7 and immediate(4 downto 0) the shift amount
+    --!@details immediate(11 downto 5) is funct7 and immediate(4 downto 0) the shift amount
     function IFR_I_TYPE_SHIFT(
         funct7  : FUNCT7_TYPE;
         shamt   : integer; --TODO: range
@@ -222,7 +222,7 @@ package riscv_pack is
     return INSTRUCTION_BIT_TYPE;
     
     --!@brief create IFR B-Type
-    --!@detail only even numbers shall be used for immediate
+    --!@details only even numbers shall be used for immediate
     function IFR_B_TYPE(
         imm     : integer;
         rs2     : integer range 0 to REGISTER_COUNT-1;        
@@ -241,7 +241,7 @@ package riscv_pack is
     return INSTRUCTION_BIT_TYPE;
     
     --!@brief create IFR J-Type
-    --!@detail only even numbers shall be used for immediate
+    --!@details only even numbers shall be used for immediate
     function IFR_J_TYPE(
             imm     : integer;             
             rd      : integer range 0 to REGISTER_COUNT-1; 

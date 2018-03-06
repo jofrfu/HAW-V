@@ -3,7 +3,7 @@
 --!@details Check: https://gitlab.informatik.haw-hamburg.de/lehr-cpu-bs/ach-ne-2017-2018 for more information
 --!@author  Felix Lorenz
 --!@author  Jonas Fuhrmann
---!@atuhor  Matthis Keppner
+--!@author  Matthis Keppner
 --!@date    2017 - 2018
 
 use WORK.riscv_pack.all;
@@ -41,7 +41,7 @@ architecture beh of decode is
 begin
 
     --!@brief  First helping process to detect necessity of bubble
-    --!@detail Compares if the bits in the IFR where rs1 could be, will be changed by one of the following pipeline stages
+    --!@details Compares if the bits in the IFR where rs1 could be, will be changed by one of the following pipeline stages
     rs1_check_1:
     process(IFR(19 downto 15), DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
         variable rs1_v         : REGISTER_ADDRESS_TYPE;
@@ -68,7 +68,7 @@ begin
     end process rs1_check_1;
     
     --!@brief  First helping process to detect necessity of bubble
-    --!@detail See rs1_check_1
+    --!@details See rs1_check_1
     rs2_check_2:
     process(IFR(24 downto 20), DEST_REG_EX, DEST_REG_MA, DEST_REG_WB) is
         variable rs2_v         : REGISTER_ADDRESS_TYPE;
@@ -95,7 +95,7 @@ begin
     end process rs2_check_2;
     
     --! @brief decode unit for ID stage
-    --! @detail controls the PC flow in IF stage 
+    --! @details controls the PC flow in IF stage 
     --!         the operand selection for EX stage
     --!         data output from register file
     --!         and creates bubble for the pipeline if needed
@@ -278,7 +278,7 @@ begin
     end process decode;
     
     --! @brief  Immediate construction
-    --! @detail Extracts the immediate in the IFR and sign extends it
+    --! @details Extracts the immediate in the IFR and sign extends it
     imm_constr:
     process(IFR) is
         variable op_code_v   : OP_CODE_TYPE;
