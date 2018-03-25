@@ -15,8 +15,7 @@ src/cpu/java/**/*.*
 #for memory generation - add whole project
 !src/cpu/vhdl/memory/**
 
-#
-doc/
+#doc/
 !doc/main.tex
 !doc/chapters/*.tex
 
