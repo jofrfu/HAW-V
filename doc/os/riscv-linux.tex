@@ -1,0 +1,333 @@
+\documentclass[a4paper,11pt]{report}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{underscore}
+\lstset{basicstyle=\ttfamily,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue}
+}
+
+
+\title{Building Busybox and Ramdisc for the RISC-V }
+\author{Cyrille Ngassam Nkwenga}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\begin{abstract}
+\end{abstract}
+
+\chapter{Description}
+\section{Objectif}
+\paragraph{Linux for RISC-V}
+This work is a part of the Ach ne ! Project. The Goal of Ach ne ! is
+to build a microprocessor based on the RISC-V architecture. This processor could be
+used to teach the basics of CPU conception.
+Since a processor alone is of no use, we want an Operating System to run on it.
+
+The OS we selected for this is Linux. We choosed Linux because there were already
+a project which offered some descriptions to build Linux for RISC-V.
+
+
+\paragraph{BusyBox}
+Since we choosed Linux, we need a way to boot it and for that we need
+a bootable Linux System and this is were BusyBox comes in.
+The goal of BusyBox was to create a bootable GNU/Linux system on a single 
+floppy disk. A single floppy disk can hold a 1.4-1.7MB, so we have no room 
+for the Linux kernel and associated user applications.
+
+\paragraph{}
+BusyBox exploits the fact that the standard Linux utilities share many common
+elements. Many file-based utilities require code to recurse a directory in 
+search of files. If we combine these utilities into a single executable, they
+can share these common elements, which results in a smaller executable.
+BusyBox can pack almost 3.5MB of utilities into around 200KB. This provides greater
+functionality to embedded devices that use Linux.
+
+\paragraph{Initial RAM disk}
+The initial RAM disk (initrd) is an initial root file system that is mounted
+prior to when the real root file system is available. The initrd is bound to the kernel and loaded as part of the kernel boot precedure. The kernel then mounts
+this initrd as part of the two-stage boot process to load the modules to make the real file systems available and get at the real root file system.
+
+\chapter{Application}
+
+\paragraph{}
+One of the many thing to achieve for this project is having a bootable system.
+To have that, we need BusyBox and an initrd.
+To get that, we need first to build the Linux kernel for the RISC-V architecture.
+For that we are using the GNU GCC Toolchain for RISC-V. The Kernel must be
+configured to use an initrd. After having build the kernel successfuly, we must 
+configured and build BusyBox.
+The next step is then to create the root file system and generate a RAM disk.
+The last step is to genrate an binary image and run it on the the hardware or on
+a simulator ( QEMU, SPIKE ... ).
+
+\paragraph{Kernel Build instructions} 
+Since this paper is not a HOW-TO to build a Linux kernel, I will just
+provide the minimum  steps required to build a minimal kernel :
+\section{Kernel Configuration}
+\paragraph{}
+Many kernel drivers can be turn \textit{on} or \textit{off}, or built as modules. The \textit{.config} file 
+in the kernel source directory determines which drivers are built. When you get
+the source tree of the kernel, it doesn't come with a \textit{.config} file. 
+We have many options on generating a .config file :
+\begin{itemize}
+  \item Duplicate the current config
+  \item Making the default config
+  \item Making a minimal config.
+\end{itemize}
+
+We will look at how to make a default config and how to modify it.
+\newpage
+
+\subsection{Making a default Config}
+To make a default config, we must run the following command :
+\begin{lstlisting}
+  make defconfig
+\end{lstlisting}
+The problem with the default config is that the options you want 
+are probably not activated. So the next step is to modify it.
+
+\subsection{Modifying your current config}
+If you need to make any changes to your actuel configuration, you can run the following command :
+\begin{lstlisting}
+  make menuconfig
+\end{lstlisting}
+You will get a similare window where you can activate the desired options.
+For this project, we want to have the following options activated :\begin{itemize}
+  \item processor architecture : 64Bit RISC-V
+  \item the Toolchain path : where to find the GCC Toolchain. I recommand to have it defined in an environment variable.
+  \item Select the RAM Disk ( initrd)  and the path to the initrd
+  \item more ...
+\end{itemize}
+
+\subsection{Building the kernel}
+Now that you have modified the config as you wish, you can use the following
+command to build the kernel :
+\begin{lstlisting}
+  make vmlinux
+\end{lstlisting}
+or if you have a multicore processor :
+\begin{lstlisting}
+  make vmlinux -jX
+\end{lstlisting}
+where X is the number of threads to be used by make.
+\section{BusyBox Configuration}
+BusyBox uses symbolic links to make one executable look like many.
+For each utilities contained within BusyBox, a symbolic link is created
+so that BusyBox is invoked.
+so, as an example : 
+
+\begin{lstlisting}
+  mv busybox  cat
+  ./cat param
+  ln -s cat more
+  ./more param
+
+\end{lstlisting}
+
+\subsection{Configuring and building BusyBox}
+For this project we are using the version 1.26
+A more recent version is available on the busybox.net.
+we used this version because it was the latest as we started
+this project. This software is distributed in a compressed tarball,
+and we can transform it into a source tree using the command bellow:
+\begin{lstlisting}
+  tar xvfz busybox-1.26.0.tar.gz
+\end{lstlisting}
+This will result in a directory called busybox-1.26.0, this directory 
+contains the BusyBox source code.
+
+\paragraph{Configuration}
+Configuring BusyBox is a similar process to the linux kernel Configuration we 
+we did :
+
+\begin{lstlisting}
+  cd busybox-1.26.0
+  make defconfig
+  make
+  
+\end{lstlisting}
+This setting will build the default configuration, which will be rather large, and we don't  want all the module that are activated in the default configuration.
+
+\paragraph{Manual Configuration}
+Since we are building an embedded device that has very specific needs (as of now),
+we can manually configure the contents of our BusyBox with menuconfig make target.
+This is the same target for configuring the contents of the Linux kernel.
+Using the manual configuration, you can specify the commands to be included in the final BusyBox image, you can also specify the compiler to use and whether BusyBox should be compiled statically or dynamically.
+To manually configure BusyBox, run the following commands :
+\begin{lstlisting}
+  make menuconfig
+  make 
+  make PREFIX=path/to/install install
+\end{lstlisting}
+
+
+\section{RAM disk : initrd}
+
+The initrd contains a minimal set of directories and executables such as the \textit{insmod} tool to install modules into the kernel.
+On a desktop or server Linux system, the initrd is a transient file system. It lives only on the short time serving as bridge to the real root file system.
+However in embedded systems with no mutable storage, the initrd is the permanent
+root file system. 
+
+\paragraph{}
+Depending on the version of the Linux kernel you are running, the method for
+creating the initial RAM disk can vary.
+
+The default initrd image on modern Linux system is a compressed cpio archive file.
+To inspect the contents of a cpio archive, use the following commands :
+\begin{lstlisting}[language=bash, caption={Inspecting the cpio archive content}]
+ mkdir temp
+ cd temp
+ cp /path/to/initrd.img initrd.img.gz
+ gunzip initrd.img.gz
+ cpio -i --make-directories < initrd.img
+ 
+\end{lstlisting}
+ The result of this is a small root file system.
+ The small, but necessary, set of of applications are present in ./bin directory.
+ The file with more interest for us is the init file at the root. This file is invoked when the initrd image is decompressed into the RAM disk. We will have a look at it later.
+ 
+\subsection{Tools for creating an initrd}
+For a traditional Linux system, the initrd image is created during the build process. There are tools such as mkinitrd, that can be used to automatically build an initrd with the necessary libraries and modules forbridging to the 
+root file system. The mkinitrd is actually a shell script, so we can see what it 
+is doing to get the results.
+
+\paragraph{Manually Building custom initrd}
+Because in many Linux embedded systems there is no hard drive, the initrd also seves as the permanent root file system. The listing below shows how to create
+an initrd image. This can be run on a standard desktop system
+
+
+\begin{lstlisting}[language=bash,caption={Manually creating initrd script}]
+
+#!/bin/bash
+ 
+# Housekeeping...
+rm -f /tmp/ramdisk.img
+rm -f /tmp/ramdisk.img.gz
+ 
+# Ramdisk Constants
+RDSIZE=4000
+BLKSIZE=1024
+ 
+# Create an empty ramdisk image
+dd if=/dev/zero of=/tmp/ramdisk.img bs=$BLKSIZE count=$RDSIZE
+ 
+# Make it an ext2 mountable file system
+/sbin/mke2fs -F -m 0 -b $BLKSIZE /tmp/ramdisk.img $RDSIZE
+ 
+# Mount it so that we can populate
+mount /tmp/ramdisk.img /mnt/initrd -t ext2 -o loop=/dev/loop0
+ 
+# Populate the filesystem (subdirectories)
+mkdir /mnt/initrd/bin
+mkdir /mnt/initrd/sys
+mkdir /mnt/initrd/dev
+mkdir /mnt/initrd/proc
+ 
+# Grab busybox and create the symbolic links
+pushd /mnt/initrd/bin
+cp /usr/local/src/busybox-1.26.0/busybox .
+ln -s busybox ash
+ln -s busybox mount
+ln -s busybox echo
+ln -s busybox ls
+ln -s busybox cat
+ln -s busybox ps
+ln -s busybox dmesg
+ln -s busybox sysctl
+popd
+ 
+# Grab the necessary dev files
+cp -a /dev/console /mnt/initrd/dev
+cp -a /dev/ramdisk /mnt/initrd/dev
+cp -a /dev/ram0 /mnt/initrd/dev
+cp -a /dev/null /mnt/initrd/dev
+cp -a /dev/tty1 /mnt/initrd/dev
+cp -a /dev/tty2 /mnt/initrd/dev
+ 
+# Equate sbin with bin
+pushd /mnt/initrd
+ln -s bin sbin
+popd
+ 
+# Create the init file
+cat >> /mnt/initrd/linuxrc << EOF
+#!/bin/ash
+echo
+echo "Simple initrd is active"
+echo
+mount -t proc /proc /proc
+mount -t sysfs none /sys
+/bin/ash --login
+EOF
+ 
+chmod +x /mnt/initrd/linuxrc
+ 
+# Finish up...
+umount /mnt/initrd
+gzip -9 /tmp/ramdisk.img
+cp /tmp/ramdisk.img.gz /boot/ramdisk.img.gz
+
+\end{lstlisting}
+
+To create an initrd, begin by creating an empty file, using /dev/zero as input 
+writing to the ramdisk.img file. The resulting file is 4MB(for the above listing) in size (4000 1K Blocks).
+So make sure to choose a size big enough to hold your kernel. After you have done
+that, mount the file to /mnt/initrd using the loop device. At this mount point
+you have a directory you can populate for your initrd. The rest of the script provide this functionality.
+
+The next step is creating the subdirectories necessary that make up your
+root file system : /bin, /sys, /dev and /proc. If you need more, just go
+ahead and add them. 
+As of now, this root filesystem is not useful. To make it useful you use
+BusyBox. The advantage of BusyBox is that it packs many utilities into one while sharing their common elements, resulting in a much smaller image. This is ideal for embedded systems.
+
+Place the BusyBox binary into your root in /bin directory. A number of symbolic links are then created that all point to the BusyBox utility. BusyBox figures out which utility was invoked and performs that functionality. A small set of links are created in this directory to support your init script (with each command link pointing to BusyBox).
+
+The next step is the creation of a small number of special device files. I copy these directly from my current /dev subdirectory, using the -a option (archive) to preserve their attributes.
+
+The ultimate step is to generate the linuxrc file. After the kernel mounts the RAM disk, it searches for an init file to execute. If an init file is not found, the kernel invokes the linuxrc file as its startup script. You do the basic setup of the environment in this file, such as mounting the /proc file system. In addition to /proc, I also mount the /sys file system and emit a message to the console. Finally, I invoke ash (a Bourne Shell clone, you should have seen it when configuring the Kernel or BusyBox) so I can interact with the root file system. The linuxrc file is then made executable using chmod.
+
+Finally, your root file system is complete. It's unmounted and then compressed using gzip. The resulting file (ramdisk.img.gz) is copied to the /boot subdirectory
+\begin{verse}
+  \textbf{Initrd support in the Linux kernel}
+
+For the Linux kernel to support the initial RAM disk, the kernel must be compiled with the CONFIG_BLK_DEV_RAM and CONFIG_BLK_DEV_INITRD options.
+\end{verse}
+
+
+
+\section{Summary}
+
+The initial RAM disk was originally created to support bridging the kernel to the ultimate root file system through a transient root file system. The initrd is also useful as a non-persistent root file system mounted in a RAM disk for embedded Linux systems.
+
+\chapter{Summary}
+
+  In the summary I will try to enumerate a list of the challenges we faced:
+    \begin{itemize}
+      \item No experiences on Confuguring and Building a Linux Kernel (this was a serious Challenge)
+      \item Our upstream Documentation was really bad, nothing at all worked as espected, I really mean nothing.
+      \item I don't have a powerful computer. I got around 5h build time. On the first build errors everything had
+      to be restarted again. One could easily give up.
+      \item The project required much experiences which we didn't pocesse.
+      \item Since we had no experience, it was hard to stay organised and work together.
+      \item No reference work available for the RISC-V architecture where we could find
+      better information. Everything important was keeped secret.
+      
+    \end{itemize}
+    
+    \begin{itemize}
+      \item I learn some basics on Building and Configuring the Linux Kernel, BusyBox and RAMDISK for an x86 and ARM System
+      \item Discover that RISC-V might be a thing.
+      \item Have a better understanding of what it mean to be working in a team.
+      \item Learn that the little step we do right in life are important too.
+      \item I had a great time with the whole Team.
+    \end{itemize}
+\end{document}
