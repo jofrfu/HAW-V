@@ -1,0 +1,31 @@
+File CY7C64225_Setup_Guide_1_3-1.pdf
+- This file contains Information about the drivers you need to install
+when using a windows systems. It should not be required running windows 7+.
+
+
+File GS-AES-Z7EV-7Z020-G-V7-1.pdf Page 11:
+This page contains the Basic Setup and Operation
+page 38 contains infos on the usage of USB-UART
+
+
+Here are the needed step to run a custom build ( HAWShell) :
+0- Put the custom image on the root SD Card
+1. Connect 12 V power to barrel jack (J20).
+2. Connect the UART port of ZedBoard TM (J14) to a PC using the
+MicroUSB cable.
+3. Insert the included SD Card into J12.
+4. Turn power switch (SW8) to ON. Board will power on. Green Power
+Good LED (LD13) should illuminate.
+5. Wait approximately 15 seconds. The blue Done LED (LD12) should
+illuminate, and a default image will be displayed on the OLED (DISP1).
+6. If the amber USB-Link Status (LD11) does not flicker to indicate
+activity, instructions for downloading the CY7C64225 USB-to-UART
+driver can be found on the website listed below.
+7. Use Device Manager to determine the COM Port. Open a Terminal
+Program, confi gure to 115200/8/n/1/n.
+8. Cycle power by turning the power switch (SW8) from ON to OFF and
+then back ON.
+9. In the Terminal Window, a simple Linux image should boot with
+functionality that demonstrates the basic capabilities of ZedBoard TM .
+10. When you are done using Linux, run the command “poweroff” and
+then switch off ZedBoard TM .
