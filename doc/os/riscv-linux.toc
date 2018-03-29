@@ -1,0 +1,24 @@
+\contentsline {chapter}{\numberline {1}Description}{1}
+\contentsline {section}{\numberline {1.1}Objectif}{1}
+\contentsline {paragraph}{Linux for RISC-V}{1}
+\contentsline {paragraph}{BusyBox}{1}
+\contentsline {paragraph}{}{1}
+\contentsline {paragraph}{Initial RAM disk}{1}
+\contentsline {chapter}{\numberline {2}Application}{2}
+\contentsline {paragraph}{}{2}
+\contentsline {paragraph}{Kernel Build instructions}{2}
+\contentsline {section}{\numberline {2.1}Kernel Configuration}{2}
+\contentsline {paragraph}{}{2}
+\contentsline {subsection}{\numberline {2.1.1}Making a default Config}{3}
+\contentsline {subsection}{\numberline {2.1.2}Modifying your current config}{3}
+\contentsline {subsection}{\numberline {2.1.3}Building the kernel}{3}
+\contentsline {section}{\numberline {2.2}BusyBox Configuration}{3}
+\contentsline {subsection}{\numberline {2.2.1}Configuring and building BusyBox}{4}
+\contentsline {paragraph}{Configuration}{4}
+\contentsline {paragraph}{Manual Configuration}{4}
+\contentsline {section}{\numberline {2.3}RAM disk : initrd}{4}
+\contentsline {paragraph}{}{5}
+\contentsline {subsection}{\numberline {2.3.1}Tools for creating an initrd}{5}
+\contentsline {paragraph}{Manually Building custom initrd}{5}
+\contentsline {section}{\numberline {2.4}Summary}{8}
+\contentsline {chapter}{\numberline {3}Summary}{9}
