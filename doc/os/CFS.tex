@@ -1,0 +1,59 @@
+% Author	:	Talal Tabia
+
+\documentclass[a4paper, oneside]{scrreprt}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{hyperref}
+
+\begin{document}
+
+\chapter{Completely Fair Scheduler (CFS)}
+
+\section{Characteristics}
+
+CFS is the linux scheduler and it has:
+\begin{itemize}
+	\item no heuristics
+	\item good I/O Handling
+	\item cpu bound processors
+\end{itemize}
+
+\section{Task}
+Fair and equal distribution of CPU time among the processes\\
+Ideal Fairness:
+Each process in the ready queue gets (100/n) percent of the CPU time.
+
+In each cycle - time slice in miliseconds. 
+The processor time is equal: n / x
+The scheduler tries to distribure the CPU time among \\the processes in each cycle
+
+The whole thing is done using Virtual Runtimes. 
+Every executale process has the vruntime.
+-- At each scheduling point, if the process was started \\for t miliseconds, 
+the vruntime = vruntime + t
+
+\section{CFS idea}
+When a timer interrupt occurs:
+\begin{itemize}
+\item Select the task with the smallest vruntime (min vruntime) - Pointer
+\item The process is then executed in the CPU
+  \item If another interrupt occurs, 
+then context change to a task with a smaller runtime
+\end{itemize}
+
+For the administration of different tasks and runtime, \\the CFS uses red-black-tree:
+\begin{itemize}
+\item Each node represents a runnable task
+\item The nodes are sorted by their vruntime
+\item Node left is smaller than node right
+\item The node that is most left has the min vruntime
+\end{itemize}
+
+- The scheduler takes the task with min vruntime to execute next.
+
+We wrote in this project a small programm in python \\that works with that, it change cfs parameters \\and shows the current processor usage of single cpus.
+
+The location of the programm is in the folder: \\ach-ne-2017-2018/src/os/linuxscheduler/
+And the programm main file is: LinuxSchedulerWindows.py
+
+\end{document}
