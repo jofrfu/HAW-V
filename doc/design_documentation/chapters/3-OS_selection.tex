@@ -21,5 +21,24 @@ In our first meeting we figured out which Operating Systems are available for ou
 Linux and FreeBSD are way to huge and it would take to much time to customize it for our needs.\\
 Riot as an OS which is partly invented at the HAW would be a great one to use.\\
 But we decided to use the Minix OS because it is very small and light weighted, well documented and easy to extend.\\
-Aditionally Minix as an Operating System for teaching perfectly fits to our project.
+Aditionally Minix as an Operating System for teaching perfectly fits to our project.\\
+\\
+\section{Update}
 
+During our third meeting we figured out, that there already is an existing Linux-Port for the RISC-V architecture. So we decided to use that Linux-Version for our project, but also we want to keep the idea of a running minix system for our project. Moreover we planned to build our own HAW-Shell for that system.\\
+Due to our investigations we figured out, that a minix-portation would be far to expensive. First we have to make shure to understand the whole build-system of the minix-architecture, the code-dependencies can be found at:\\
+\begin{itemize}
+\item \url{http://svn.freebsd.org/base/head/sys/conf/files.riscv}
+\end{itemize}
+Makefile:
+\begin{itemize}
+\item \url{http://svn.freebsd.org/base/head/sys/conf/Makefile.riscv}
+\end{itemize}
+LDscript:
+\begin{itemize}
+\item \url{http://svn.freebsd.org/base/head/sys/conf/ldscript.riscv}
+\end{itemize}
+Options:
+\begin{itemize}
+\item \url{http://svn.freebsd.org/base/head/sys/conf/options.riscv}
+\end{itemize}

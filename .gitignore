@@ -1,0 +1,27 @@
+#gitignore for achne project
+.project
+BuildPath.txt
+
+#vhdl sources
+src/cpu/vhdl/**/*.*
+!src/cpu/vhdl/**/*.vhdl
+!src/cpu/vhdl/**/*.do
+!src/cpu/vhdl/**/*.coe
+
+#java sources
+src/cpu/java/**/*.*
+!src/cpu/java/**/*.java
+
+#for memory generation - add whole project
+!src/cpu/vhdl/memory/**
+
+#
+doc/
+!doc/main.tex
+!doc/chapters/*.tex
+
+#ignore doxygen files
+ach_ne_doxy/
+
+
+doc/doxygen/Thumbs\.db

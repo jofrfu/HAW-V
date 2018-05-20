@@ -1,0 +1,42 @@
+% File		: 	main.tex
+% Created by:	Sebastian Brückner
+% Created at :	03.10.17 13:00
+% Authors	:	Andre Brand
+
+\chapter{Quick guide for Plan B}
+
+For Plan B we are using an existing implementation for an RISC-V architecture with a linux distribution. 
+This is find in the following repository. 
+https://github.com/ucb-bar/fpga-zynq 
+
+\section{Step one}
+Clone the repository.
+
+\section{Step two}
+Switch to zedboard folder in terminal and run the command make fetch-images.
+\section{Step three}
+Switch to the fpga-images-zedboard folder and copy \textit{boot.bin, devicetree.dtb, uImage and uramdisk.image.gz} to a \textbf{fap32} formatted sd-card.
+\section{Step four}
+Set the Jumper Position of JP11-JP7 to the following position to set as SD-BOOT mode:
+
+\begin{tabular}{|c|c|} \hline
+ JP11 & 0 \\ \hline
+ JP10 & 1 \\ \hline
+ JP9  & 1 \\ \hline
+ JP8  & 0 \\ \hline
+ JP7  & 0 \\ \hline
+\end{tabular}
+
+Connect the micro-usb to the uart connector and power up the zedboard.
+\section{Step five}
+Run the following command:
+
+\textit{screen /dev/tty.usbmodem1411115200,cs8,-parenb,-cstopb}
+
+The linux should power on on the ARM Processor.
+The \underline{username} and the \underline{password} are \textbf{root}.
+
+\section{Step six}
+Run the following command to start a linux on the RISC-V processor:
+
+\textit{./fesvr-zynq bbl}
