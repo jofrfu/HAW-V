@@ -1,0 +1,420 @@
+Loaded Modules
+__main__
+,['sys', 'os', 'Qt']
+sys
+,[]
+os
+,['__doc__', 'abc', 'sys']
+abc
+,['__doc__', 'WeakSet', 'abstractmethod']
+_weakrefset
+,['ref', '__all__', '_IterationGuard']
+_weakref
+,[]
+errno
+,[]
+stat
+,['__doc__', 'ST_MODE', 'ST_INO']
+_stat
+,[]
+posix
+,[]
+posixpath
+,['__doc__', 'curdir', 'pardir']
+genericpath
+,['__doc__', 'os', 'stat']
+pwd
+,[]
+re
+,['__doc__', 'enum', 'sre_compile']
+enum
+,['sys', 'MappingProxyType', 'DynamicClassAttribute']
+types
+,['__doc__', 'sys', '_f']
+functools
+,['__doc__', '__all__', 'reduce']
+_functools
+,[]
+collections
+,['__doc__', '__all__', 'ABCMeta']
+_collections_abc
+,['__doc__', 'ABCMeta', 'abstractmethod']
+operator
+,['__doc__', '__all__', '_abs']
+builtins
+,[]
+_operator
+,[]
+keyword
+,['__doc__', '__all__', 'kwlist']
+heapq
+,['__doc__', '__about__', '__all__']
+_heapq
+,[]
+doctest
+,['__doc__', '__docformat__', '__all__']
+__future__
+,['__doc__', 'all_feature_names', '__all__']
+argparse
+,['__doc__', '__version__', '__all__']
+copy
+,['__doc__', 'types', 'weakref']
+weakref
+,['__doc__', 'getweakrefcount', 'getweakrefs']
+itertools
+,[]
+atexit
+,[]
+gc
+,[]
+copyreg
+,['__doc__', '__all__', 'dispatch_table']
+textwrap
+,['__doc__', 're', '__all__']
+gettext
+,['__doc__', 'locale', 'copy']
+locale
+,['__doc__', 'sys', 'encodings']
+encodings
+,['__doc__', 'codecs', 'sys']
+codecs
+,['__doc__', 'builtins', 'sys']
+_codecs
+,[]
+encodings.aliases
+,['__doc__', 'aliases']
+_bootlocale
+,['__doc__', 'sys', '_locale']
+_locale
+,[]
+encodings.mbcs
+,['__doc__', 'mbcs_encode', 'mbcs_decode']
+io
+,['__doc__', '__author__', '__all__']
+_io
+,[]
+struct
+,['__all__', '_clearcache', '__doc__']
+_struct
+,[]
+difflib
+,['__doc__', '__all__', '_nlargest']
+inspect
+,['__doc__', '__author__', 'abc']
+ast
+,['__doc__', 'parse', '_NUM_TYPES']
+_ast
+,[]
+dis
+,['__doc__', 'sys', 'types']
+opcode
+,['__doc__', '__all__', 'stack_effect']
+_opcode
+,[]
+collections.abc
+,['__doc__', 'ABCMeta', 'abstractmethod']
+importlib
+,['__doc__', '__all__', '_imp']
+_imp
+,[]
+importlib._bootstrap
+,['__doc__', '_bootstrap_external', '_wrap']
+importlib._bootstrap_external
+,['__doc__', '_CASE_INSENSITIVE_PLATFORMS_STR_KEY', '_CASE_INSENSITIVE_PLATFORMS_BYTES_KEY']
+tokenize
+,['__doc__', '__author__', '__credits__']
+token
+,['__doc__', '__all__', 'ENDMARKER']
+warnings
+,['__doc__', 'sys', '__all__']
+_warnings
+,[]
+linecache
+,['__doc__', 'functools', 'sys']
+tracemalloc
+,['Sequence', 'Iterable', 'total_ordering']
+fnmatch
+,['__doc__', 'os', 'posixpath']
+pickle
+,['__doc__', 'FunctionType', 'dispatch_table']
+_compat_pickle
+,['IMPORT_MAPPING', 'NAME_MAPPING', 'PYTHON2_EXCEPTIONS']
+_pickle
+,[]
+pprint
+,['__doc__', '_collections', 're']
+time
+,[]
+_tracemalloc
+,[]
+importlib.machinery
+,['__doc__', '_imp', 'ModuleSpec']
+pdb
+,['__doc__', 'os', 're']
+cmd
+,['__doc__', 'string', 'sys']
+string
+,['__doc__', '__all__', '_string']
+_string
+,[]
+readline
+,[]
+bdb
+,['__doc__', 'fnmatch', 'sys']
+reprlib
+,['__doc__', '__all__', 'builtins']
+_thread
+,[]
+_dummy_thread
+,['__doc__', '__all__', 'TIMEOUT_MAX']
+traceback
+,['__doc__', 'collections', 'itertools']
+code
+,['__doc__', 'sys', 'traceback']
+codeop
+,['__doc__', '__future__', '_features']
+glob
+,['__doc__', 'os', 're']
+signal
+,['_signal', '_wraps', '_IntEnum']
+_signal
+,[]
+shlex
+,['__doc__', 'os', 're']
+pydoc
+,['__doc__', '__all__', '__author__']
+importlib.util
+,['__doc__', 'abc', 'module_from_spec']
+importlib.abc
+,['__doc__', '_bootstrap', '_bootstrap_external']
+contextlib
+,['__doc__', 'abc', 'sys']
+pkgutil
+,['__doc__', 'namedtuple', 'simplegeneric']
+zipimport
+,[]
+marshal
+,[]
+platform
+,['__doc__', '__copyright__', '__version__']
+subprocess
+,['__doc__', 'sys', '_mswindows']
+threading
+,['__doc__', '_sys', '_thread']
+_collections
+,[]
+_threading_local
+,['__doc__', 'ref', 'contextmanager']
+_posixsubprocess
+,[]
+select
+,[]
+selectors
+,['__doc__', 'ABCMeta', 'abstractmethod']
+math
+,[]
+dummy_threading
+,['__doc__', 'sys_modules', '_dummy_thread']
+plistlib
+,['__doc__', '__all__', 'binascii']
+binascii
+,[]
+datetime
+,['__doc__', '_time', '_math']
+_datetime
+,[]
+_strptime
+,['__doc__', 'time', 'locale']
+calendar
+,['__doc__', 'sys', 'datetime']
+xml
+,['__doc__', '__all__']
+xml.parsers
+,['__doc__']
+xml.parsers.expat
+,['__doc__', 'sys']
+pyexpat
+,[]
+socket
+,['__doc__', '_socket', 'os']
+_socket
+,[]
+urllib
+,[]
+urllib.parse
+,['__doc__', 're', 'sys']
+tempfile
+,['__doc__', '__all__', '_functools']
+shutil
+,['__doc__', 'os', 'sys']
+zlib
+,[]
+bz2
+,['__doc__', '__all__', '__author__']
+_compression
+,['__doc__', 'io', 'BUFFER_SIZE']
+_bz2
+,[]
+lzma
+,['__doc__', '__all__', 'builtins']
+_lzma
+,[]
+grp
+,[]
+tarfile
+,['__doc__', 'version', '__author__']
+gzip
+,['__doc__', 'struct', 'sys']
+zipfile
+,['__doc__', 'io', 'os']
+py_compile
+,['__doc__', 'importlib', 'os']
+random
+,['__doc__', '_warn', '_MethodType']
+hashlib
+,['__doc__', '__always_supported', 'algorithms_guaranteed']
+_hashlib
+,[]
+logging
+,['__doc__', 'sys', 'os']
+_sha1
+,[]
+_md5
+,[]
+_sha256
+,[]
+_sha512
+,[]
+_blake2
+,[]
+_sha3
+,[]
+bisect
+,['__doc__', 'insort_right', 'insort']
+_bisect
+,[]
+_random
+,[]
+tty
+,['__doc__', '__all__', 'IFLAG']
+termios
+,[]
+pydoc_data
+,[]
+pydoc_data.topics
+,['topics']
+http
+,['IntEnum', '__all__', 'HTTPStatus']
+http.server
+,['__doc__', '__version__', '__all__']
+email
+,['__doc__', '__all__', 'message_from_string']
+email.parser
+,['__doc__', '__all__', 'StringIO']
+email.feedparser
+,['__doc__', '__all__', 're']
+email.errors
+,['__doc__', 'MessageError', 'MessageParseError']
+email._policybase
+,['__doc__', 'abc', 'header']
+email.header
+,['__doc__', '__all__', 're']
+email.quoprimime
+,['__doc__', '__all__', 're']
+email.base64mime
+,['__doc__', '__all__', 'b64encode']
+base64
+,['__doc__', 're', 'struct']
+getopt
+,['__doc__', '__all__', 'os']
+email.charset
+,['__all__', 'partial', 'email']
+email.encoders
+,['__doc__', '__all__', '_bencode']
+quopri
+,['__doc__', '__all__', 'ESCAPE']
+email.utils
+,['__doc__', '__all__', 'os']
+email._parseaddr
+,['__doc__', '__all__', 'time']
+email.message
+,['__doc__', '__all__', 're']
+uu
+,['__doc__', 'binascii', 'os']
+optparse
+,['__doc__', '__version__', '__all__']
+email._encoded_words
+,['__doc__', 're', 'base64']
+email.iterators
+,['__doc__', '__all__', 'sys']
+email.generator
+,['__doc__', '__all__', 're']
+email.policy
+,['__doc__', 're', 'Policy']
+email.headerregistry
+,['__doc__', 'MappingProxyType', 'utils']
+email._header_value_parser
+,['__doc__', 're', 'urllib']
+email.contentmanager
+,['binascii', 'email', 'quoprimime']
+html
+,['__doc__', '_re', '_html5']
+html.entities
+,['__doc__', '__all__', 'name2codepoint']
+http.client
+,['__doc__', 'email', 'http']
+ssl
+,['__doc__', 'ipaddress', 'textwrap']
+ipaddress
+,['__doc__', '__version__', 'functools']
+_ssl
+,[]
+mimetypes
+,['__doc__', 'os', 'sys']
+socketserver
+,['__doc__', '__version__', 'socket']
+webbrowser
+,['__doc__', 'os', 'shlex']
+unittest
+,['__doc__', '__all__', '__unittest']
+unittest.result
+,['__doc__', 'io', 'sys']
+unittest.util
+,['__doc__', 'namedtuple', 'OrderedDict']
+unittest.case
+,['__doc__', 'sys', 'functools']
+unittest.suite
+,['__doc__', 'sys', 'case']
+unittest.loader
+,['__doc__', 'os', 're']
+unittest.main
+,['__doc__', 'sys', 'argparse']
+unittest.runner
+,['__doc__', 'sys', 'time']
+unittest.signals
+,['signal', 'weakref', 'wraps']
+sre_compile
+,['__doc__', '_sre', 'sre_parse']
+_sre
+,[]
+sre_parse
+,['__doc__', 'MAGIC', 'MAXREPEAT']
+sre_constants
+,['__doc__', 'MAGIC', 'MAXREPEAT']
+ntpath
+,['__doc__', 'curdir', 'pardir']
+PyQt5
+,[]
+PyQt5.QtCore
+,[]
+PyQt5.QtGui
+,[]
+PyQt5.QtWidgets
+,[]
+ProcessComperator
+,['time', 'QThread', 'pyqtSignal']
+ProcessGenerator
+,['QThread', 'pyqtSignal', 'QDateTime']
+--------------------------------------------------
+Modules not imported:
+dict_keys(['org.python.core', 'collections.namedtuple', 'collections.deque', '_frozen_importlib', '_frozen_importlib_external', 'collections.Sequence', 'collections.Iterable', 'os.path', 'collections.OrderedDict', 'collections.ChainMap', 'msvcrt', '_winapi', 'collections.Mapping', '_dummy_threading', 'winreg', '_winreg', 'java.lang', 'vms_lib', 'nt', 'http.HTTPStatus'])
