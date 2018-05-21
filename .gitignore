@@ -16,8 +16,7 @@ src/cpu/java/**/*.*
 !src/cpu/vhdl/memory/**
 
 #doc/
-!doc/main.tex
-!doc/chapters/*.tex
+doc/design_documentation/main.synctex.gz
 
 #ignore doxygen files
 ach_ne_doxy/
