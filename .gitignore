@@ -16,6 +16,8 @@ src/cpu/java/**/*.*
 !src/cpu/vhdl/memory/**
 
 #doc/
+doc/design_documentation/main.synctex.gz
+#doc/
 !doc/main.tex
 !doc/chapters/*.tex
 
