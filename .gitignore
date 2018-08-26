@@ -5,6 +5,7 @@ BuildPath.txt
 #vhdl sources
 src/cpu/vhdl/**/*.*
 !src/cpu/vhdl/**/*.vhdl
+!src/cpu/vhdl/**/*.vhd
 !src/cpu/vhdl/**/*.do
 !src/cpu/vhdl/**/*.coe
 
