@@ -77,11 +77,11 @@
 
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
-USE IEEE.STD_LOGIC_ARITH.ALL;
-USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+-- USE IEEE.STD_LOGIC_ARITH.ALL;
+-- USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 
-LIBRARY UNISIM;
-USE UNISIM.VCOMPONENTS.ALL;
+-- LIBRARY UNISIM;
+-- USE UNISIM.VCOMPONENTS.ALL;
 
 --------------------------------------------------------------------------------
 -- Entity Declaration
@@ -116,96 +116,96 @@ ENTITY blk_mem_gen_0_wrapper IS
 END blk_mem_gen_0_wrapper;
 
 
-ARCHITECTURE xilinx OF blk_mem_gen_0_wrapper IS
+-- ARCHITECTURE xilinx OF blk_mem_gen_0_wrapper IS
 
-attribute DowngradeIPIdentifiedWarnings: string;
-attribute DowngradeIPIdentifiedWarnings of xilinx : architecture is "yes";
+-- attribute DowngradeIPIdentifiedWarnings: string;
+-- attribute DowngradeIPIdentifiedWarnings of xilinx : architecture is "yes";
 
---  COMPONENT BUFG IS
---  PORT (
---     I      : IN STD_ULOGIC;
---     O      : OUT STD_ULOGIC
---  );
---  END COMPONENT;
+-- --  COMPONENT BUFG IS
+-- --  PORT (
+-- --     I      : IN STD_ULOGIC;
+-- --     O      : OUT STD_ULOGIC
+-- --  );
+-- --  END COMPONENT;
 
-  COMPONENT blk_mem_gen_0 IS
-  PORT (
-      --Port A
+  -- COMPONENT blk_mem_gen_0 IS
+  -- PORT (
+      -- --Port A
 
-    ENA        : IN STD_LOGIC;  --opt port
+    -- ENA        : IN STD_LOGIC;  --opt port
   
-    WEA        : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-    ADDRA      : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    -- WEA        : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+    -- ADDRA      : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
   
-    DINA       : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    -- DINA       : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
   
-    DOUTA      : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-
-  
-    CLKA       : IN STD_LOGIC;
+    -- DOUTA      : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 
   
-      --Port B
-    ENB        : IN STD_LOGIC;  --opt port
-  
-    WEB        : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
-    ADDRB      : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-  
-    DINB       : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-    DOUTB      : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-    CLKB       : IN STD_LOGIC
-
-
-  );
-  END COMPONENT;
-
-  SIGNAL CLKA_buf     : STD_LOGIC;
-  SIGNAL CLKB_buf     : STD_LOGIC;
-  SIGNAL S_ACLK_buf   : STD_LOGIC;
-
-
-BEGIN
-
---  bufg_A : BUFG
---    PORT MAP (
---     I => CLKA,
---     O => CLKA_buf
---     );
-
---  bufg_B : BUFG
---    PORT MAP (
---     I => CLKB,
---     O => CLKB_buf
---     );
-
-
-  bmg0 : blk_mem_gen_0
-    PORT MAP (
-      --Port A
-      ENA        => ENA,
-
+    -- CLKA       : IN STD_LOGIC;
 
   
-      WEA        => WEA,
-      ADDRA      => ADDRA,
+      -- --Port B
+    -- ENB        : IN STD_LOGIC;  --opt port
   
-      DINA       => DINA,
+    -- WEB        : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+    -- ADDRB      : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
   
-      DOUTA      => DOUTA,
+    -- DINB       : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+    -- DOUTB      : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+    -- CLKB       : IN STD_LOGIC
 
-      CLKA       => CLKA,--CLKA_buf,
+
+  -- );
+  -- END COMPONENT;
+
+  -- SIGNAL CLKA_buf     : STD_LOGIC;
+  -- SIGNAL CLKB_buf     : STD_LOGIC;
+  -- SIGNAL S_ACLK_buf   : STD_LOGIC;
+
+
+-- BEGIN
+
+-- --  bufg_A : BUFG
+-- --    PORT MAP (
+-- --     I => CLKA,
+-- --     O => CLKA_buf
+-- --     );
+
+-- --  bufg_B : BUFG
+-- --    PORT MAP (
+-- --     I => CLKB,
+-- --     O => CLKB_buf
+-- --     );
+
+
+  -- bmg0 : blk_mem_gen_0
+    -- PORT MAP (
+      -- --Port A
+      -- ENA        => ENA,
+
 
   
-      --Port B
-      ENB        => ENB, 
+      -- WEA        => WEA,
+      -- ADDRA      => ADDRA,
   
-      WEB        => WEB,
-      ADDRB      => ADDRB,
+      -- DINA       => DINA,
   
-      DINB       => DINB,
-      DOUTB      => DOUTB,
-      CLKB       => CLKB--CLKB_buf
+      -- DOUTA      => DOUTA,
 
-    );
+      -- CLKA       => CLKA,--CLKA_buf,
 
-END xilinx;
+  
+      -- --Port B
+      -- ENB        => ENB, 
+  
+      -- WEB        => WEB,
+      -- ADDRB      => ADDRB,
+  
+      -- DINB       => DINB,
+      -- DOUTB      => DOUTB,
+      -- CLKB       => CLKB--CLKB_buf
+
+    -- );
+
+-- END xilinx;
