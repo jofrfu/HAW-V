@@ -26,12 +26,13 @@ library IEEE;
     use IEEE.numeric_std.all;
 
 use WORK.riscv_pack.all;
+use WORK.COMPONENTS.all;
 
 --!@brief This device contains the complete processor (Core, Memory and Peripherals).
 
 entity top_level is
     port(
-        clk, reset     : in    std_logic;
+        reset_n     : in    std_logic;
         
         -- peripheral I/O
         periph_bit_io  : inout PERIPH_IO_TYPE
@@ -40,16 +41,8 @@ end entity top_level;
 
 architecture beh of top_level is
 
-    signal CLK_50MHz_s : std_logic;
-    
-    component clk_wiz_0
-        port
-        (-- Clock in ports
-        -- Clock out ports
-        clk_out1          : out    std_logic;
-        clk_in1           : in     std_logic
-        );
-    end component;
+    signal CLK : std_logic;
+    signal RESET : std_logic;
 
     component risc_v_core is
         port(
@@ -121,17 +114,21 @@ architecture beh of top_level is
     for all : peripherals use entity work.peripherals_wrapper(beh);
 begin
  
-    clk_wiz_0_i : clk_wiz_0
+    RESET <= not reset_n;
+ 
+    OSCILLATOR : HSOSC
+    generic map(
+        CLKHF_DIV => "0b11"
+    )
     port map ( 
-       -- Clock out ports  
-       clk_out1 => CLK_50MHz_s,
-       -- Clock in ports
-       clk_in1 => clk
+       CLKHFPU => '1',
+       CLKHFEN => '1',
+       CLKHF => CLK
     );
  
     core_i : risc_v_core
     port map(
-        CLK_50MHz_s,
+        CLK,
         reset,
         
         pc_asynch_s,
@@ -146,7 +143,7 @@ begin
     
     mem_i : memory
     port map(
-        CLK_50MHz_s,
+        CLK,
         reset,
         
         pc_asynch_s,
@@ -165,7 +162,7 @@ begin
     
     periph_i : peripherals
     port map(
-        CLK_50MHz_s,
+        CLK,
         reset,
         
         PERIPH_WRITE_EN_s,
