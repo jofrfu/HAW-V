@@ -1,7 +1,8 @@
 library IEEE;
     use IEEE.std_logic_1164.all;
-    
-use WORK.COMPONENTS.all;
+
+library ICE40UP;
+    use ICE40UP.COMPONENTS.all;
     
 architecture lattice of blk_mem_gen_0_wrapper is
     -- EBRAM

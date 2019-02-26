@@ -25,8 +25,10 @@ library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
+library ICE40UP;
+    use ICE40UP.COMPONENTS.all;
+    
 use WORK.riscv_pack.all;
-use WORK.COMPONENTS.all;
 
 --!@brief This device contains the complete processor (Core, Memory and Peripherals).
 

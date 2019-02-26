@@ -1,7 +1,8 @@
 library IEEE;
     use IEEE.std_logic_1164.all;
 
-use WORK.COMPONENTS.all;
+library ICE40UP;
+    use ICE40UP.COMPONENTS.all;
     
 entity DUAL_PORT_32K is
     port(
@@ -27,7 +28,8 @@ end entity DUAL_PORT_32K;
 library IEEE;
     use IEEE.std_logic_1164.all;
 
-use WORK.COMPONENTS.all;
+library ICE40UP;
+    use ICE40UP.COMPONENTS.all;
 
 entity DUAL_PORT_16K is
     port(
@@ -53,7 +55,8 @@ end entity DUAL_PORT_16K;
 library IEEE;
     use IEEE.std_logic_1164.all;
 
-use WORK.COMPONENTS.all;
+library ICE40UP;
+    use ICE40UP.COMPONENTS.all;
 
 entity DUAL_PORT_8K is
     port(
