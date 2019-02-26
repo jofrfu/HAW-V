@@ -98,7 +98,7 @@ ENTITY blk_mem_gen_0_wrapper IS
   
     DOUTA          : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
   
-    CLKA       : IN STD_LOGIC;
+    CLKA           : IN STD_LOGIC;
 
   
       --Inputs - Port B

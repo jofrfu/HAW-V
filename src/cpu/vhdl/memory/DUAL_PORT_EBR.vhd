@@ -646,7 +646,7 @@ begin
         CEW => '1',
         CER => '1',
         RE => READ0_EN,
-        WE => WRITE_EN,
+        WE => WRITE_EN and (WRITE_MASK(1) or WRITE_MASK(0)),
         MASK_N => (15 downto 8 => not WRITE_MASK(1), 7 downto 0 => not WRITE_MASK(0)),
         DO => READ0_PORT(15 downto 0)
     );
@@ -665,7 +665,7 @@ begin
         CEW => '1',
         CER => '1',
         RE => READ0_EN,
-        WE => WRITE_EN,
+        WE => WRITE_EN and (WRITE_MASK(3) or WRITE_MASK(2)),
         MASK_N => (15 downto 8 => not WRITE_MASK(3), 7 downto 0 => not WRITE_MASK(2)),
         DO => READ0_PORT(31 downto 16)
     );
@@ -686,7 +686,7 @@ begin
         CEW => '1',
         CER => '1',
         RE => READ1_EN,
-        WE => WRITE_EN,
+        WE => WRITE_EN and (WRITE_MASK(1) or WRITE_MASK(0)),
         MASK_N => (15 downto 8 => not WRITE_MASK(1), 7 downto 0 => not WRITE_MASK(0)),
         DO => READ1_PORT(15 downto 0)
     );
@@ -705,7 +705,7 @@ begin
         CEW => '1',
         CER => '1',
         RE => READ1_EN,
-        WE => WRITE_EN,
+        WE => WRITE_EN and (WRITE_MASK(3) or WRITE_MASK(2)),
         MASK_N => (15 downto 8 => not WRITE_MASK(3), 7 downto 0 => not WRITE_MASK(2)),
         DO => READ1_PORT(31 downto 16)
     );
