@@ -1,10 +1,13 @@
 library IEEE;
     use IEEE.std_logic_1164.all;
+    use IEEE.numeric_std.all;
 
-library ICE40UP;
-    use ICE40UP.COMPONENTS.all;
-    
+use WORK.riscv_pack.all;
+
 entity DUAL_PORT_32K is
+    generic(
+        MEMORY_CONTENT : MEMORY_TYPE(0 to 4*2**10-1) := (others => (others => '0'))
+    );
     port(
         -- READ PORT
         READ_CLK        : in  std_logic;
@@ -22,11 +25,14 @@ end entity DUAL_PORT_32K;
 
 library IEEE;
     use IEEE.std_logic_1164.all;
+    use IEEE.numeric_std.all;
 
-library ICE40UP;
-    use ICE40UP.COMPONENTS.all;
-
+use WORK.riscv_pack.all;
+    
 entity DUAL_PORT_16K is
+    generic(
+        MEMORY_CONTENT : MEMORY_TYPE(0 to 4*2**9-1) := (others => (others => '0'))
+    );
     port(
         -- READ PORT
         READ_CLK        : in  std_logic;
@@ -47,8 +53,13 @@ library IEEE;
 
 library ICE40UP;
     use ICE40UP.COMPONENTS.all;
+    
+use WORK.riscv_pack.all;
 
 entity DUAL_PORT_8K is
+    generic(
+        MEMORY_CONTENT : MEMORY_TYPE(0 to 4*2**8-1) := (others => (others => '0'))
+    );
     port(
         -- READ PORT
         READ_CLK        : in  std_logic;
@@ -64,283 +75,125 @@ entity DUAL_PORT_8K is
     );
 end entity DUAL_PORT_8K;
 
-architecture BEH of DUAL_PORT_32K is
-    signal  EBRAM0_OUT_MAP,
-            EBRAM1_OUT_MAP,
-            EBRAM2_OUT_MAP,
-            EBRAM3_OUT_MAP,
-            EBRAM4_OUT_MAP,
-            EBRAM5_OUT_MAP,
-            EBRAM6_OUT_MAP,
-            EBRAM7_OUT_MAP
-            : std_logic_vector(15 downto 0);
+architecture BEH of DUAL_PORT_32K is       
+    type RAM_TYPE is array(0 to 2**10-1) of std_logic_vector(7 downto 0);
+    
+    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer) return RAM_TYPE;
+    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer) return RAM_TYPE is
+        variable RAM_VALUES : RAM_TYPE;
+    begin
+        for i in 0 to 2**10-1 loop
+            RAM_VALUES(i) := DUMP(i*4+INDEX);
+        end loop;
+        return RAM_VALUES;
+    end function INIT_RAM; 
+    
+    signal RAM0 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 0);
+    signal RAM1 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 1);
+    signal RAM2 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 2);
+    signal RAM3 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 3);   
 begin
-
-    READ_PORT <= EBRAM7_OUT_MAP(13) & EBRAM7_OUT_MAP(9) & EBRAM7_OUT_MAP(5) & EBRAM7_OUT_MAP(1)
-               & EBRAM6_OUT_MAP(13) & EBRAM6_OUT_MAP(9) & EBRAM6_OUT_MAP(5) & EBRAM6_OUT_MAP(1)
-               & EBRAM5_OUT_MAP(13) & EBRAM5_OUT_MAP(9) & EBRAM5_OUT_MAP(5) & EBRAM5_OUT_MAP(1)
-               & EBRAM4_OUT_MAP(13) & EBRAM4_OUT_MAP(9) & EBRAM4_OUT_MAP(5) & EBRAM4_OUT_MAP(1)
-               & EBRAM3_OUT_MAP(13) & EBRAM3_OUT_MAP(9) & EBRAM3_OUT_MAP(5) & EBRAM3_OUT_MAP(1)
-               & EBRAM2_OUT_MAP(13) & EBRAM2_OUT_MAP(9) & EBRAM2_OUT_MAP(5) & EBRAM2_OUT_MAP(1)
-               & EBRAM1_OUT_MAP(13) & EBRAM1_OUT_MAP(9) & EBRAM1_OUT_MAP(5) & EBRAM1_OUT_MAP(1)
-               & EBRAM0_OUT_MAP(13) & EBRAM0_OUT_MAP(9) & EBRAM0_OUT_MAP(5) & EBRAM0_OUT_MAP(1);
-
-    EBR0 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "4",
-        DATA_WIDTH_R => "4"
-    )
-    port map(
-        DI => (13 => WRITE_PORT(3), 9 => WRITE_PORT(2), 5 => WRITE_PORT(1), 1 => WRITE_PORT(0), others => '0'),
-        ADW => '0' & WRITE_ADDRESS,
-        ADR => '0' & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE  => READ_EN,
-        WE  => WRITE_EN and WRITE_MASK(0),
-        MASK_N => x"0000",
-        DO => EBRAM0_OUT_MAP
-    );
     
-    EBR1 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "4",
-        DATA_WIDTH_R => "4"
-    )
-    port map(
-        DI => (13 => WRITE_PORT(7), 9 => WRITE_PORT(6), 5 => WRITE_PORT(5), 1 => WRITE_PORT(4), others => '0'),
-        ADW => '0' & WRITE_ADDRESS,
-        ADR => '0' & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE  => READ_EN,
-        WE  => WRITE_EN and WRITE_MASK(0),
-        MASK_N => x"0000",
-        DO => EBRAM1_OUT_MAP
-    );
+    process(WRITE_CLK) is
+    begin
+        if WRITE_CLK = '1' and WRITE_CLK'event then
+            if WRITE_EN = '1' then
+                if WRITE_MASK(0) = '1' then
+                    RAM0(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(7 downto 0);
+                end if;
+                
+                if WRITE_MASK(1) = '1' then
+                    RAM1(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(15 downto 8);
+                end if;
+                
+                if WRITE_MASK(2) = '1' then
+                    RAM2(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(23 downto 16);
+                end if;
+                
+                if WRITE_MASK(3) = '1' then
+                    RAM3(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(31 downto 24);
+                end if;
+            end if;
+        end if;
+    end process;
     
-    EBR2 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "4",
-        DATA_WIDTH_R => "4"
-    )
-    port map(
-        DI => (13 => WRITE_PORT(11), 9 => WRITE_PORT(10), 5 => WRITE_PORT(9), 1 => WRITE_PORT(8), others => '0'),
-        ADW => '0' & WRITE_ADDRESS,
-        ADR => '0' & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE  => READ_EN,
-        WE  => WRITE_EN and WRITE_MASK(1),
-        MASK_N => x"0000",
-        DO => EBRAM2_OUT_MAP
-    );
-    
-    EBR3 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "4",
-        DATA_WIDTH_R => "4"
-    )
-    port map(
-        DI => (13 => WRITE_PORT(15), 9 => WRITE_PORT(14), 5 => WRITE_PORT(13), 1 => WRITE_PORT(12), others => '0'),
-        ADW => '0' & WRITE_ADDRESS,
-        ADR => '0' & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE  => READ_EN,
-        WE  => WRITE_EN and WRITE_MASK(1),
-        MASK_N => x"0000",
-        DO => EBRAM3_OUT_MAP
-    );
-    
-    EBR4 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "4",
-        DATA_WIDTH_R => "4"
-    )
-    port map(
-        DI => (13 => WRITE_PORT(19), 9 => WRITE_PORT(18), 5 => WRITE_PORT(17), 1 => WRITE_PORT(16), others => '0'),
-        ADW => '0' & WRITE_ADDRESS,
-        ADR => '0' & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE  => READ_EN,
-        WE  => WRITE_EN and WRITE_MASK(2),
-        MASK_N => x"0000",
-        DO => EBRAM4_OUT_MAP
-    );
-    
-    EBR5 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "4",
-        DATA_WIDTH_R => "4"
-    )
-    port map(
-        DI => (13 => WRITE_PORT(23), 9 => WRITE_PORT(22), 5 => WRITE_PORT(21), 1 => WRITE_PORT(20), others => '0'),
-        ADW => '0' & WRITE_ADDRESS,
-        ADR => '0' & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE  => READ_EN,
-        WE  => WRITE_EN and WRITE_MASK(2),
-        MASK_N => x"0000",
-        DO => EBRAM5_OUT_MAP
-    );
-    
-    EBR6 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "4",
-        DATA_WIDTH_R => "4"
-    )
-    port map(
-        DI => (13 => WRITE_PORT(27), 9 => WRITE_PORT(26), 5 => WRITE_PORT(25), 1 => WRITE_PORT(24), others => '0'),
-        ADW => '0' & WRITE_ADDRESS,
-        ADR => '0' & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE  => READ_EN,
-        WE  => WRITE_EN and WRITE_MASK(3),
-        MASK_N => x"0000",
-        DO => EBRAM6_OUT_MAP
-    );
-    
-    EBR7 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "4",
-        DATA_WIDTH_R => "4"
-    )
-    port map(
-        DI => (13 => WRITE_PORT(31), 9 => WRITE_PORT(30), 5 => WRITE_PORT(29), 1 => WRITE_PORT(28), others => '0'),
-        ADW => '0' & WRITE_ADDRESS,
-        ADR => '0' & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE  => READ_EN,
-        WE  => WRITE_EN and WRITE_MASK(3),
-        MASK_N => x"0000",
-        DO => EBRAM7_OUT_MAP
-    );
+    process(READ_CLK) is
+    begin
+        if READ_CLK = '1' and READ_CLK'event then
+            if READ_EN = '1' then
+                READ_PORT <= RAM3(to_integer(unsigned(READ_ADDRESS)))
+                           & RAM2(to_integer(unsigned(READ_ADDRESS)))
+                           & RAM1(to_integer(unsigned(READ_ADDRESS)))
+                           & RAM0(to_integer(unsigned(READ_ADDRESS)));
+            end if;
+        end if;
+    end process;
 end architecture BEH;
 
 architecture BEH of DUAL_PORT_16K is
-    signal  EBRAM0_OUT_MAP,
-            EBRAM1_OUT_MAP,
-            EBRAM2_OUT_MAP,
-            EBRAM3_OUT_MAP
-            : std_logic_vector(15 downto 0);
+    type RAM_TYPE is array(0 to 2**9-1) of std_logic_vector(7 downto 0);
+    
+    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer) return RAM_TYPE;
+    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer) return RAM_TYPE is
+        variable RAM_VALUES : RAM_TYPE;
+    begin
+        for i in 0 to 2**9-1 loop
+            RAM_VALUES(i) := DUMP(i*4+INDEX);
+        end loop;
+        return RAM_VALUES;
+    end function INIT_RAM; 
+    
+    signal RAM0 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 0);
+    signal RAM1 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 1);
+    signal RAM2 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 2);
+    signal RAM3 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 3);
 begin
     
-    READ_PORT <= EBRAM3_OUT_MAP(14) & EBRAM3_OUT_MAP(12) & EBRAM3_OUT_MAP(10) & EBRAM3_OUT_MAP( 8)
-               & EBRAM3_OUT_MAP( 6) & EBRAM3_OUT_MAP( 4) & EBRAM3_OUT_MAP( 2) & EBRAM3_OUT_MAP( 0)
-               & EBRAM2_OUT_MAP(14) & EBRAM2_OUT_MAP(12) & EBRAM2_OUT_MAP(10) & EBRAM2_OUT_MAP( 8)
-               & EBRAM2_OUT_MAP( 6) & EBRAM2_OUT_MAP( 4) & EBRAM2_OUT_MAP( 2) & EBRAM2_OUT_MAP( 0)
-               & EBRAM1_OUT_MAP(14) & EBRAM1_OUT_MAP(12) & EBRAM1_OUT_MAP(10) & EBRAM1_OUT_MAP( 8)
-               & EBRAM1_OUT_MAP( 6) & EBRAM1_OUT_MAP( 4) & EBRAM1_OUT_MAP( 2) & EBRAM1_OUT_MAP( 0)
-               & EBRAM0_OUT_MAP(14) & EBRAM0_OUT_MAP(12) & EBRAM0_OUT_MAP(10) & EBRAM0_OUT_MAP( 8)
-               & EBRAM0_OUT_MAP( 6) & EBRAM0_OUT_MAP( 4) & EBRAM0_OUT_MAP( 2) & EBRAM0_OUT_MAP( 0);
+    process(WRITE_CLK) is
+    begin
+        if WRITE_CLK = '1' and WRITE_CLK'event then
+            if WRITE_EN = '1' then
+                if WRITE_MASK(0) = '1' then
+                    RAM0(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(7 downto 0);
+                end if;
+                
+                if WRITE_MASK(1) = '1' then
+                    RAM1(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(15 downto 8);
+                end if;
+                
+                if WRITE_MASK(2) = '1' then
+                    RAM2(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(23 downto 16);
+                end if;
+                
+                if WRITE_MASK(3) = '1' then
+                    RAM3(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(31 downto 24);
+                end if;
+            end if;
+        end if;
+    end process;
     
-    EBR0 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "8",
-        DATA_WIDTH_R => "8"
-    )
-    port map(
-        DI => (14 => WRITE_PORT(7), 12 => WRITE_PORT(6), 10 => WRITE_PORT(5),  8 => WRITE_PORT(4),
-                6 => WRITE_PORT(3),  4 => WRITE_PORT(2),  2 => WRITE_PORT(1),  0 => WRITE_PORT(0),
-                others => '0'),
-        ADW => "00" & WRITE_ADDRESS,
-        ADR => "00" & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE => READ_EN,
-        WE => WRITE_EN and WRITE_MASK(0),
-        MASK_N => x"0000",
-        DO => EBRAM0_OUT_MAP
-    );
-    
-    EBR1 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "8",
-        DATA_WIDTH_R => "8"
-    )
-    port map(
-        DI => (14 => WRITE_PORT(15), 12 => WRITE_PORT(14), 10 => WRITE_PORT(13),  8 => WRITE_PORT(12),
-                6 => WRITE_PORT(11),  4 => WRITE_PORT(10),  2 => WRITE_PORT(9),  0 => WRITE_PORT(8),
-                others => '0'),
-        ADW => "00" & WRITE_ADDRESS,
-        ADR => "00" & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE => READ_EN,
-        WE => WRITE_EN and WRITE_MASK(1),
-        MASK_N => x"0000",
-        DO => EBRAM1_OUT_MAP
-    );
-    
-    EBR2 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "8",
-        DATA_WIDTH_R => "8"
-    )
-    port map(
-        DI => (14 => WRITE_PORT(23), 12 => WRITE_PORT(22), 10 => WRITE_PORT(21),  8 => WRITE_PORT(20),
-                6 => WRITE_PORT(19),  4 => WRITE_PORT(18),  2 => WRITE_PORT(17),  0 => WRITE_PORT(16),
-                others => '0'),
-        ADW => "00" & WRITE_ADDRESS,
-        ADR => "00" & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE => READ_EN,
-        WE => WRITE_EN and WRITE_MASK(2),
-        MASK_N => x"0000",
-        DO => EBRAM2_OUT_MAP
-    );
-    
-    EBR3 : PDP4K
-    generic map(
-        DATA_WIDTH_W => "8",
-        DATA_WIDTH_R => "8"
-    )
-    port map(
-        DI => (14 => WRITE_PORT(31), 12 => WRITE_PORT(30), 10 => WRITE_PORT(29),  8 => WRITE_PORT(28),
-                6 => WRITE_PORT(27),  4 => WRITE_PORT(26),  2 => WRITE_PORT(25),  0 => WRITE_PORT(24),
-                others => '0'),
-        ADW => "00" & WRITE_ADDRESS,
-        ADR => "00" & READ_ADDRESS,
-        CKW => WRITE_CLK,
-        CKR => READ_CLK,
-        CEW => '1',
-        CER => '1',
-        RE => READ_EN,
-        WE => WRITE_EN and WRITE_MASK(3),
-        MASK_N => x"0000",
-        DO => EBRAM3_OUT_MAP
-    );
+    process(READ_CLK) is
+    begin
+        if READ_CLK = '1' and READ_CLK'event then
+            if READ_EN = '1' then
+                READ_PORT <= RAM3(to_integer(unsigned(READ_ADDRESS)))
+                           & RAM2(to_integer(unsigned(READ_ADDRESS)))
+                           & RAM1(to_integer(unsigned(READ_ADDRESS)))
+                           & RAM0(to_integer(unsigned(READ_ADDRESS)));
+            end if;
+        end if;
+    end process;
 end architecture BEH;
 
 architecture BEH of DUAL_PORT_8K is
+    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer; POSITION : integer) return string;
+    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer; POSITION : integer) return string is
+        variable RAM_VALUES : string;
+    begin
+        for i in 0 to (2**8)/16-1 loop
+            
+        end loop;
+    end function INIT_RAM;
 begin
 
     EBR0 : PDP4K
