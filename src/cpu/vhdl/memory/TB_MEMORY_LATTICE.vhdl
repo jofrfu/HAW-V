@@ -61,76 +61,51 @@ begin
         DINB <= (others => '0');
         wait until CLK='1' and CLK'event;
         
-        ------------ 32K EBR
+        ------------ EBR for Instructions
         
         ENB <= '1';
         WEB <= "1111";
             
-        for i in 0 to 2**10-1 loop -- test 32K block
+        for i in 0 to 2**10+2**9+2**8-1 loop -- test 32K block
             ADDRB <= std_logic_vector(to_unsigned(i, 30)) & "00";
             DINB <= std_logic_vector(to_unsigned(i, 8)) & std_logic_vector(to_unsigned(i, 8)) & std_logic_vector(to_unsigned(i, 8)) & std_logic_vector(to_unsigned(i, 8));
             wait until CLK='1' and CLK'event;
         end loop;
         
         WEB <= "0000";
-        for i in 0 to 2**10-1 loop -- read 32K block from B
+        for i in 0 to 2**10+2**9+2**8-1 loop -- read 32K block from B
             ADDRB <= std_logic_vector(to_unsigned(i, 30)) & "00";
             wait until CLK='1' and CLK'event;
         end loop;
         ENB <= '0';
         
         ENA <= '1';
-        for i in 0 to 2**10-1 loop -- read 32K block from A
+        for i in 0 to 2**10+2**9+2**8-1 loop -- read 32K block from A
             ADDRA <= std_logic_vector(to_unsigned(i, 30)) & "00";
             wait until CLK='1' and CLK'event;
         end loop;
         ENA <= '0';
         
-        ------------ 16K EBR
+        ------------ EBR for Data
         
         ENB <= '1';
         WEB <= "1111";
             
-        for i in 2**10 to 2**10+2**9-1 loop -- test 16K block
+        for i in 2**11 to 2**11+2**10+2**9+2**8-1 loop -- test 32K block
             ADDRB <= std_logic_vector(to_unsigned(i, 30)) & "00";
             DINB <= std_logic_vector(to_unsigned(i, 8)) & std_logic_vector(to_unsigned(i, 8)) & std_logic_vector(to_unsigned(i, 8)) & std_logic_vector(to_unsigned(i, 8));
             wait until CLK='1' and CLK'event;
         end loop;
         
         WEB <= "0000";
-        for i in 2**10 to 2**10+2**9-1 loop -- read 16K block from B
+        for i in 2**11 to 2**11+2**10+2**9+2**8-1 loop -- read 32K block from B
             ADDRB <= std_logic_vector(to_unsigned(i, 30)) & "00";
             wait until CLK='1' and CLK'event;
         end loop;
         ENB <= '0';
         
         ENA <= '1';
-        for i in 2**10 to 2**10+2**9-1 loop -- read 16K block from A
-            ADDRA <= std_logic_vector(to_unsigned(i, 30)) & "00";
-            wait until CLK='1' and CLK'event;
-        end loop;
-        ENA <= '0';
-        
-        ------------ 8K EBR
-        
-        ENB <= '1';
-        WEB <= "1111";
-            
-        for i in 2**10+2**9 to 2**10+2**9+2**8-1 loop -- test 8K block
-            ADDRB <= std_logic_vector(to_unsigned(i, 30)) & "00";
-            DINB <= std_logic_vector(to_unsigned(i, 8)) & std_logic_vector(to_unsigned(i, 8)) & std_logic_vector(to_unsigned(i, 8)) & std_logic_vector(to_unsigned(i, 8));
-            wait until CLK='1' and CLK'event;
-        end loop;
-        
-        WEB <= "0000";
-        for i in 2**10+2**9 to 2**10+2**9+2**8-1 loop -- read 8K block from B
-            ADDRB <= std_logic_vector(to_unsigned(i, 30)) & "00";
-            wait until CLK='1' and CLK'event;
-        end loop;
-        ENB <= '0';
-        
-        ENA <= '1';
-        for i in 2**10+2**9 to 2**10+2**9+2**8-1 loop -- read 8K block from A
+        for i in 2**11 to 2**11+2**10+2**9+2**8-1 loop -- read 32K block from A
             ADDRA <= std_logic_vector(to_unsigned(i, 30)) & "00";
             wait until CLK='1' and CLK'event;
         end loop;

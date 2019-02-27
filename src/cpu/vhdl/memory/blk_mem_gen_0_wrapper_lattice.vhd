@@ -5,32 +5,45 @@ library ICE40UP;
     use ICE40UP.COMPONENTS.all;
     
 architecture lattice of blk_mem_gen_0_wrapper is
-    -- EBRAM
+    -- EBRAM for Instructions
     signal EB32K_CS0_cs : std_logic := '0';
     signal EB32K_CS0_ns : std_logic;
-    signal EB32K_CS1_cs : std_logic := '0';
-    signal EB32K_CS1_ns : std_logic;
+    
+    signal EB32K_WE0 : std_logic;
     
     signal EBRAM32K_OUT0 : std_logic_vector(31 downto 0);
-    signal EBRAM32K_OUT1 : std_logic_vector(31 downto 0);
     
     signal EB16K_CS0_cs : std_logic := '0';
     signal EB16K_CS0_ns : std_logic;
-    signal EB16K_CS1_cs : std_logic := '0';
-    signal EB16K_CS1_ns : std_logic;
+    
+    signal EB16K_WE0 : std_logic;
     
     signal EBRAM16K_OUT0 : std_logic_vector(31 downto 0);
-    signal EBRAM16K_OUT1 : std_logic_vector(31 downto 0);
     
     signal EB8K_CS0_cs : std_logic := '0';
     signal EB8K_CS0_ns : std_logic;
+    
+    signal EB8K_WE0 : std_logic;
+    
+    signal EBRAM8K_OUT0 : std_logic_vector(31 downto 0);
+    
+    -- EBRAM for Data
+    signal EB32K_CS1_cs : std_logic := '0';
+    signal EB32K_CS1_ns : std_logic;
+    
+    signal EBRAM32K_OUT1 : std_logic_vector(31 downto 0);
+    
+    signal EB16K_CS1_cs : std_logic := '0';
+    signal EB16K_CS1_ns : std_logic;
+    
+    signal EBRAM16K_OUT1 : std_logic_vector(31 downto 0);
+    
     signal EB8K_CS1_cs : std_logic := '0';
     signal EB8K_CS1_ns : std_logic;
     
-    signal EBRAM8K_OUT0 : std_logic_vector(31 downto 0);
     signal EBRAM8K_OUT1 : std_logic_vector(31 downto 0);
     
-    -- SPRAM
+    -- SPRAM for Data
     signal SP_CS0_cs : std_logic := '0';
     signal SP_CS0_ns : std_logic;
     signal SP_CS1_cs : std_logic := '0';
@@ -89,40 +102,75 @@ begin
             EB32K_CS0_ns <= '1' and ENA;
         end if;
     
+        ---------
+    
         if ADDRB_WORD(15) = '1' then
             SP_CS1_ns <= '1' and ENB;
             SP_CS0_ns <= '0';
             
+            EB8K_WE0 <= '0';
+            EB16K_WE0 <= '0';
+            EB32K_WE0 <= '0';
+
             EB8K_CS1_ns <= '0';
             EB16K_CS1_ns <= '0';
-            EB32K_CS1_ns <= '0';  
+            EB32K_CS1_ns <= '0';            
         elsif ADDRB_WORD(14) = '1' then
             SP_CS1_ns <= '0';
             SP_CS0_ns <= '1' and ENB;
             
+            EB8K_WE0 <= '0';
+            EB16K_WE0 <= '0';
+            EB32K_WE0 <= '0';
+
             EB8K_CS1_ns <= '0';
             EB16K_CS1_ns <= '0';
-            EB32K_CS1_ns <= '0';          
+            EB32K_CS1_ns <= '0';            
+        elsif ADDRB_WORD(11) = '1' then
+            SP_CS1_ns <= '0';
+            SP_CS0_ns <= '0';
+            
+            if ADDRB_WORD(10) = '1' then
+                if ADDRB_WORD(9) = '1' then
+                    EB8K_CS1_ns <= '1' and ENB;
+                    EB16K_CS1_ns <= '0';
+                else
+                    EB8K_CS1_ns <= '0';
+                    EB16K_CS1_ns <= '1' and ENB;
+                end if;
+                
+                EB32K_CS1_ns <= '0';
+            else
+                EB32K_CS1_ns <= '1' and ENB;
+            end if;
         elsif ADDRB_WORD(10) = '1' then
             SP_CS1_ns <= '0';
             SP_CS0_ns <= '0';
             
+            EB8K_CS1_ns <= '0';
+            EB16K_CS1_ns <= '0';
+            EB32K_CS1_ns <= '0';
+            
             if ADDRB_WORD(9) = '1' then
-                EB8K_CS1_ns <= '1' and ENB;
-                EB16K_CS1_ns <= '0';
+                EB8K_WE0 <= '1' and ENB;
+                EB16K_WE0 <= '0';
             else
-                EB8K_CS1_ns <= '0';
-                EB16K_CS1_ns <= '1' and ENB;
+                EB8K_WE0 <= '0';
+                EB16K_WE0 <= '1' and ENB;
             end if;
             
-            EB32K_CS1_ns <= '0';
+            EB32K_WE0 <= '0';
         else
             SP_CS1_ns <= '0';
             SP_CS0_ns <= '0';
             
             EB8K_CS1_ns <= '0';
             EB16K_CS1_ns <= '0';
-            EB32K_CS1_ns <= '1' and ENB;
+            EB32K_CS1_ns <= '0';
+            
+            EB8K_WE0 <= '0';
+            EB16K_WE0 <= '0';
+            EB32K_WE0 <= '1' and ENB;
         end if;
     end process;
     
@@ -142,18 +190,60 @@ begin
         end if;
     end process SEQ_LOG_A;
     
-    EBR32K : entity WORK.DUAL_PORT_32K(BEH)
+    EBR32K0 : entity WORK.DUAL_PORT_32K(BEH)
     port map(
-        -- READ PORT0
-        READ0_CLK => CLKA,   
-        READ0_ADDRESS => ADDRA_WORD(9 downto 0),
-        READ0_PORT => EBRAM32K_OUT0,   
-        READ0_EN => EB32K_CS0_ns,
-        -- READ PORT1
-        READ1_CLK => CLKB,    
-        READ1_ADDRESS => ADDRB_WORD(9 downto 0),
-        READ1_PORT => EBRAM32K_OUT1,   
-        READ1_EN => EB32K_CS1_ns,    
+        -- READ PORT
+        READ_CLK => CLKA,   
+        READ_ADDRESS => ADDRA_WORD(9 downto 0),
+        READ_PORT => EBRAM32K_OUT0,   
+        READ_EN => EB32K_CS0_ns,   
+        -- WRITE PORT
+        WRITE_CLK => CLKB,    
+        WRITE_ADDRESS => ADDRB_WORD(9 downto 0),
+        WRITE_PORT => DINB,   
+        WRITE_EN => EB32K_WE0,
+        WRITE_MASK => WEB
+    );
+    
+    EBR16K0 : entity WORK.DUAL_PORT_16K(BEH)
+    port map(
+        -- READ PORT
+        READ_CLK => CLKA,   
+        READ_ADDRESS => ADDRA_WORD(8 downto 0),
+        READ_PORT => EBRAM16K_OUT0,   
+        READ_EN => EB16K_CS0_ns,   
+        -- WRITE PORT
+        WRITE_CLK => CLKB,    
+        WRITE_ADDRESS => ADDRB_WORD(8 downto 0),
+        WRITE_PORT => DINB,   
+        WRITE_EN => EB16K_WE0,
+        WRITE_MASK => WEB
+    );
+    
+    EBR8K0 : entity WORK.DUAL_PORT_8K(BEH)
+    port map(
+        -- READ PORT
+        READ_CLK => CLKA,   
+        READ_ADDRESS => ADDRA_WORD(7 downto 0),
+        READ_PORT => EBRAM8K_OUT0,   
+        READ_EN => EB8K_CS0_ns,   
+        -- WRITE PORT
+        WRITE_CLK => CLKB,    
+        WRITE_ADDRESS => ADDRB_WORD(7 downto 0),
+        WRITE_PORT => DINB,   
+        WRITE_EN => EB8K_WE0,
+        WRITE_MASK => WEB
+    );
+    
+    -----------
+    
+    EBR32K1 : entity WORK.DUAL_PORT_32K(BEH)
+    port map(
+        -- READ PORT
+        READ_CLK => CLKA,   
+        READ_ADDRESS => ADDRA_WORD(9 downto 0),
+        READ_PORT => EBRAM32K_OUT1,   
+        READ_EN => EB32K_CS1_ns,   
         -- WRITE PORT
         WRITE_CLK => CLKB,    
         WRITE_ADDRESS => ADDRB_WORD(9 downto 0),
@@ -162,18 +252,13 @@ begin
         WRITE_MASK => WEB
     );
     
-    EBR16K : entity WORK.DUAL_PORT_16K(BEH)
+    EBR16K1 : entity WORK.DUAL_PORT_16K(BEH)
     port map(
-        -- READ PORT0
-        READ0_CLK => CLKA,   
-        READ0_ADDRESS => ADDRA_WORD(8 downto 0),
-        READ0_PORT => EBRAM16K_OUT0,   
-        READ0_EN => EB16K_CS0_ns,
-        -- READ PORT1
-        READ1_CLK => CLKB,    
-        READ1_ADDRESS => ADDRB_WORD(8 downto 0),
-        READ1_PORT => EBRAM16K_OUT1,   
-        READ1_EN => EB16K_CS1_ns,    
+        -- READ PORT
+        READ_CLK => CLKA,   
+        READ_ADDRESS => ADDRA_WORD(8 downto 0),
+        READ_PORT => EBRAM16K_OUT1,   
+        READ_EN => EB16K_CS1_ns,   
         -- WRITE PORT
         WRITE_CLK => CLKB,    
         WRITE_ADDRESS => ADDRB_WORD(8 downto 0),
@@ -182,18 +267,13 @@ begin
         WRITE_MASK => WEB
     );
     
-    EBR8K : entity WORK.DUAL_PORT_8K(BEH)
+    EBR8K1 : entity WORK.DUAL_PORT_8K(BEH)
     port map(
-        -- READ PORT0
-        READ0_CLK => CLKA,   
-        READ0_ADDRESS => ADDRA_WORD(7 downto 0),
-        READ0_PORT => EBRAM8K_OUT0,   
-        READ0_EN => EB8K_CS0_ns,
-        -- READ PORT1
-        READ1_CLK => CLKB,    
-        READ1_ADDRESS => ADDRB_WORD(7 downto 0),
-        READ1_PORT => EBRAM8K_OUT1,   
-        READ1_EN => EB8K_CS1_ns,    
+        -- READ PORT
+        READ_CLK => CLKA,   
+        READ_ADDRESS => ADDRA_WORD(7 downto 0),
+        READ_PORT => EBRAM8K_OUT1,   
+        READ_EN => EB8K_CS1_ns,   
         -- WRITE PORT
         WRITE_CLK => CLKB,    
         WRITE_ADDRESS => ADDRB_WORD(7 downto 0),
@@ -215,6 +295,8 @@ begin
         PWROFF_N => '1',
         DO => SPRAM0_OUT(15 downto 0)
     );
+    
+    ------------
     
     SPRAM01 : SP256K
     port map(
