@@ -4,62 +4,36 @@ library IEEE;
 
 use WORK.riscv_pack.all;
 
-entity DUAL_PORT_32K is
+entity DUAL_PORT_EBR is
     generic(
-        MEMORY_CONTENT : MEMORY_TYPE(0 to 4*2**10-1) := (others => (others => '0'))
+        ADDRESS_WIDTH  : integer := 11;
+        MEMORY_CONTENT : MEMORY_TYPE(0 to 4*2**ADDRESS_WIDTH-1) := (x"00", x"01", x"02", x"03", x"04", x"05", x"06", x"07", x"08", x"09", x"0A", others => (others => '0'))
     );
     port(
         -- READ PORT
         READ_CLK        : in  std_logic;
-        READ_ADDRESS    : in  std_logic_vector(9 downto 0);
+        READ_ADDRESS    : in  std_logic_vector(ADDRESS_WIDTH-1 downto 0);
         READ_PORT       : out std_logic_vector(31 downto 0);
         READ_EN         : in  std_logic;
         -- WRITE PORT
         WRITE_CLK       : in  std_logic;
-        WRITE_ADDRESS   : in  std_logic_vector(9 downto 0);
+        WRITE_ADDRESS   : in  std_logic_vector(ADDRESS_WIDTH-1 downto 0);
         WRITE_PORT      : in  std_logic_vector(31 downto 0);
         WRITE_EN        : in  std_logic;
         WRITE_MASK      : in  std_logic_vector(3 downto 0)
     );
-end entity DUAL_PORT_32K;
+end entity DUAL_PORT_EBR;
 
 library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
-
-use WORK.riscv_pack.all;
     
-entity DUAL_PORT_16K is
-    generic(
-        MEMORY_CONTENT : MEMORY_TYPE(0 to 4*2**9-1) := (others => (others => '0'))
-    );
-    port(
-        -- READ PORT
-        READ_CLK        : in  std_logic;
-        READ_ADDRESS    : in  std_logic_vector(8 downto 0);
-        READ_PORT       : out std_logic_vector(31 downto 0);
-        READ_EN         : in  std_logic;
-        -- WRITE PORT
-        WRITE_CLK       : in  std_logic;
-        WRITE_ADDRESS   : in  std_logic_vector(8 downto 0);
-        WRITE_PORT      : in  std_logic_vector(31 downto 0);
-        WRITE_EN        : in  std_logic;
-        WRITE_MASK      : in  std_logic_vector(3 downto 0)
-    );
-end entity DUAL_PORT_16K;
-
-library IEEE;
-    use IEEE.std_logic_1164.all;
-
 library ICE40UP;
     use ICE40UP.COMPONENTS.all;
-    
+
 use WORK.riscv_pack.all;
 
-entity DUAL_PORT_8K is
-    generic(
-        MEMORY_CONTENT : MEMORY_TYPE(0 to 4*2**8-1) := (others => (others => '0'))
-    );
+entity DUAL_PORT_EBR_8K is
     port(
         -- READ PORT
         READ_CLK        : in  std_logic;
@@ -73,16 +47,16 @@ entity DUAL_PORT_8K is
         WRITE_EN        : in  std_logic;
         WRITE_MASK      : in  std_logic_vector(3 downto 0)
     );
-end entity DUAL_PORT_8K;
+end entity DUAL_PORT_EBR_8K;
 
-architecture BEH of DUAL_PORT_32K is       
-    type RAM_TYPE is array(0 to 2**10-1) of std_logic_vector(7 downto 0);
+architecture BEH of DUAL_PORT_EBR is       
+    type RAM_TYPE is array(0 to 2**ADDRESS_WIDTH-1) of std_logic_vector(7 downto 0);
     
     function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer) return RAM_TYPE;
     function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer) return RAM_TYPE is
         variable RAM_VALUES : RAM_TYPE;
     begin
-        for i in 0 to 2**10-1 loop
+        for i in 0 to 2**ADDRESS_WIDTH-1 loop
             RAM_VALUES(i) := DUMP(i*4+INDEX);
         end loop;
         return RAM_VALUES;
@@ -130,70 +104,9 @@ begin
     end process;
 end architecture BEH;
 
-architecture BEH of DUAL_PORT_16K is
-    type RAM_TYPE is array(0 to 2**9-1) of std_logic_vector(7 downto 0);
-    
-    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer) return RAM_TYPE;
-    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer) return RAM_TYPE is
-        variable RAM_VALUES : RAM_TYPE;
-    begin
-        for i in 0 to 2**9-1 loop
-            RAM_VALUES(i) := DUMP(i*4+INDEX);
-        end loop;
-        return RAM_VALUES;
-    end function INIT_RAM; 
-    
-    signal RAM0 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 0);
-    signal RAM1 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 1);
-    signal RAM2 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 2);
-    signal RAM3 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 3);
-begin
-    
-    process(WRITE_CLK) is
-    begin
-        if WRITE_CLK = '1' and WRITE_CLK'event then
-            if WRITE_EN = '1' then
-                if WRITE_MASK(0) = '1' then
-                    RAM0(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(7 downto 0);
-                end if;
-                
-                if WRITE_MASK(1) = '1' then
-                    RAM1(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(15 downto 8);
-                end if;
-                
-                if WRITE_MASK(2) = '1' then
-                    RAM2(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(23 downto 16);
-                end if;
-                
-                if WRITE_MASK(3) = '1' then
-                    RAM3(to_integer(unsigned(WRITE_ADDRESS)))(7 downto 0) <= WRITE_PORT(31 downto 24);
-                end if;
-            end if;
-        end if;
-    end process;
-    
-    process(READ_CLK) is
-    begin
-        if READ_CLK = '1' and READ_CLK'event then
-            if READ_EN = '1' then
-                READ_PORT <= RAM3(to_integer(unsigned(READ_ADDRESS)))
-                           & RAM2(to_integer(unsigned(READ_ADDRESS)))
-                           & RAM1(to_integer(unsigned(READ_ADDRESS)))
-                           & RAM0(to_integer(unsigned(READ_ADDRESS)));
-            end if;
-        end if;
-    end process;
-end architecture BEH;
-
-architecture BEH of DUAL_PORT_8K is
-    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer; POSITION : integer) return string;
-    function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer; POSITION : integer) return string is
-        variable RAM_VALUES : string;
-    begin
-        for i in 0 to (2**8)/16-1 loop
-            
-        end loop;
-    end function INIT_RAM;
+architecture BEH of DUAL_PORT_EBR_8K is
+    -- function INIT_RAM(DUMP : MEMORY_TYPE; INDEX : integer; POSITION : integer) return string;
+    -- TODO: Implement RAM initialization
 begin
 
     EBR0 : PDP4K
