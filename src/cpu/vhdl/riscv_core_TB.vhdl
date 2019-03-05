@@ -49,7 +49,7 @@ architecture beh of risc_v_core_tb is
             CLKB           : IN STD_LOGIC
         );
     end component;
-    for all : memory use entity work.blk_mem_gen_0_wrapper(xilinx);
+    for all : memory use entity work.blk_mem_gen_0_wrapper(lattice);
     
     constant cycles2execute : integer := 100;
     constant clock_period   : time    := 20 ns;

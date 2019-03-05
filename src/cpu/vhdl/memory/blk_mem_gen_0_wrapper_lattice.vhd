@@ -4,6 +4,8 @@ library IEEE;
 library ICE40UP;
     use ICE40UP.COMPONENTS.all;
     
+use WORK.RAM_CONTENT.all;
+    
 architecture lattice of blk_mem_gen_0_wrapper is
     -- EBRAM for Instructions   
     signal EB64K_WE : std_logic;
@@ -36,6 +38,7 @@ architecture lattice of blk_mem_gen_0_wrapper is
     -- Address
     signal ADDRA_WORD : std_logic_vector(29 downto 0);
     signal ADDRB_WORD : std_logic_vector(29 downto 0);
+    
 begin
     
     ADDRA_WORD <= ADDRA(31 downto 2);
@@ -110,10 +113,10 @@ begin
         end if;
     end process;
     
-    SEQ_LOG_A:
-    process(CLKA) is
+    SEQ_LOG:
+    process(CLKB) is
     begin
-        if CLKA='1' and CLKA'event then
+        if CLKB='1' and CLKB'event then
             EB32K_CS_cs <= EB32K_CS_ns;
             EB16K_CS_cs <= EB16K_CS_ns;
             EB8K_CS_cs  <= EB8K_CS_ns;
@@ -121,11 +124,12 @@ begin
             SP_CS0_cs    <= SP_CS0_ns;
             SP_CS1_cs    <= SP_CS1_ns;
         end if;
-    end process SEQ_LOG_A;
+    end process SEQ_LOG;
     
     EBR64K : entity WORK.DUAL_PORT_EBR(BEH)
     generic map(
-        ADDRESS_WIDTH => 11
+        ADDRESS_WIDTH => 11,
+        MEMORY_CONTENT => INSTRUCTION_EBRAM
     )
     port map(
         -- READ PORT
@@ -145,12 +149,13 @@ begin
     
     EBR32K : entity WORK.DUAL_PORT_EBR(BEH)
     generic map(
-        ADDRESS_WIDTH => 10
+        ADDRESS_WIDTH => 10,
+        MEMORY_CONTENT => DATA_EBRAM
     )
     port map(
         -- READ PORT
-        READ_CLK => CLKA,   
-        READ_ADDRESS => ADDRA_WORD(9 downto 0),
+        READ_CLK => CLKB,   
+        READ_ADDRESS => ADDRB_WORD(9 downto 0),
         READ_PORT => EBRAM32K_OUT,   
         READ_EN => EB32K_CS_ns,   
         -- WRITE PORT
@@ -167,8 +172,8 @@ begin
     )
     port map(
         -- READ PORT
-        READ_CLK => CLKA,   
-        READ_ADDRESS => ADDRA_WORD(8 downto 0),
+        READ_CLK => CLKB,   
+        READ_ADDRESS => ADDRB_WORD(8 downto 0),
         READ_PORT => EBRAM16K_OUT,   
         READ_EN => EB16K_CS_ns,   
         -- WRITE PORT
@@ -182,8 +187,8 @@ begin
     EBR8K : entity WORK.DUAL_PORT_EBR_8K(BEH)
     port map(
         -- READ PORT
-        READ_CLK => CLKA,   
-        READ_ADDRESS => ADDRA_WORD(7 downto 0),
+        READ_CLK => CLKB,   
+        READ_ADDRESS => ADDRB_WORD(7 downto 0),
         READ_PORT => EBRAM8K_OUT,   
         READ_EN => EB8K_CS_ns,   
         -- WRITE PORT
@@ -193,7 +198,9 @@ begin
         WRITE_EN => EB8K_CS_ns,
         WRITE_MASK => WEB
     );
-        
+    
+    ------------
+    
     SPRAM00 : SP256K
     port map(
         AD => ADDRB_WORD(13 downto 0),
@@ -207,8 +214,6 @@ begin
         PWROFF_N => '1',
         DO => SPRAM0_OUT(15 downto 0)
     );
-    
-    ------------
     
     SPRAM01 : SP256K
     port map(

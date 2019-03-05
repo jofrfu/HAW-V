@@ -127,9 +127,6 @@ package riscv_pack is
     type IO_BYTE_TYPE is array(0 to IO_BYTE_COUNT-1) of BYTE_TYPE;
     type IO_ENABLE_TYPE is array(0 to IO_BYTE_COUNT-1) of BYTE_TYPE;
     type GPIO_TYPE is array(GPIO_WIDTH-1 downto 0) of BYTE_TYPE;
-    
-    --! @brief Used for iCE40up5k Block RAM initialization 
-    type MEMORY_TYPE is array(natural range <>) of BYTE_TYPE;
 	
 	--! @brief Instruction Fetch Constants
 	constant STD_PC_ADD : DATA_TYPE := std_logic_vector(to_unsigned(4, DATA_WIDTH)); --! PC must be increased by 4 every clock cycle 

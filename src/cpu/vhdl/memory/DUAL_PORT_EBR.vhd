@@ -2,12 +2,12 @@ library IEEE;
     use IEEE.std_logic_1164.all;
     use IEEE.numeric_std.all;
 
-use WORK.riscv_pack.all;
+use WORK.RAM_CONTENT.all;
 
 entity DUAL_PORT_EBR is
     generic(
         ADDRESS_WIDTH  : integer := 11;
-        MEMORY_CONTENT : MEMORY_TYPE(0 to 4*2**ADDRESS_WIDTH-1) := (x"00", x"01", x"02", x"03", x"04", x"05", x"06", x"07", x"08", x"09", x"0A", others => (others => '0'))
+        MEMORY_CONTENT : MEMORY_TYPE(0 to 4*2**ADDRESS_WIDTH-1) := (others => (others => '0'))
     );
     port(
         -- READ PORT
