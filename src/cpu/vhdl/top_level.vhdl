@@ -34,15 +34,15 @@ use WORK.riscv_pack.all;
 
 entity top_level is
     port(
-        reset_n     : in    std_logic;
-        
         -- peripheral I/O
         periph_bit_io  : inout PERIPH_IO_TYPE
     );
 end entity top_level;
 
 architecture beh of top_level is
-
+    signal RESET_COUNT_cs : std_logic_vector(2 downto 0) := "000";
+    signal RESET_COUNT_ns : std_logic_vector(2 downto 0);
+    
     signal CLK : std_logic;
     signal RESET : std_logic;
 
@@ -116,7 +116,19 @@ architecture beh of top_level is
     for all : peripherals use entity work.peripherals_wrapper(beh);
 begin
  
-    RESET <= not reset_n;
+    RESET_COUNT_ns <= std_logic_vector(unsigned(RESET_COUNT_cs) + '1');
+    
+    RESET <= '0' when RESET_COUNT_cs = "110" else '1';
+ 
+    RESET_LOG:
+    process(CLK) is
+    begin
+        if clk = '1' and CLK'event then
+            if RESET_COUNT_ns /= "111" then
+                RESET_COUNT_cs <= RESET_COUNT_ns;
+            end if;
+        end if;
+    end process RESET_LOG;
  
     OSCILLATOR : HSOSC
     generic map(

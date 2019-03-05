@@ -62,10 +62,10 @@ architecture BEH of DUAL_PORT_EBR is
         return RAM_VALUES;
     end function INIT_RAM; 
     
-    signal RAM0 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 0);
-    signal RAM1 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 1);
-    signal RAM2 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 2);
-    signal RAM3 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 3);   
+    signal RAM0 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 3);
+    signal RAM1 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 2);
+    signal RAM2 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 1);
+    signal RAM3 : RAM_TYPE := INIT_RAM(MEMORY_CONTENT, 0);   
 begin
     
     process(WRITE_CLK) is
