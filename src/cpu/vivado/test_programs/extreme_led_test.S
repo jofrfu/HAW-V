@@ -13,7 +13,7 @@ _main:
     # ------------------------------------------------------------
     li a2, 0x00000001   # for shifting
     slli a2, a2, 31     # shift to MSB - LED config address => 0x80000000
-    addi a3, a2, 0x00000001 # LED register address => 0x80000001
+    addi a3, a2, 0x00000003 # LED register address => 0x80000003
     # ------------------------------------------------------------
     sb zero, 0(a2)  # store zero to LED config address - GPIOs are output
     li a4, 0x1     # led toggle variable

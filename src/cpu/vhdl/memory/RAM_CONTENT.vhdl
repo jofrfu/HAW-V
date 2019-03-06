@@ -5,12 +5,12 @@ package RAM_CONTENT is
     --! @brief Used for iCE40up5k Block RAM initialization 
     type MEMORY_TYPE is array(natural range <>) of std_logic_vector(7 downto 0);
     
-    constant INSTRUCTION_EBRAM : MEMORY_TYPE(0 to 4*2**11-1) :=  (x"97", x"25", x"00", x"00",
+    constant INSTRUCTION_EBRAM : MEMORY_TYPE(0 to 4*2**11-1) :=(x"97", x"25", x"00", x"00",
                                                                 x"93", x"85", x"05", x"00",
                                                                 x"83", x"A5", x"05", x"00",
                                                                 x"13", x"06", x"10", x"00",
                                                                 x"13", x"16", x"F6", x"01",
-                                                                x"93", x"06", x"16", x"00",
+                                                                x"93", x"06", x"36", x"00",
                                                                 x"23", x"00", x"06", x"00",
                                                                 x"13", x"07", x"10", x"00",
                                                                 x"93", x"07", x"00", x"00",
@@ -26,6 +26,6 @@ package RAM_CONTENT is
                                                                 x"13", x"07", x"10", x"00",
                                                                 x"6F", x"F0", x"DF", x"FD",
                                                                 others => (others => '0'));
-    constant DATA_EBRAM : MEMORY_TYPE(0 to 4*2**10-1) :=         (x"60", x"EA", x"00", x"00",
+    constant DATA_EBRAM : MEMORY_TYPE(0 to 4*2**10-1) :=       (x"60", x"EA", x"00", x"00",
                                                                 others => (others => '0'));
 end package RAM_CONTENT;
