@@ -150,7 +150,7 @@ begin
     EBR32K : entity WORK.DUAL_PORT_EBR(BEH)
     generic map(
         ADDRESS_WIDTH => 10,
-        MEMORY_CONTENT => DATA_EBRAM
+        MEMORY_CONTENT => DATA_EBRAM0
     )
     port map(
         -- READ PORT
@@ -168,7 +168,8 @@ begin
     
     EBR16K : entity WORK.DUAL_PORT_EBR(BEH)
     generic map(
-        ADDRESS_WIDTH => 9
+        ADDRESS_WIDTH => 9,
+        MEMORY_CONTENT => DATA_EBRAM1
     )
     port map(
         -- READ PORT
